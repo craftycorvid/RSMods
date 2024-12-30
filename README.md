@@ -1,6 +1,10 @@
 # The Rocksmith Mods that nobody asked for
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/Lovrom8/rsmods?svg=true)](https://ci.appveyor.com/project/Lovrom8/rsmods)
+
+## IMPORTANT NOTE:
+If you are trying to play on a Learn & Play build from Steam that was released on December 19th, 2024, you cannot use the mods without additional work. Please see the instructions on this github issue on how to get the mods to work: https://github.com/Lovrom8/RSMods/issues/196#issuecomment-2564077160.
+
 ## Features:
 
 * **Extended Range Mode**
