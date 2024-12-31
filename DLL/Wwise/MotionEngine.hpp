@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Types.hpp"
-#include "Exports.hpp"
-
 namespace Wwise::MotionEngine {
 	AKRESULT AddPlayerMotionDevice(AkUInt8 in_iPlayerID, AkUInt32 in_iCompanyID, AkUInt32 in_iDeviceID, void* in_pDevice);
 	void RegisterMotionDevice(AkUInt32 in_ulCompanyID, AkUInt32 in_ulPluginID, AkCreatePluginCallback in_pCreateFunc);

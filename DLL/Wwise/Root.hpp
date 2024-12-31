@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Types.hpp"
-#include "Exports.hpp"
-
 namespace Wwise {
 	bool IsRestoreSinkRequested(void);
 	bool IsUsingDummySink(void);

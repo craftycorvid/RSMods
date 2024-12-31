@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Types.hpp"
-#include "Exports.hpp"
+enum AkErrorCode;
+enum AkErrorLevel;
 
 namespace Wwise::Monitor {
-	AKRESULT PostCode(ErrorCode in_eError, ErrorLevel in_eErrorLevel);
+	AKRESULT PostCode(AkErrorCode in_eError, AkErrorLevel in_eErrorLevel);
 }
 
-typedef AKRESULT(__cdecl* tMonitor_PostCode)(ErrorCode in_eError, ErrorLevel in_eErrorLevel);
+typedef AKRESULT(__cdecl* tMonitor_PostCode)(AkErrorCode in_eError, AkErrorLevel in_eErrorLevel);

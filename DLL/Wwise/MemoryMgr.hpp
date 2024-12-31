@@ -1,7 +1,15 @@
 #pragma once
 
-#include "Types.hpp"
-#include "Exports.hpp"
+enum AKRESULT;
+enum AkMemPoolAttributes;
+
+struct PoolMemInfo;
+struct PoolStats;
+
+typedef long AkInt32;
+typedef unsigned long AkUInt32;
+typedef AkInt32 AkMemPoolId;
+typedef wchar_t AkOSChar;
 
 namespace Wwise::MemoryMgr {
 	AKRESULT CheckPoolId(AkMemPoolId in_poolId);

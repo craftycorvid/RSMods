@@ -1,13 +1,5 @@
 #pragma once
 
-#include <cmath>
-#include <map>
-#include <vector>
-#include <iostream>
-#include <list>
-
-#include "windows.h"
-
 /*
  Get documentation here: https://www.audiokinetic.com/library/2015.1.9_5624/?source=SDK&id=namespace_a_k_1_1_sound_engine.html
 
@@ -68,7 +60,7 @@ static const AkUniqueID AK_INVALID_UNIQUE_ID = (AkUniqueID)0;
 static const AkUniqueID AK_ID_Default_Time_Stretch = 0xB3745FC2;
 static const AkPlayingID AK_INVALID_PLAYING_ID = (AkPlayingID)0;
 
-enum AKRESULT
+enum AKRESULT : int
 {
 	AK_NotImplemented = 0,	///< This feature is not implemented.
 	AK_Success = 1,	///< The operation was successful.
@@ -280,7 +272,7 @@ struct AkExternalSourceInfo
 		: iExternalSrcCookie(0)
 		, idCodec(0)
 		, szFile(0)
-		, pInMemory(0)
+		, pInMemory(nullptr)
 		, uiMemorySize(0)
 		, idFile(0) {}
 
@@ -322,7 +314,7 @@ struct AkExternalSourceInfo
 		, idFile(in_idFile) {}
 };
 
-enum PreparationType
+enum PreparationType : int
 {
 	Preparation_Load,
 	Preparation_Unload
@@ -558,7 +550,7 @@ struct PoolStats
 	AkUInt32 uPeakUsed;
 };
 
-enum ErrorLevel
+enum AkErrorLevel : int
 {
 	ErrorLevel_Message = (1 << 0), // used as bitfield
 	ErrorLevel_Error = (1 << 1),
@@ -566,7 +558,7 @@ enum ErrorLevel
 	ErrorLevel_All = ErrorLevel_Message | ErrorLevel_Error
 };
 
-enum ErrorCode
+enum AkErrorCode : int
 {
 	ErrorCode_NoError = 0, // 0-based index into AK::Monitor::s_aszErrorCodes table 
 	ErrorCode_FileNotFound,
@@ -692,7 +684,7 @@ struct AkStreamMgrSettings
 	AkUInt32 uMemorySize;
 };
 
-enum AkMemPoolAttributes
+enum AkMemPoolAttributes : int
 {
 	AkNoAlloc = 0,
 	AkMalloc = 1,
@@ -1335,13 +1327,13 @@ struct AkPlatformInitSettings
 	AkUInt32            idAudioDevice;
 };
 
-enum AkPanningRule
+enum AkPanningRule : int
 {
 	AkPanningRule_Speakers = 0,
 	AkPanningRule_Headphones = 1
 };
 
-enum AkAudioOutputType
+enum AkAudioOutputType : int
 {
 	AkOutput_Dummy = 1 << 3,
 	AkOutput_MergeToMain = 1 << 4,

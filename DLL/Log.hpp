@@ -1,9 +1,5 @@
 #pragma once
 
-#include "Windows.h"
-#include <iostream>
-#include <string>
-
 /// If changing this file, be sure to do a clean build, else some changes might not go into effect.
 
 #ifdef _DEBUG
@@ -29,11 +25,11 @@
 #endif
 
 #ifndef _LOG_NOHEAD
-#define _LOG_NOHEAD(X) try { LOG << X; } catch (const std::exception& e) { std::cerr << X; }// Used to append to an existing log message. Will not add timestamp nor level of log.
+#define _LOG_NOHEAD(X) try { LOG << X; } catch (const std::exception&) { std::cerr << X; }// Used to append to an existing log message. Will not add timestamp nor level of log.
 #endif
 
 #ifndef _LOG
-#define _LOG(X) try { LOG << LOG.GetHeader() << X; } catch ( const std::exception& e) { std::cerr << X; }  // Log a specific message to the log file.
+#define _LOG(X) try { LOG << LOG.GetHeader() << X; } catch ( const std::exception&) { std::cerr << X; }  // Log a specific message to the log file.
 #endif
 
 #ifndef _LOG_SETLEVEL

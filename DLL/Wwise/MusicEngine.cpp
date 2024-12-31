@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "MusicEngine.hpp"
 
 // Most accurate documentation is available here: https://www.audiokinetic.com/library/2015.1.9_5624/?source=SDK&id=namespace_a_k_1_1_music_engine.html
@@ -9,7 +10,7 @@ namespace Wwise::MusicEngine {
 	/// </summary>
 	/// <param name="out_settings"> - Returned default platform-independent music engine settings</param>
 	void GetDefaultInitSettings(AkMusicSettings* out_settings) {
-		tMusic_GetDefaultInitSettings func = (tMusic_GetDefaultInitSettings)Wwise::Exports::func_Wwise_Music_GetDefaultInitSettings;
+		tMusic_GetDefaultInitSettings func = (tMusic_GetDefaultInitSettings)Wwise::Exports::func_Wwise_Music_GetDefaultInitSettings.Get();
 		return func(out_settings);
 	}
 
@@ -21,7 +22,7 @@ namespace Wwise::MusicEngine {
 	/// <param name="in_bExtrapolate"> - Position is extrapolated based on time elapsed since last sound engine update.</param>
 	/// <returns>AK_Success if there is a playing music structure associated with the specified playing ID.</returns>
 	AKRESULT GetPlayingSegmentInfo(AkPlayingID in_playingID, AkSegmentInfo* out_segmentInfo, bool in_bExtrapolate) {
-		tMusic_GetPlayingSegmentInfo func = (tMusic_GetPlayingSegmentInfo)Wwise::Exports::func_Wwise_Music_GetPlayingSegmentInfo;
+		tMusic_GetPlayingSegmentInfo func = (tMusic_GetPlayingSegmentInfo)Wwise::Exports::func_Wwise_Music_GetPlayingSegmentInfo.Get();
 		return func(in_playingID, out_segmentInfo, in_bExtrapolate);
 	}
 
@@ -31,7 +32,7 @@ namespace Wwise::MusicEngine {
 	/// <param name="in_pSettings"> - Initialization settings (can be NULL, to use the default values)</param>
 	/// <returns>AK_Success if the Init was successful, AK_Fail otherwise.</returns>
 	AKRESULT Init(AkMusicSettings* in_pSettings) {
-		tMusic_Init func = (tMusic_Init)Wwise::Exports::func_Wwise_Music_Init;
+		tMusic_Init func = (tMusic_Init)Wwise::Exports::func_Wwise_Music_Init.Get();
 		return func(in_pSettings);
 	}
 
@@ -39,7 +40,7 @@ namespace Wwise::MusicEngine {
 	/// Terminate the music engine. Needs to be called BEFORE SoundEngine::Term() is run.
 	/// </summary>
 	void Term() {
-		tMusic_Term func = (tMusic_Term)Wwise::Exports::func_Wwise_Music_Term;
+		tMusic_Term func = (tMusic_Term)Wwise::Exports::func_Wwise_Music_Term.Get();
 		return func();
 	}
 }

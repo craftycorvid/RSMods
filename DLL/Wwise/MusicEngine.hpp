@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Types.hpp"
-#include "Exports.hpp"
+struct AkMusicSettings;
+struct AkSegmentInfo;
+
+typedef AkUInt32 AkPlayingID;
 
 namespace Wwise::MusicEngine {
 	void GetDefaultInitSettings(AkMusicSettings* out_settings);

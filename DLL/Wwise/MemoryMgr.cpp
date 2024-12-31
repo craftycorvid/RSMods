@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "MemoryMgr.hpp"
 
 // Most accurate documentation is available here: https://www.audiokinetic.com/library/2015.1.9_5624/?source=SDK&id=namespace_a_k_1_1_memory_mgr.html
@@ -10,7 +11,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_poolId"> - ID of memory pool to test</param>
 	/// <returns>AK_Success if the pool exists, AK_InvalidID otherwise.</returns>
 	AKRESULT CheckPoolId(AkMemPoolId in_poolId) {
-		tMemory_CheckPoolId func = (tMemory_CheckPoolId)Wwise::Exports::func_Wwise_Memory_CheckPoolId;
+		tMemory_CheckPoolId func = (tMemory_CheckPoolId)Wwise::Exports::func_Wwise_Memory_CheckPoolId.Get();
 		return func(in_poolId);
 	}
 	/// <summary>
@@ -23,7 +24,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_uBlockAlign"> - Alignment of memory blocks</param>
 	/// <returns>The ID of the created memory pool, or AK_INVALID_POOL_ID if creation failed.</returns>
 	AKRESULT CreatePool(void* in_pMemAddress, AkUInt32 in_uMemSize, AkUInt32 in_uBlockSize, AkUInt32 in_eAttributes, AkUInt32 in_uBlockAlign) {
-		tMemory_CreatePool func = (tMemory_CreatePool)Wwise::Exports::func_Wwise_Memory_CreatePool;
+		tMemory_CreatePool func = (tMemory_CreatePool)Wwise::Exports::func_Wwise_Memory_CreatePool.Get();
 		return func(in_pMemAddress, in_uMemSize, in_uBlockSize, in_eAttributes, in_uBlockAlign);
 	}
 
@@ -33,7 +34,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_poolId"> - ID of memory pool</param>
 	/// <returns>AK_Success if successful</returns>
 	AKRESULT DestroyPool(AkMemPoolId in_poolId) {
-		tMemory_DestroyPool func = (tMemory_DestroyPool)Wwise::Exports::func_Wwise_Memory_DestroyPool;
+		tMemory_DestroyPool func = (tMemory_DestroyPool)Wwise::Exports::func_Wwise_Memory_DestroyPool.Get();
 		return func(in_poolId);
 	}
 
@@ -44,7 +45,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_pMemAddress"> - Pointer to the start of memory allocated with Malloc</param>
 	/// <returns>AK_Success if successful</returns>
 	AKRESULT Falign(AkMemPoolId in_poolId, void* in_pMemAddress) {
-		tMemory_Falign func = (tMemory_Falign)Wwise::Exports::func_Wwise_Memory_Falign;
+		tMemory_Falign func = (tMemory_Falign)Wwise::Exports::func_Wwise_Memory_Falign.Get();
 		return func(in_poolId, in_pMemAddress);
 	}
 
@@ -54,7 +55,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_poolId"> - ID of the memory pool</param>
 	/// <returns>A pointer to the start of the allocated memory (NULL if the system is out of memory) The size of the memory block is always in_uBlockSize, specified in AK::MemoryMgr::CreatePool.</returns>
 	void* GetBlock(AkMemPoolId in_poolId) {
-		tMemory_GetBlock func = (tMemory_GetBlock)Wwise::Exports::func_Wwise_Memory_GetBlock;
+		tMemory_GetBlock func = (tMemory_GetBlock)Wwise::Exports::func_Wwise_Memory_GetBlock.Get();
 		return func(in_poolId);
 	}
 
@@ -64,7 +65,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_poolId"> - ID of the memory pool</param>
 	/// <returns>Block size</returns>
 	AkUInt32 GetBlockSize(AkMemPoolId in_poolId) {
-		tMemory_GetBlockSize func = (tMemory_GetBlockSize)Wwise::Exports::func_Wwise_Memory_GetBlockSize;
+		tMemory_GetBlockSize func = (tMemory_GetBlockSize)Wwise::Exports::func_Wwise_Memory_GetBlockSize.Get();
 		return func(in_poolId);
 	}
 
@@ -73,7 +74,7 @@ namespace Wwise::MemoryMgr {
 	/// </summary>
 	/// <returns>The maximum number of memory pools</returns>
 	AkInt32 GetMaxPools() {
-		tMemory_GetMaxPools func = (tMemory_GetMaxPools)Wwise::Exports::func_Wwise_Memory_GetMaxPools;
+		tMemory_GetMaxPools func = (tMemory_GetMaxPools)Wwise::Exports::func_Wwise_Memory_GetMaxPools.Get();
 		return func();
 	}
 
@@ -82,7 +83,7 @@ namespace Wwise::MemoryMgr {
 	/// </summary>
 	/// <returns>The current number of memory pools</returns>
 	AkInt32 GetNumPools() {
-		tMemory_GetNumPools func = (tMemory_GetNumPools)Wwise::Exports::func_Wwise_Memory_GetNumPools;
+		tMemory_GetNumPools func = (tMemory_GetNumPools)Wwise::Exports::func_Wwise_Memory_GetNumPools.Get();
 		return func();
 	}
 
@@ -92,7 +93,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_poolId"> - ID of memory pool</param>
 	/// <returns>The memory pool's attributes.</returns>
 	AkMemPoolAttributes GetPoolAttributes(AkMemPoolId in_poolId) {
-		tMemory_GetPoolAttributes func = (tMemory_GetPoolAttributes)Wwise::Exports::func_Wwise_Memory_GetPoolAttributes;
+		tMemory_GetPoolAttributes func = (tMemory_GetPoolAttributes)Wwise::Exports::func_Wwise_Memory_GetPoolAttributes.Get();
 		return func(in_poolId);
 	}
 
@@ -102,7 +103,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_poolId"> - ID of memory pool</param>
 	/// <param name="out_memInfo"> - Returned statistics structure</param>
 	void GetPoolMemoryUsed(AkMemPoolId in_poolId, PoolMemInfo* out_memInfo) {
-		tMemory_GetPoolMemoryUsed func = (tMemory_GetPoolMemoryUsed)Wwise::Exports::func_Wwise_Memory_GetPoolMemoryUsed;
+		tMemory_GetPoolMemoryUsed func = (tMemory_GetPoolMemoryUsed)Wwise::Exports::func_Wwise_Memory_GetPoolMemoryUsed.Get();
 		return func(in_poolId, out_memInfo);
 	}
 
@@ -112,7 +113,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_poolId"> - ID of memory pool</param>
 	/// <returns>A pointer to the name of the memory pool (NULL if the operation failed)</returns>
 	AkOSChar* GetPoolName(AkMemPoolId in_poolId) {
-		tMemory_GetPoolName func = (tMemory_GetPoolName)Wwise::Exports::func_Wwise_Memory_GetPoolName;
+		tMemory_GetPoolName func = (tMemory_GetPoolName)Wwise::Exports::func_Wwise_Memory_GetPoolName.Get();
 		return func(in_poolId);
 	}
 
@@ -123,7 +124,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="out_stats"> - Returned statistics structure</param>
 	/// <returns></returns>
 	AKRESULT GetPoolStats(AkMemPoolId in_poolId, PoolStats* out_stats) {
-		tMemory_GetPoolStats func = (tMemory_GetPoolStats)Wwise::Exports::func_Wwise_Memory_GetPoolStats;
+		tMemory_GetPoolStats func = (tMemory_GetPoolStats)Wwise::Exports::func_Wwise_Memory_GetPoolStats.Get();
 		return func(in_poolId, out_stats);
 	}
 
@@ -132,7 +133,7 @@ namespace Wwise::MemoryMgr {
 	/// </summary>
 	/// <returns>True if the Memory Manager is initialized, False otherwise</returns>
 	bool IsInitialized() {
-		tMemory_IsInitialized func = (tMemory_IsInitialized)Wwise::Exports::func_Wwise_Memory_IsInitialized;
+		tMemory_IsInitialized func = (tMemory_IsInitialized)Wwise::Exports::func_Wwise_Memory_IsInitialized.Get();
 		return func();
 	}
 
@@ -144,7 +145,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_uAlignment"> - Alignment (in bytes)</param>
 	/// <returns>A pointer to the start of the allocated memory (NULL if the system is out of memory)</returns>
 	void* Malign(AkMemPoolId in_poolId, size_t in_uSize, AkUInt32 in_uAlignment) {
-		tMemory_Malign func = (tMemory_Malign)Wwise::Exports::func_Wwise_Memory_Malign;
+		tMemory_Malign func = (tMemory_Malign)Wwise::Exports::func_Wwise_Memory_Malign.Get();
 		return func(in_poolId, in_uSize, in_uAlignment);
 	}
 
@@ -155,7 +156,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_uSize"> - Number of bytes to allocate</param>
 	/// <returns>A pointer to the start of the allocated memory (NULL if the system is out of memory)</returns>
 	void* Malloc(AkMemPoolId in_poolId, size_t in_uSize) {
-		tMemory_Malloc func = (tMemory_Malloc)Wwise::Exports::func_Wwise_Memory_Malloc;
+		tMemory_Malloc func = (tMemory_Malloc)Wwise::Exports::func_Wwise_Memory_Malloc.Get();
 		return func(in_poolId, in_uSize);
 	}
 
@@ -166,7 +167,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_pMemAddress"> - Pointer to the start of memory allocated with Malloc</param>
 	/// <returns>AK_Success if successful</returns>
 	AKRESULT ReleaseBlock(AkMemPoolId in_poolId, void* in_pMemAddress) {
-		tMemory_ReleaseBlock func = (tMemory_ReleaseBlock)Wwise::Exports::func_Wwise_Memory_ReleaseBlock;
+		tMemory_ReleaseBlock func = (tMemory_ReleaseBlock)Wwise::Exports::func_Wwise_Memory_ReleaseBlock.Get();
 		return func(in_poolId, in_pMemAddress);
 	}
 
@@ -177,7 +178,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_bDoMonitor"> - Enables error monitoring (has no effect in Release build)</param>
 	/// <returns>AK_Success if the pool exists</returns>
 	AKRESULT SetMonitoring(AkMemPoolId in_poolId, bool in_bDoMonitor) {
-		tMemory_SetMonitoring func = (tMemory_SetMonitoring)Wwise::Exports::func_Wwise_Memory_SetMonitoring;
+		tMemory_SetMonitoring func = (tMemory_SetMonitoring)Wwise::Exports::func_Wwise_Memory_SetMonitoring.Get();
 		return func(in_poolId, in_bDoMonitor);
 	}
 
@@ -188,7 +189,7 @@ namespace Wwise::MemoryMgr {
 	/// <param name="in_pszPoolName"> - Pointer to name string</param>
 	/// <returns>AK_Success if successful</returns>
 	AKRESULT SetPoolName(AkMemPoolId in_poolId, const char* in_pszPoolName) {
-		tMemory_SetPoolName func = (tMemory_SetPoolName)Wwise::Exports::func_Wwise_Memory_SetPoolName;
+		tMemory_SetPoolName func = (tMemory_SetPoolName)Wwise::Exports::func_Wwise_Memory_SetPoolName.Get();
 		return func(in_poolId, in_pszPoolName);
 	}
 
@@ -196,7 +197,7 @@ namespace Wwise::MemoryMgr {
 	/// NOT THREAD SAFE! Terminate the Memory Manager.
 	/// </summary>
 	void Term() {
-		tMemory_Term func = (tMemory_Term)Wwise::Exports::func_Wwise_Memory_Term;
+		tMemory_Term func = (tMemory_Term)Wwise::Exports::func_Wwise_Memory_Term.Get();
 		return func();
 	}
 }

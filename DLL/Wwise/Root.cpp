@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "Root.hpp"
 
 // No documentation
@@ -9,7 +10,7 @@ namespace Wwise {
 	/// </summary>
 	/// <returns>Restore Sink Requested</returns>
 	bool IsRestoreSinkRequested() {
-		tIsRestoreSinkRequested func = (tIsRestoreSinkRequested)Wwise::Exports::func_Wwise_Root_IsRestoreSinkRequested;
+		tIsRestoreSinkRequested func = (tIsRestoreSinkRequested)Wwise::Exports::func_Wwise_Root_IsRestoreSinkRequested.Get();
 		return func();
 	}
 
@@ -18,7 +19,7 @@ namespace Wwise {
 	/// </summary>
 	/// <returns>Using a dummy sink</returns>
 	bool IsUsingDummySink() {
-		tIsUsingDummySink func = (tIsUsingDummySink)Wwise::Exports::func_Wwise_Root_IsUsingDummySink;
+		tIsUsingDummySink func = (tIsUsingDummySink)Wwise::Exports::func_Wwise_Root_IsUsingDummySink.Get();
 		return func();
 	}
 }
