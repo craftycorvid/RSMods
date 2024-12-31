@@ -1,10 +1,10 @@
 #pragma once
-#include "windows.h"
-#include <vector>
 
 namespace MemUtil {
 	bool bCompare(const BYTE* pData, const byte* bMask, const char* szMask);
+	bool PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake, size_t len, bool addBaseHandle = false);
 	bool PatchAdr(LPVOID address, LPVOID changeToMake, size_t len);
+	bool PlaceHook(VersioningStruct<uintptr_t>& hookSpot, void* ourFunct, int len, bool addBaseHandle = false);
 	bool PlaceHook(void* hookSpot, void* ourFunct, int len);
 	PBYTE TrampHook(PBYTE src, PBYTE dst, unsigned int len);
 	bool IsBadReadPtr(void* pointer);
@@ -15,6 +15,9 @@ namespace MemUtil {
 
 	template <typename T>
 	T FindPattern(uint32_t address, size_t size, PBYTE pattern, char* mask);
+
+	NTSTATUS HookedVirtualProtect(LPVOID address, SIZE_T len, ULONG newProtection, ULONG& oldProtection);
+	NTSTATUS HookedQueryVirtualMemory(LPVOID address, PMEMORY_BASIC_INFORMATION memoryBuffer, SIZE_T dwLength);
 };
 
 template <typename T>
@@ -48,7 +51,8 @@ bool MemUtil::SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthO
 	DWORD dwOldProt, dwDummy;
 
 	// Save old Virtual Protect status, but allow us to Execute, Read, and Write to the executable's memory so we can make this change.
-	if (!VirtualProtect((LPVOID)staticValue, lengthOfData, PAGE_EXECUTE_READWRITE, &dwOldProt)) {
+	if (!HookedVirtualProtect((LPVOID)staticValue, lengthOfData, PAGE_EXECUTE_READWRITE, dwOldProt))
+	{
 		return false;
 	}
 
@@ -56,7 +60,10 @@ bool MemUtil::SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthO
 	*(T*)staticValue = data;
 
 	// Resets the virtual protect to the status we saved earlier in this function. 
-	VirtualProtect((LPVOID)staticValue, lengthOfData, dwOldProt, &dwDummy);
+	if (!HookedVirtualProtect((LPVOID)staticValue, lengthOfData, dwOldProt, dwDummy))
+	{
+		return false;
+	}
 
 	return true;
 }
