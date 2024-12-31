@@ -1,16 +1,5 @@
 #pragma once
-#include "d3d9.h"
-#include "../MemHelpers.hpp"
-#include "D3D.hpp"
-#include <intrin.h>
 #include "../Mods/ExtendedRangeMode.hpp"
-#include "../Log.hpp"
-
-
-#include "../Lib/ImGUI/imgui.h"
-#include "../Lib/ImGUI/imgui_impl_dx9.h"
-#include "../Lib/ImGUI/imgui_impl_win32.h"
-#include "../Lib/ImGUI/RobotoFont.cpp"
 
 namespace D3DHooks {
 	inline UINT StartRegister;

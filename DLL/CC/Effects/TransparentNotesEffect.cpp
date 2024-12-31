@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "TransparentNotesEffect.hpp"
 
 using namespace CrowdControl::Enums;

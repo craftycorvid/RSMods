@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "RiffRepeater.hpp"
 
 float Divisor = 10000.f;

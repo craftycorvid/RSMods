@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "FYourFCEffect.hpp"
 
 namespace CrowdControl::Effects { // Kills user's current note streak
@@ -34,9 +35,9 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 
 		uintptr_t currentNoteStreak = 0;
 
-		if (MemHelpers::Contains(D3DHooks::currentMenu, learnASongModes))
+		if (Contains(D3DHooks::currentMenu, learnASongModes))
 			currentNoteStreak = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_currentNoteStreak, Offsets::ptr_currentNoteStreakLASOffsets);
-		else if (MemHelpers::Contains(D3DHooks::currentMenu, scoreAttackModes))
+		else if (Contains(D3DHooks::currentMenu, scoreAttackModes))
 			currentNoteStreak = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_currentNoteStreak, Offsets::ptr_currentNoteStreakSAOffsets);
 
 		if (currentNoteStreak != 0)

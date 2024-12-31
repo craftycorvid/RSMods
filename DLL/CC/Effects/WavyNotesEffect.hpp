@@ -1,6 +1,4 @@
 #pragma once
-#include "../CCEffect.hpp"
-#include "../CCEffectList.hpp"
 
 namespace CrowdControl::Effects {
 	struct Vec3 {

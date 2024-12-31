@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "RemoveInstrumentEffect.hpp"
 
 namespace CrowdControl::Effects { 

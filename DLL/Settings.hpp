@@ -1,16 +1,5 @@
 #pragma once
 
-// Libraries
-#include "Windows.h"
-#include <vector>
-
-#include "Log.hpp"
-#include "Structs.hpp"
-
-#include "Lib/Ini/SimpleIni.h"
-#include "D3D/D3DHooks.hpp"
-
-
 namespace Settings {
 	void Initialize(); // Default Settings
 
@@ -32,10 +21,10 @@ namespace Settings {
 	// Functions
 	int GetVKCodeForString(std::string vkString);
 	// float GetStringColor(std::string);
-	std::vector<Color> GetStringColors(bool CB);
-	std::vector<Color> GetNoteColors(bool CB);
-	void SetStringColors(int strIndex, Color c, bool CB);
-	void SetNoteColors(int strIndex, Color c, bool CB);
+	std::vector<RSColor> GetStringColors(bool CB);
+	std::vector<RSColor> GetNoteColors(bool CB);
+	void SetStringColors(int strIndex, RSColor c, bool CB);
+	void SetNoteColors(int strIndex, RSColor c, bool CB);
 	void UpdateSettings();
 	void UpdateModSetting(std::string name, std::string newValue);
 	void UpdateCustomSetting(std::string name, int newValue);
@@ -232,12 +221,12 @@ namespace Settings {
 		{ "VK_OEM_CLEAR" , 0xFE }
 	};
 	
-	Color ConvertHexToColor(std::string hexStr);
+	RSColor ConvertHexToColor(std::string hexStr);
 
-	inline std::vector<Color> customStringColorsNormal;
-	inline std::vector<Color> customStringColorsCB;
-	inline std::vector<Color> customNoteColorsNormal;
-	inline std::vector<Color> customNoteColorsCB;
+	inline std::vector<RSColor> customStringColorsNormal;
+	inline std::vector<RSColor> customStringColorsCB;
+	inline std::vector<RSColor> customNoteColorsNormal;
+	inline std::vector<RSColor> customNoteColorsCB;
 
 	inline bool async_UpdateMidiSettings = false;
 

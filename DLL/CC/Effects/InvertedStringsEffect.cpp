@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "InvertedStringsEffect.hpp"
 
 using namespace CrowdControl::Enums;

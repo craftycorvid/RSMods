@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "SmallNoteheadEffect.hpp"
 
 namespace CrowdControl::Effects { // Scales notes in a song to unusually small size

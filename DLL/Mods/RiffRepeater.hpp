@@ -1,14 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include "Windows.h"
-#include <string>
-
-#include "../MemHelpers.hpp"
-#include "../Offsets.hpp"
-#include "../Wwise/SoundEngine.hpp"
-
-
 namespace RiffRepeater {
 	float GetSpeed(bool realSpeed = false);
 	void SetSpeed(float newSpeed, bool isRealSpeed = false);

@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "KillMusicVolumeEffect.hpp"
 
 namespace CrowdControl::Effects {

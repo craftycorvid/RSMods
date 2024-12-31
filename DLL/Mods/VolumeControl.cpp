@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "VolumeControl.hpp"
 
 /// <summary>
@@ -13,7 +14,7 @@ void VolumeControl::IncreaseVolume(int amountToIncrease, std::string mixerToIncr
 	RTPCValue_type type = RTPCValue_GameObject;
 
 	// Mixer sent is not a valid mixer.
-	if (!MemHelpers::Contains(mixerToIncrease, mixerNames)) {
+	if (!Contains(mixerToIncrease, mixerNames)) {
 		_LOG("That mixer doesn't exist" << std::endl);
 		return;
 	}
@@ -49,7 +50,7 @@ void VolumeControl::DecreaseVolume(int amountToDecrease, std::string mixerToDecr
 	RTPCValue_type type = RTPCValue_GameObject;
 
 	// Mixer sent is not a valid mixer.
-	if (!MemHelpers::Contains(mixerToDecrease, mixerNames)) {
+	if (!Contains(mixerToDecrease, mixerNames)) {
 		_LOG("That mixer doesn't exist" << std::endl);
 		return;
 	}
@@ -81,7 +82,7 @@ void VolumeControl::DisableSongPreviewAudio() {
 
 	if (!disabledSongPreviewAudio) {
 		// Changes the string "Play_%s_Preview" to "Play_%s_Invalid" so song previews never play.
-		MemUtil::PatchAdr((void*)Offsets::patch_SongPreviewWwiseEvent, "Play_%s_Invalid", 16);
+		MemUtil::PatchAdr(Offsets::patch_SongPreviewWwiseEvent, "Play_%s_Invalid", 16);
 		disabledSongPreviewAudio = true;
 	}
 	else {
@@ -148,7 +149,7 @@ void VolumeControl::EnableSongPreviewAudio() {
 
 	if (disabledSongPreviewAudio) {
 		// Changes the string "Play_%s_Invalid" to "Play_%s_Preview" so song previews will play again.
-		MemUtil::PatchAdr((void*)Offsets::patch_SongPreviewWwiseEvent, "Play_%s_Preview", 16);
+		MemUtil::PatchAdr(Offsets::patch_SongPreviewWwiseEvent, "Play_%s_Preview", 16);
 		disabledSongPreviewAudio = false;
 	}
 	else {
@@ -163,8 +164,8 @@ void VolumeControl::AllowAltTabbingWithAudio() {
 	_LOG_INIT;
 
 	char patch[] = { 0x1 };
-	MemUtil::PatchAdr((void*)Offsets::ptr_WindowNotInFocusValue, patch, 1); // Return with the value of 1, "window in focus", every time you alt+tab.
-	*(char*)Offsets::ptr_IsWindowInFocus = (char)0x1; // Tell the game that you currently have the window in focus.
+	MemUtil::PatchAdr(Offsets::ptr_WindowNotInFocusValue, patch, 1); // Return with the value of 1, "window in focus", every time you alt+tab.
+	MemUtil::PatchAdr(Offsets::ptr_IsWindowInFocus, "\x01", 1);
 	_LOG("Allowed audio to be played in the background!" << std::endl);
 	allowedAltTabbingWithAudio = true;
 }
@@ -177,8 +178,8 @@ void VolumeControl::DisableAltTabbingWithAudio() {
 	_LOG_INIT;
 
 	char patch[] = { 0x0 };
-	MemUtil::PatchAdr((void*)Offsets::ptr_WindowNotInFocusValue, patch, 1);  // Return with the value of 0, "window out of focus", every time you alt+tab.
-	*(char*)Offsets::ptr_IsWindowInFocus = (char)0x0; // Tell the game that you are currently alt+tabbed.
+	MemUtil::PatchAdr(Offsets::ptr_WindowNotInFocusValue, patch, 1);  // Return with the value of 0, "window out of focus", every time you alt+tab.
+	MemUtil::PatchAdr(Offsets::ptr_IsWindowInFocus, "\x00", 1);
 	_LOG("Stopped audio from being played in the background!" << std::endl);
 	allowedAltTabbingWithAudio = false;
 }

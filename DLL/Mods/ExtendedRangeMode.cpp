@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "ExtendedRangeMode.hpp"
 
 /// <param name="stringnum"> - Number of string</param>
@@ -42,11 +43,11 @@ void ERMode::InitStrings(std::vector<uintptr_t>& strings, int state) {
 /// </summary>
 /// <param name="strings"> - Pointers to string colors</param>
 /// <param name="colors"> - New String Colors</param>
-void ERMode::SetColors(std::vector<uintptr_t> strings, std::vector<Color> colors) {
+void ERMode::SetColors(std::vector<uintptr_t> strings, std::vector<RSColor> colors) {
 	for (int strIndex = 0; strIndex < 6;strIndex++) {
 		if (strings[strIndex] == NULL)
 			return;
-		*(Color*)strings[strIndex] = colors[strIndex];
+		*(RSColor*)strings[strIndex] = colors[strIndex];
 	}
 }
 
@@ -71,12 +72,12 @@ void ERMode::SetColors(std::vector<uintptr_t> strings, std::string colorType) {
 		if (strings[strIndex] == NULL)
 			return;
 
-		*(Color*)strings[strIndex] = customColors[strIndex][colorType];
+		*(RSColor*)strings[strIndex] = customColors[strIndex][colorType];
 	}
 }
 
 
-std::vector<Color> oldNormal, oldDisabled, oldEnabled, oldGlow, oldAmb;
+std::vector<RSColor> oldNormal, oldDisabled, oldEnabled, oldGlow, oldAmb;
 
 /// <summary>
 /// Run ResetString on all six strings.
@@ -104,15 +105,15 @@ void ERMode::ResetString(int strIndex) {
 	InitStrings(stringsEnabled, Enabled);
 
 	// Set the origial values.
-	*(Color*)stringsGlow[strIndex] = oldGlow[strIndex];
-	*(Color*)stringsDisabled[strIndex] = oldDisabled[strIndex];
+	*(RSColor*)stringsGlow[strIndex] = oldGlow[strIndex];
+	*(RSColor*)stringsDisabled[strIndex] = oldDisabled[strIndex];
 	//*(Color*)stringsAmb[strIndex] = oldAmb[strIndex];
-	*(Color*)stringsEnabled[strIndex] = oldEnabled[strIndex];
+	*(RSColor*)stringsEnabled[strIndex] = oldEnabled[strIndex];
 
 	//Settings::SetStringColors(strIndex, oldGlow[strIndex], false);
 }
 
-std::vector<std::vector<Color>> defaultColors;
+std::vector<std::vector<RSColor>> defaultColors;
 
 /// <summary>
 /// Set colors of strings depending on INI settings.
@@ -182,10 +183,10 @@ void ERMode::Toggle7StringMode() {
 	else {
 		if (!ColorsSaved) { //read only once, so it won't change defaults if you change to CB
 			for (int i = 0; i < 6; i++) {
-				oldDisabled.push_back(*(Color*)stringsDisabled[i]);
-				oldEnabled.push_back(*(Color*)stringsEnabled[i]);
-				oldGlow.push_back(*(Color*)stringsGlow[i]);
-				oldAmb.push_back(*(Color*)stringsAmb[i]);
+				oldDisabled.push_back(*(RSColor*)stringsDisabled[i]);
+				oldEnabled.push_back(*(RSColor*)stringsEnabled[i]);
+				oldGlow.push_back(*(RSColor*)stringsGlow[i]);
+				oldAmb.push_back(*(RSColor*)stringsAmb[i]);
 			}
 
 			ColorsSaved = true;
@@ -212,9 +213,9 @@ void ERMode::Toggle7StringMode() {
 			for (int idx = 0; idx < 17; idx++) {
 				InitStrings(stringsTest, (idx * 0x18 + 0x350));
 
-				std::vector<Color> defaults;
+				std::vector<RSColor> defaults;
 				for (int i = 0; i < 6; i++)
-					defaults.push_back(*(Color*)stringsTest[i]);
+					defaults.push_back(*(RSColor*)stringsTest[i]);
 
 				defaultColors.push_back(defaults);
 			}
@@ -228,7 +229,7 @@ void ERMode::Toggle7StringMode() {
 				InitStrings(stringsTest, (idx * 0x18 + 0x350));
 
 				for (int i = 0; i < 6; i++)
-					*(Color*)stringsTest[i] = defaultColors[idx][i];
+					*(RSColor*)stringsTest[i] = defaultColors[idx][i];
 			}
 
 			restoreDefaults = false;
@@ -287,7 +288,7 @@ void ERMode::DoRainbow() {
 	std::vector<uintptr_t> stringsEnabled;
 	std::vector<uintptr_t> stringsHigh;
 	std::vector<uintptr_t> stringsDisabled;
-	std::vector<Color> oldEnabledColors, oldHigh, oldDisabledColors;
+	std::vector<RSColor> oldEnabledColors, oldHigh, oldDisabledColors;
 
 	// Get original string colors.
 	for (int i = 0; i < 6; i++) {
@@ -297,7 +298,7 @@ void ERMode::DoRainbow() {
 	}
 
 	// Start with Red.
-	Color c;
+	RSColor c;
 	c.r = 1.f;
 	c.g = 0.f;
 	c.b = 0.f;
@@ -317,9 +318,9 @@ void ERMode::DoRainbow() {
 		for (int i = 0; i < 6; i++) {
 			// Save the previous colors
 			if (RainbowEnabled) {
-				oldEnabledColors.push_back(*(Color*)stringsEnabled[i]);
-				oldHigh.push_back(*(Color*)stringsHigh[i]);
-				oldDisabledColors.push_back(*(Color*)stringsDisabled[i]);
+				oldEnabledColors.push_back(*(RSColor*)stringsEnabled[i]);
+				oldHigh.push_back(*(RSColor*)stringsHigh[i]);
+				oldDisabledColors.push_back(*(RSColor*)stringsDisabled[i]);
 				didWeUseRainbowStrings = true;
 			}
 			
@@ -338,9 +339,9 @@ void ERMode::DoRainbow() {
 
 			// Set the new rainbow colors.
 			if (RainbowEnabled) {
-				*(Color*)stringsEnabled[i] = c;
-				*(Color*)stringsHigh[i] = c;
-				*(Color*)stringsDisabled[i] = c;
+				*(RSColor*)stringsEnabled[i] = c;
+				*(RSColor*)stringsHigh[i] = c;
+				*(RSColor*)stringsDisabled[i] = c;
 			}
 
 			// Reset back to the original colors.
@@ -349,9 +350,9 @@ void ERMode::DoRainbow() {
 					return;
 
 				for (int i = 0; i < 6; i++) {
-					*(Color*)stringsEnabled[i] = oldEnabledColors[i];
-					*(Color*)stringsHigh[i] = oldHigh[i];
-					*(Color*)stringsDisabled[i] = oldDisabledColors[i];
+					*(RSColor*)stringsEnabled[i] = oldEnabledColors[i];
+					*(RSColor*)stringsHigh[i] = oldHigh[i];
+					*(RSColor*)stringsDisabled[i] = oldDisabledColors[i];
 				}
 			}
 		}
@@ -376,9 +377,9 @@ bool IsMatch(std::vector<uintptr_t> strings, int R, int G, int B) {
 	if (strings[0] == NULL)
 		return false;
 
-	int r = (int)std::round((*(Color*)strings[0]).r * 255); // Remember, just casting to int doesn't round up :(
-	int g = (int)std::round((*(Color*)strings[0]).g * 255);
-	int b = (int)std::round((*(Color*)strings[0]).b * 255);
+	int r = (int)std::round((*(RSColor*)strings[0]).r * 255); // Remember, just casting to int doesn't round up :(
+	int g = (int)std::round((*(RSColor*)strings[0]).g * 255);
+	int b = (int)std::round((*(RSColor*)strings[0]).b * 255);
 	if (R == 63)
 		_LOG(std::dec << R << " " << r << " " << (R == r) << " " << G << " " << g << " " << (G == g) << " " << B << " " << b << " " << (B == b) << std::endl);
 

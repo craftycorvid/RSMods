@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "D3DHooks.hpp"
 
 /// <summary>
@@ -14,7 +15,7 @@ HRESULT APIENTRY D3DHooks::Hook_DP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE P
 
 	// Note-tails for Extended Range / Custom Colors
 	if (AttemptedERInThisSong && UseEROrColorsInThisSong && NOTE_TAILS) {
-		MemHelpers::ToggleCB(UseERExclusivelyInThisSong);
+		GameState::ToggleCB(UseERExclusivelyInThisSong);
 
 		switch (Settings::GetModSetting("SeparateNoteColors")) {
 			case 0: // Use same color scheme on notes as we do on strings
@@ -150,16 +151,16 @@ HRESULT APIENTRY D3DHooks::Hook_Reset(IDirect3DDevice9* pDevice, D3DPRESENT_PARA
 	// Lost Device
 	ImGui_ImplDX9_InvalidateDeviceObjects();
 
-	if (MemHelpers::DX9FontEncapsulation)
-		MemHelpers::DX9FontEncapsulation->OnLostDevice();
+	if (GameOverlay::DX9FontEncapsulation)
+		GameOverlay::DX9FontEncapsulation->OnLostDevice();
 
 	// Reset Device. Call original Reset.
 	HRESULT ResetReturn = oReset(pDevice, pPresentationParameters);
 
 	ImGui_ImplDX9_CreateDeviceObjects();
 
-	if (MemHelpers::DX9FontEncapsulation)
-		MemHelpers::DX9FontEncapsulation->OnResetDevice();
+	if (GameOverlay::DX9FontEncapsulation)
+		GameOverlay::DX9FontEncapsulation->OnResetDevice();
 
 	return ResetReturn;
 }
@@ -275,7 +276,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 		pCurrNotewayTexture = (IDirect3DTexture9*)pBaseNotewayTexture;
 
 		if (pBaseNotewayTexture) {
-			if (CRCForTexture(pCurrNotewayTexture, pDevice, crc)) {
+			if (D3D::CRCForTexture(pCurrNotewayTexture, pDevice, crc)) {
 
 				// Noteway Texture
 				if (crc == crcNoteLanes && Settings::ReturnNotewayColor("CustomHighwayNumbered") != (std::string)"" && Settings::ReturnNotewayColor("CustomHighwayUnNumbered") != (std::string)"")
@@ -333,7 +334,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 			if (!pBaseRainbowTexture)
 				return SHOW_TEXTURE;
 
-			if (CRCForTexture(pCurrRainbowTexture, pDevice, crc)) {
+			if (D3D::CRCForTexture(pCurrRainbowTexture, pDevice, crc)) {
 
 				// Same checksum for stems and accents, because they use the same texture. Bends and slides use the same texture.
 				if (crc == crcStemsAccents || crc == crcBendSlideIndicators)
@@ -404,7 +405,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 
 	// Extended Range / Custom Colors (includes separate note colors)
 	if (AttemptedERInThisSong && UseEROrColorsInThisSong) {
-		MemHelpers::ToggleCB(UseERExclusivelyInThisSong);
+		GameState::ToggleCB(UseERExclusivelyInThisSong);
 
 		// Settings::GetModSetting("SeparateNoteColors") == 1 -> Default Colors, so don't do anything.
 
@@ -430,7 +431,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 				if (!pBaseTexture)
 					return SHOW_TEXTURE;
 
-				if (CRCForTexture(pCurrTexture, pDevice, crc)) {
+				if (D3D::CRCForTexture(pCurrTexture, pDevice, crc)) {
 
 					// Same checksum for stems and accents, because they use the same texture. Bends and slides use the same texture.
 					if (crc == crcStemsAccents || crc == crcBendSlideIndicators)  
@@ -456,7 +457,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 			if (!pBaseTexture)
 				return REMOVE_TEXTURE;
 
-			if (CRCForTexture(pCurrTexture, pDevice, crc)) {
+			if (D3D::CRCForTexture(pCurrTexture, pDevice, crc)) {
 
 				// Same checksum for stems and accents, because they use the same texture. Bends and slides use the same texture.
 				if (crc == crcStemsAccents || crc == crcBendSlideIndicators)  
@@ -480,7 +481,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 			if (!pBaseTexture)
 				return SHOW_TEXTURE;
 
-			if (CRCForTexture(pCurrTexture, pDevice, crc)) {
+			if (D3D::CRCForTexture(pCurrTexture, pDevice, crc)) {
 
 				// Same checksum for stems and accents, because they use the same texture. Bends and slides use the same texture.
 				if (crc == crcStemsAccents || crc == crcBendSlideIndicators)  
@@ -511,7 +512,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 			if (!pBaseTexture)
 				return SHOW_TEXTURE;
 
-			if (CRCForTexture(pCurrTexture, pDevice, crc)) {
+			if (D3D::CRCForTexture(pCurrTexture, pDevice, crc)) {
 
 				// Same checksum for stems and accents, because they use the same texture. Bends and slides use the same texture.
 				if (crc == crcStemsAccents || crc == crcBendSlideIndicators) {  
@@ -532,9 +533,9 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	if (Settings::IsTwitchSettingEnabled("FYourFC")) {
 		uintptr_t currentNoteStreak = 0;
 
-		if (MemHelpers::Contains(currentMenu, learnASongModes))
+		if (Contains(currentMenu, learnASongModes))
 			currentNoteStreak = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_currentNoteStreak, Offsets::ptr_currentNoteStreakLASOffsets);
-		else if (MemHelpers::Contains(currentMenu, scoreAttackModes))
+		else if (Contains(currentMenu, scoreAttackModes))
 			currentNoteStreak = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_currentNoteStreak, Offsets::ptr_currentNoteStreakSAOffsets);
 
 		if (currentNoteStreak != 0)
@@ -552,7 +553,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 		return REMOVE_TEXTURE;
 
 	// Thicc Mesh Mods that are as simple as doing a simple check against the params of this function.
-	if (MemHelpers::IsInSong()) {
+	if (GameState::IsInSong()) {
 		if (Settings::ReturnSettingValue("FretlessModeEnabled") == "on" && IsExtraRemoved(fretless, currentThicc))
 			return REMOVE_TEXTURE;
 		if (Settings::ReturnSettingValue("RemoveInlaysEnabled") == "on" && IsExtraRemoved(inlays, currentThicc))
@@ -564,7 +565,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	}
 
 	// Remove Headstock Artifacts
-	else if (MemHelpers::Contains(currentMenu, tuningMenus) && Settings::ReturnSettingValue("RemoveHeadstockEnabled") == "on" && RemoveHeadstockInThisMenu)
+	else if (Contains(currentMenu, tuningMenus) && Settings::ReturnSettingValue("RemoveHeadstockEnabled") == "on" && RemoveHeadstockInThisMenu)
 	{
 		// This is called to remove those pesky tuning letters that share the same texture values as fret numbers and chord fingerings
 		if (IsExtraRemoved(tuningLetters, currentThicc)) 
@@ -594,7 +595,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 
 		// There's only two textures in Stage 1 for meshes with Stride = 16, so we could as well skip CRC calcuation and just check if !pBaseTextures[1] and return REMOVE_TEXTURE directly
 		if (pBaseTextures[1]) {  
-			if (CRCForTexture(pCurrTextures[1], pDevice, crc)) {
+			if (D3D::CRCForTexture(pCurrTextures[1], pDevice, crc)) {
 
 				// Purple rectangles + orange line beneath them
 				if (crc == crcSkylinePurple || crc == crcSkylineOrange) { 
@@ -608,7 +609,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 		pCurrTextures[0] = (IDirect3DTexture9*)pBaseTextures[0];
 
 		if (pBaseTextures[0]) {
-			if (CRCForTexture(pCurrTextures[0], pDevice, crc)) {
+			if (D3D::CRCForTexture(pCurrTextures[0], pDevice, crc)) {
 
 				// There's a few more of textures used in Stage 0, so doing the same is no-go; Shadow-ish thing in the background + backgrounds of rectangles.
 				if (crc == crcSkylineBackground || crc == crcSkylineShadow) {  
@@ -634,7 +635,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 					return REMOVE_TEXTURE;
 
 				// Take a CRC of the texture, and check it against our preset CRCs.
-				if (CRCForTexture(pCurrTextures[1], pDevice, crc)) {
+				if (D3D::CRCForTexture(pCurrTextures[1], pDevice, crc)) {
 					if (crc == crcHeadstock0 || crc == crcHeadstock1 || crc == crcHeadstock2 || crc == crcHeadstock3 || crc == crcHeadstock4)
 						AddToTextureList(headstockTexturePointers, pCurrTextures[1]);
 				}
@@ -642,7 +643,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 				int headstockCRCLimit = 3;
 
 				// If the user is in multiplayer, we have to make sure our CRC limit is double or some bugs appear.
-				if (MemHelpers::Contains(currentMenu, multiplayerTuners))
+				if (Contains(currentMenu, multiplayerTuners))
 					headstockCRCLimit = 6;
 
 				// We've calculated all CRCs that we can, within our limit.

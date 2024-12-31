@@ -1,7 +1,4 @@
 #pragma once
-#include "../CCEffect.hpp"
-#include "../../D3D/D3D.hpp"
-#include "../CCEffectList.hpp"
 
 namespace CrowdControl::Effects {
 	class InvertedStringsEffect : public CCEffect

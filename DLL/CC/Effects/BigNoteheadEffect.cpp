@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "BigNoteheadEffect.hpp"
 
 namespace CrowdControl::Effects {

@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "Midi.hpp"
 
 // Midi codes should follow this guide: http://fmslogo.sourceforge.net/manual/midi-table.html
@@ -398,7 +399,7 @@ namespace Midi {
 
 			Sleep(1500); // The menu is called when the animation starts. The tuning isn't set at that point, so we need to wait to get the value. This doesn't seem to lag the game.
 
-			int* highestLowestTuning = MemHelpers::GetHighestLowestString();
+			int* highestLowestTuning = SongTuning::GetHighestLowestString();
 
 			int highestTuning = highestLowestTuning[0];
 			int lowestTuning = highestLowestTuning[1];
@@ -411,7 +412,7 @@ namespace Midi {
 			
 			delete[] highestLowestTuning;
 
-			int TrueTuning_Hertz = MemHelpers::GetTrueTuning();
+			int TrueTuning_Hertz = SongTuning::GetTrueTuning();
 
 			if (TrueTuning_Hertz < 260) // Give some leeway for A220 and it's true tuned offsets
 				highestTuning -= 12;
@@ -437,7 +438,7 @@ namespace Midi {
 
 			Sleep(2000); // The menu is called when the animation starts. We need to wait for the tuning name to appear in the bottom-right corner so we can read it and get the tuning we need.
 
-			int* highestLowestTuning = MemHelpers::GetHighestLowestString(MemHelpers::GetTuningAtTuner());
+			int* highestLowestTuning = SongTuning::GetHighestLowestString(SongTuning::GetTuningAtTuner());
 
 			int highestTuning = highestLowestTuning[0];
 			int lowestTuning = highestLowestTuning[1];
@@ -450,7 +451,7 @@ namespace Midi {
 
 			delete[] highestLowestTuning;
 
-			int TrueTuning_Hertz = MemHelpers::GetTrueTuning();
+			int TrueTuning_Hertz = SongTuning::GetTrueTuning();
 
 			// highestLowestTuning accounts for true tuning of A220. Do not add a check for it here.
 

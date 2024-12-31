@@ -1,6 +1,5 @@
 #pragma once
-#include "../CCEffect.hpp"
-#include "../CCEffectList.hpp"
+#include "../../Mods/Loft.hpp"
 
 namespace CrowdControl::Effects {
 	class DrunkModeEffect : public CCEffect

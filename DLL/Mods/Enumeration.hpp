@@ -1,7 +1,4 @@
-#include "../Offsets.hpp"
-#include "../MemUtil.hpp"
-#include <vector>
-#include <filesystem>
+#pragma once
 
 namespace Enumeration {
 	void ForceEnumeration();

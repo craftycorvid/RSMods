@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "Logging.hpp"
 
 #ifdef _WWISE_LOGS

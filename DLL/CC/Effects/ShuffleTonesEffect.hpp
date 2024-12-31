@@ -1,7 +1,4 @@
 #pragma once
-#include "../CCEffect.hpp"
-#include "../CCEffectList.hpp"
-#include "../../D3D/D3D.hpp"
 
 namespace CrowdControl::Effects {
 	class ShuffleTonesEffect : public CCEffect

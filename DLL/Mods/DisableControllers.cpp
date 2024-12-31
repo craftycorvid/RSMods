@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "DisableControllers.hpp"
 
 LPVOID* DirectInputPointer = NULL;

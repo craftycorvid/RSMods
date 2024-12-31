@@ -1,15 +1,4 @@
-#include "Windows.h"
-#include <string>
-#include <mmdeviceapi.h>
-#include <endpointvolume.h>
-#include <Functiondiscoverykeys_devpkey.h>
-
-#include "../Log.hpp"
-#include "../MemHelpers.hpp"
-#include "../Offsets.hpp"
-#include "../MemUtil.hpp"
-#include "../Wwise/SoundEngine.hpp"
-
+#pragma once
 
 namespace VolumeControl {
 	void IncreaseVolume(int amountToIncrease, std::string mixerToIncrease);

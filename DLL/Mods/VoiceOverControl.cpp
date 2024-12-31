@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "VoiceOverControl.hpp"
 
 namespace VoiceOverControl {

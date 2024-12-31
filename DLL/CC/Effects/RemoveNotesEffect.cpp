@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "RemoveNotesEffect.hpp"
 
 namespace CrowdControl::Effects {

@@ -1,6 +1,4 @@
 #pragma once
-#include "../CCEffect.hpp"
-#include "../CCEffectList.hpp"
 
 namespace CrowdControl::Effects {
 	// Scales notes in a song to unusually big size

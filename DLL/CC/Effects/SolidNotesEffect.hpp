@@ -1,7 +1,5 @@
 #pragma once
-#include "../CCEffect.hpp"
 #include "../../Mods/ExtendedRangeMode.hpp"
-#include "../CCEffectList.hpp"
 
 namespace CrowdControl::Effects {
 	// Changes current note heads to a custom generated texture
@@ -24,7 +22,7 @@ namespace CrowdControl::Effects {
 		 */
 		bool CanStart(std::map<std::string, CCEffect*>* AllEffects) override
 		{
-			return ERMode::ColorsSaved && MemHelpers::IsInSong() && !AreIncompatibleEffectsRunning(AllEffects) && !running;
+			return ERMode::ColorsSaved && GameState::IsInSong() && !AreIncompatibleEffectsRunning(AllEffects) && !running;
 		}
 
 	};

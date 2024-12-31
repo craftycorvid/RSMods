@@ -1,11 +1,4 @@
 #pragma once
-#include "windows.h"
-#include <vector>
-#include <string>
-#include <iostream>
-#include <cstdlib>
-#include <cmath>
-#include "../Structs.hpp"
 
 namespace GuitarSkeletons {
 	xyzPosition StringAttachPosition(bool leftHanded, bool bass, int stringNumber, bool setToDefaults, double inputZ);

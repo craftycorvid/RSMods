@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "TrueTuning.hpp"
 
 const float ForcedTrueTuning = 440.0f;

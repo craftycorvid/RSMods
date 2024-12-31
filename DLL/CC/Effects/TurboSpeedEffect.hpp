@@ -1,6 +1,4 @@
 #pragma once
-#include "../CCEffect.hpp"
-#include "../CCEffectList.hpp"
 #include "../../Mods/RiffRepeater.hpp"
 
 namespace CrowdControl::Effects {

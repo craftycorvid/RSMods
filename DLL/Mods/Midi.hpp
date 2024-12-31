@@ -1,17 +1,7 @@
 #pragma once
 
-#include "Windows.h"
-#include <cstdlib>
-#include <map>
-#include <string>
-#include <thread>
-
-#include "../Log.hpp"
-#include "../Lib/Midi/RtMidi.h"
-#include "../MemHelpers.hpp"
-#include "../Structs.hpp"
 #include "RiffRepeater.hpp"
-#include "../Wwise/SoundEngine.hpp"
+#include <mmeapi.h>
 
 namespace Midi {
 	void InitMidi();

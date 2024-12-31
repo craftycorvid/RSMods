@@ -1,6 +1,5 @@
+#include "../../stdafx.h"
 #include "SolidNotesEffect.hpp"
-#include "../../Lib/Json/json.hpp"
-#include <sstream>
 
 namespace CrowdControl::Effects {
 	

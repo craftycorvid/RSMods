@@ -1,7 +1,5 @@
 #pragma once
-#include "../CCEffect.hpp"
 #include "../../Mods/ExtendedRangeMode.hpp"
-#include "../CCEffectList.hpp"
 
 namespace CrowdControl::Effects {
 	class RainbowStringsEffect : public CCEffect
@@ -23,7 +21,7 @@ namespace CrowdControl::Effects {
 		 */
 		bool CanStart(std::map<std::string, CCEffect*>* AllEffects) override
 		{
-			return !ERMode::IsRainbowEnabled() && MemHelpers::IsInSong() && !AreIncompatibleEffectsRunning(AllEffects) && !running;
+			return !ERMode::IsRainbowEnabled() && GameState::IsInSong() && !AreIncompatibleEffectsRunning(AllEffects) && !running;
 		}
 	};
 

@@ -1,7 +1,4 @@
 #pragma once
-#include <cmath>
-#include <map>
-#include <vector>
 
 enum string_state {
 	Ambient = 0x350,
@@ -64,24 +61,24 @@ enum string_state {
 };
 
 const double M_PI = 3.14159265359;
-struct Color {
+struct RSColor {
 	float r;
 	float g;
 	float b;
 
-	Color() {
+	RSColor() {
 		r = 1.0f;
 		g = 0.0f;
 		b = 0.0f;
 	}
 
-	Color(int R, int G, int B) {
+	RSColor(int R, int G, int B) {
 		r = (float)R / 255;
 		g = (float)G / 255;
 		b = (float)B / 255;
 	}
 
-	Color(float R, float G, float B) {
+	RSColor(float R, float G, float B) {
 		r = R;
 		g = G;
 		b = B;
@@ -127,9 +124,8 @@ struct xyzPosition {
 	}
 };
 
-typedef Color RSColor;
-typedef std::map<std::string, RSColor> ColorMap;
-typedef std::vector<RSColor> ColorList;
+using ColorMap = std::map<std::string, RSColor>;
+using ColorList = std::vector<RSColor>;
 
 struct Tuning {
 	byte lowE; //0x0000
@@ -204,6 +200,7 @@ struct MidiPedal {
 		semiTones = {};
 		activeBypassMap = {};
 		softwarePedal = false;
+		autoTuneFunction = nullptr;
 	}
 
 	MidiPedal(std::string _pedalName, char _CC_Bank, char _PC_Channel, char _CC_Channel, bool _supportsDropTuning, bool _supportsTrueTuning, std::vector<float> _semiTones, std::map<char, char> _activeBypassMap, tuningFunction _tuningFunction, bool _softwarePedal = false) {

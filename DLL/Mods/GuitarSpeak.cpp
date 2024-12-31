@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "GuitarSpeak.hpp"
 
 /*
@@ -51,17 +52,17 @@ bool GuitarSpeak::RunGuitarSpeak() {
 	while (true) {
 		Sleep(timer);
 
-		std::string currentMenu = MemHelpers::GetCurrentMenu();
+		std::string currentMenu = GameState::GetCurrentMenu();
 
 		// If someone wants to tune in the setting menu they skip the check
-		if (MemHelpers::Contains(currentMenu, tuningMenus) && Settings::ReturnSettingValue("GuitarSpeakWhileTuning") == "off") {
+		if (Contains(currentMenu, tuningMenus) && Settings::ReturnSettingValue("GuitarSpeakWhileTuning") == "off") {
 			if (verbose)
 				_LOG("(GS) Entered Tuning Menu! Stopping Guitar Speak." << std::endl);
 			break; // We aren't needed here anymore.
 		}
 
 		// Disabled due to entering Lessons, a song, or a calibration menu.
-		if (MemHelpers::Contains(currentMenu, lessonModes) || MemHelpers::IsInSong() || MemHelpers::Contains(currentMenu, calibrationMenus)) {
+		if (Contains(currentMenu, lessonModes) || GameState::IsInSong() || Contains(currentMenu, calibrationMenus)) {
 			if (verbose)
 				_LOG("(GS) Entered Song Menu! Stopping Guitar Speak." << std::endl);
 			break; // We aren't needed here anymore.

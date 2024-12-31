@@ -1,31 +1,8 @@
 // DLL Hijack. Do NOT remove this line!
 #include "Proxy.hpp"
 
-// DLL Settings
-#include "MemHelpers.hpp"
-#include "Lib/Detours/detours.h"
-#include "Offsets.hpp"
-#include "MemUtil.hpp"
-#include "Settings.hpp"
-#include "Structs.hpp"
-#include "Functions.hpp"
-#include "D3D/D3D.hpp"
-#include "D3D/D3DHooks.hpp"
-#include "Wwise/SoundEngine.hpp"
-#include "Wwise/Logging.hpp"
-#include "CC/ControlServer.hpp"
 #include "Tests.hpp"
-#include "Log.hpp"
-
-// Windows Libraries
-#include <chrono>
-#include <process.h>
-#include <iostream>
-#include <fstream>
-#include <thread>
-#include "psapi.h"
-
-// Mods
+#include "CC/ControlServer.hpp"
 #include "Mods/Enumeration.hpp"
 #include "Mods/CustomSongTitles.hpp"
 #include "Mods/CollectColors.hpp"
@@ -40,6 +17,7 @@
 #include "Mods/AudioDevices.hpp"
 #include "Mods/BugPrevention.hpp"
 #include "Mods/TrueTuning.hpp"
+#include "Mods/Loft.hpp"
 
 std::vector<std::string> effectQueue;
 std::vector<std::string> enabledEffects;

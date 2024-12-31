@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Proxy.hpp"
 
 #pragma pack(1)

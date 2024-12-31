@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "RainbowNotesEffect.hpp"
 
 namespace CrowdControl::Effects {

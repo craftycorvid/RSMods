@@ -1,6 +1,8 @@
+#include "../stdafx.h"
 #include "D3D.hpp"
-#include "../Mods/ExtendedRangeMode.hpp"
+
 #include "../Mods/CollectColors.hpp"
+#include "../Mods/ExtendedRangeMode.hpp"
 
 /// <summary>
 /// Apply Custom String Colors
@@ -232,7 +234,7 @@ void D3D::GenerateTextures(IDirect3DDevice9* pDevice, TextureType type) {
 		float h = 0.0f, stringOffset = 20.0f;
 		int currTexture = 0;
 
-		Color c;
+		RSColor c;
 		ColorList colorsRainbow;
 
 		while (h < 360.f) {
@@ -351,4 +353,90 @@ HRESULT D3D::GenerateSolidTexture(IDirect3DDevice9* pDevice, IDirect3DTexture9**
 	(*ppD3Dtex)->UnlockRect(0);
 
 	return S_OK;
+}
+
+bool D3D::CRCForTexture(LPDIRECT3DTEXTURE9 texture, IDirect3DDevice9* pDevice, DWORD& o_crc) {
+	_LOG_INIT;
+
+	_LOG_SETLEVEL(LogLevel::Error);
+
+	D3DLOCKED_RECT lockedRect;
+
+	if (texture->LockRect(0, &lockedRect, NULL, D3DLOCK_NOOVERWRITE | D3DLOCK_READONLY) == D3D_OK) {
+		o_crc = 0;
+		DWORD* pData = (DWORD*)lockedRect.pBits;
+		if (pData != NULL) {
+			o_crc = QuickCheckSum(pData, 20);
+
+			texture->UnlockRect(0);
+			return true;
+		}
+		else {
+			_LOG("CRCForTexture: FAILED. lockedRect.pBits == NULL" << std::endl);
+			return false;
+		}
+	}
+	else {
+		_LOG("CRCForTexture: FAILED. LockRect == D3DERR_INVALIDCALL" << std::endl);
+
+		D3DCAPS9 pDeviceCaps;
+		IDirect3DSurface9* pRenderTarget;
+		D3DSURFACE_DESC surfaceDesc;
+
+		pDevice->GetDeviceCaps(&pDeviceCaps);
+
+		for (int i = 0; i < pDeviceCaps.NumSimultaneousRTs - 1; i++) {
+			_LOG_SETLEVEL(LogLevel::Info);
+			_LOG("CRCForTexture: Trying RenderTarget(" << i << ")" << std::endl);
+
+			HRESULT rRenderTarget = pDevice->GetRenderTarget(i, &pRenderTarget);
+
+			if (rRenderTarget == D3D_OK) {
+				pRenderTarget->GetDesc(&surfaceDesc);
+				std::string poolType;
+
+				short pool = surfaceDesc.Pool;
+
+				switch (pool) {
+				case D3DPOOL_DEFAULT:
+					poolType = "D3DPOOL_DEFAULT";
+					break;
+				case D3DPOOL_MANAGED:
+					poolType = "D3DPOOL_MANAGED";
+					break;
+				case D3DPOOL_SYSTEMMEM:
+					poolType = "D3DPOOL_SYSTEMMEM";
+					break;
+				case D3DPOOL_SCRATCH:
+					poolType = "D3DPOOL_SCRATCH";
+					break;
+				case D3DPOOL_FORCE_DWORD:
+					poolType = "D3DPOOL_FORCE_DWORD";
+					break;
+
+				default:
+					poolType = "UNKNOWN";
+				}
+
+				_LOG("CRCForTexture: RenderTarget(" << i << ")->Pool == " << poolType << std::endl);
+			}
+			else if (rRenderTarget == D3DERR_NOTFOUND)
+			{
+				_LOG_SETLEVEL(LogLevel::Error);
+				_LOG("CRCForTexture: No Render Target At Index: " << i << std::endl);
+			}
+			else
+			{
+				_LOG_SETLEVEL(LogLevel::Error);
+				_LOG("CRCForTexure: pDevice->GetRenderTarget(" << i << ") has an invalid argument" << std::endl);
+			}
+
+
+			if (pRenderTarget != nullptr)
+				pRenderTarget->Release(); // Gotta release it or it'll leak everywhere.
+		}
+		_LOG_SETLEVEL(LogLevel::Info);
+		_LOG("CRCForTexture: END" << std::endl);
+		return false;
+	}
 }

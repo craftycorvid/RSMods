@@ -1,16 +1,5 @@
 #pragma once
 
-#include "Windows.h"
-
-#include "../Log.hpp"
-#include "../Lib/Detours/detours.h"
-
-#include "Types.hpp"
-#include "Exports.hpp"
-#include "SoundEngine.hpp"
-
-#include "../MemHelpers.hpp"
-
 #ifdef _WWISE_LOGS
 namespace Wwise::Logging {
 	void Init();

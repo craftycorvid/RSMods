@@ -78,9 +78,6 @@
     <ClCompile Include="Scrapped.hpp">
       <Filter>Main Headers</Filter>
     </ClCompile>
-    <ClCompile Include="MemHelpers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mods\Enumeration.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
@@ -258,6 +255,33 @@
     <ClCompile Include="CC\Effects\WavyNotesEffect.cpp">
       <Filter>CrowdControl\Effects</Filter>
     </ClCompile>
+    <ClCompile Include="VersioningStruct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Wwise\Exports.cpp">
+      <Filter>Wwise</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CC\CCEffect.cpp">
+      <Filter>CrowdControl</Filter>
+    </ClCompile>
+    <ClCompile Include="SongTuning.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SongTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DOverlay.cpp">
+      <Filter>D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Mods\Loft.cpp">
+      <Filter>Mods</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MemUtil.hpp">
@@ -267,9 +291,6 @@
       <Filter>Main Headers</Filter>
     </ClInclude>
     <ClInclude Include="Main.hpp">
-      <Filter>Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MemHelpers.hpp">
       <Filter>Main Headers</Filter>
     </ClInclude>
     <ClInclude Include="Offsets.hpp">
@@ -518,6 +539,27 @@
     <ClInclude Include="CC\Effects\WavyNotesEffect.hpp">
       <Filter>CrowdControl\Effects\EffectHeaders</Filter>
     </ClInclude>
+    <ClInclude Include="VersioningStruct.h">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SongTuning.hpp">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.hpp">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SongTimer.hpp">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DOverlay.hpp">
+      <Filter>D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Mods\Loft.hpp">
+      <Filter>Mods\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="xinput1_3.def">
@@ -546,5 +588,10 @@
     <Library Include="Lib\DirectX\d3dx9.lib">
       <Filter>Libs</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="syscalls.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

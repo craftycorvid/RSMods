@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "TurboSpeedEffect.hpp"
 
 using namespace CrowdControl::Enums;

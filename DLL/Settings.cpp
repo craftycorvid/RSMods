@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "Settings.hpp"
-#include <regex>
 
 /// <summary>
 /// Load Default Settings.
@@ -546,7 +546,7 @@ float cSettings::GetStringColor(std::string string) {
 /// </summary>
 /// <param name="CB"> - colorblind or not</param>
 /// <returns>List of all string colors</returns>
-std::vector<Color> Settings::GetStringColors(bool CB) {
+std::vector<RSColor> Settings::GetStringColors(bool CB) {
 	if (CB)
 		return customStringColorsCB;
 	else
@@ -558,7 +558,7 @@ std::vector<Color> Settings::GetStringColors(bool CB) {
 /// </summary>
 /// <param name="CB"> - colorblind or not</param>
 /// <returns>List of all note colors</returns>
-std::vector<Color> Settings::GetNoteColors(bool CB) {
+std::vector<RSColor> Settings::GetNoteColors(bool CB) {
 	if (CB)
 		return customNoteColorsCB;
 	else
@@ -572,7 +572,7 @@ std::vector<Color> Settings::GetNoteColors(bool CB) {
 /// <param name="strIndex"> - string number (zero-indexed)</param>
 /// <param name="c"> - new color</param>
 /// <param name="CB"> - colorblind or not</param>
-void Settings::SetStringColors(int strIndex, Color c, bool CB) {
+void Settings::SetStringColors(int strIndex, RSColor c, bool CB) {
 	if (CB)
 		customStringColorsCB[strIndex] = c;
 	else
@@ -585,7 +585,7 @@ void Settings::SetStringColors(int strIndex, Color c, bool CB) {
 /// <param name="strIndex"> - string number (zero-indexed)</param>
 /// <param name="c"> - new color</param>
 /// <param name="CB"> - colorblind or not</param>
-void Settings::SetNoteColors(int strIndex, Color c, bool CB) {
+void Settings::SetNoteColors(int strIndex, RSColor c, bool CB) {
 	if (CB)
 		customNoteColorsCB[strIndex] = c;
 	else
@@ -613,15 +613,15 @@ void Settings::UpdateSettings() {
 /// </summary>
 /// <param name="hexStr"> - String of hex, without #</param>
 /// <returns>Color struct</returns>
-Color Settings::ConvertHexToColor(std::string hexStr) {
+RSColor Settings::ConvertHexToColor(std::string hexStr) {
 	int r, g, b;
 	if (sscanf_s(hexStr.c_str(), "%02x%02x%02x", &r, &g, &b) != EOF) {
-		Color c((float)r / 255, (float)g / 255, (float)b / 255);
+		RSColor c((float)r / 255, (float)g / 255, (float)b / 255);
 
 		return c;
 	}
 	else {
-		Color nullColor(0.0f, 0.0f, 0.0f);
+		RSColor nullColor(0.0f, 0.0f, 0.0f);
 		return nullColor;
 	}
 }

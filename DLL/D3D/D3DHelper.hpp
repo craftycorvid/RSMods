@@ -1,7 +1,4 @@
 #pragma once
-#include <vector>
-#include <string>
-#include <fstream>
 
 namespace D3DHelper {
 	inline char dlldir[320];

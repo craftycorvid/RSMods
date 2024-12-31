@@ -1,19 +1,15 @@
 #pragma once
-#include "windows.h"
-#include "d3d9.h"
-#include <vector>
-#include <iostream>
-#include <random>
-#include <string>
 #include <gdiplus.h>
 
-#include "../Log.hpp"
-#include "../Structs.hpp"
 #include "D3DHelper.hpp"
 
 // #pragma intrinsic(_ReturnAddress) Not actually declared
 #pragma comment (lib, "gdiplus.lib")
 #pragma once
+
+struct RSColor;
+typedef std::map<std::string, RSColor> ColorMap;
+typedef std::vector<RSColor> ColorList;
 
 namespace D3D {
 	enum TextureType {
@@ -32,6 +28,7 @@ namespace D3D {
 	HRESULT GenerateSolidTexture(IDirect3DDevice9* pDevice, IDirect3DTexture9** ppD3Dtex, DWORD colour32);
 	void GenerateTexture(IDirect3DDevice9* pDevice, IDirect3DTexture9** ppTexture, ColorList colorSet, UINT in_width = 256, UINT in_height = 128, int in_lineHeight = 8, int howManyLines = 16);
 	void GenerateTextures(IDirect3DDevice9* pDevice, TextureType type);
+	bool CRCForTexture(LPDIRECT3DTEXTURE9 texture, IDirect3DDevice9* pDevice, DWORD& o_crc);
 };
 
 inline Gdiplus::GdiplusStartupInput inp;
@@ -219,91 +216,5 @@ inline DWORD QuickCheckSum(DWORD* BufferData, size_t Size) // Yes, we are aware 
 		Sum = (DWORD)(Sum << 3) ^ Temp;
 	}
 	return Sum;
-}
-
-inline bool CRCForTexture(LPDIRECT3DTEXTURE9 texture, IDirect3DDevice9* pDevice, DWORD& o_crc) {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
-	D3DLOCKED_RECT lockedRect;
-
-	if (texture->LockRect(0, &lockedRect, NULL, D3DLOCK_NOOVERWRITE | D3DLOCK_READONLY) == D3D_OK) {
-		o_crc = 0;
-		DWORD* pData = (DWORD*)lockedRect.pBits;
-		if (pData != NULL) {
-			o_crc = QuickCheckSum(pData, 20);
-
-			texture->UnlockRect(0);
-			return true;
-		}
-		else {
-			_LOG("CRCForTexture: FAILED. lockedRect.pBits == NULL" << std::endl);
-			return false;
-		}
-	}
-	else {
-		_LOG("CRCForTexture: FAILED. LockRect == D3DERR_INVALIDCALL" << std::endl);
-
-		D3DCAPS9 pDeviceCaps;
-		IDirect3DSurface9* pRenderTarget, *newRenderTarget;
-		D3DSURFACE_DESC surfaceDesc;
-
-		pDevice->GetDeviceCaps(&pDeviceCaps);
-
-		for (int i = 0; i < pDeviceCaps.NumSimultaneousRTs - 1; i++) {
-			_LOG_SETLEVEL(LogLevel::Info);
-			_LOG("CRCForTexture: Trying RenderTarget(" << i << ")" << std::endl);
-
-			HRESULT rRenderTarget = pDevice->GetRenderTarget(i, &pRenderTarget);
-			
-			if (rRenderTarget == D3D_OK) {
-				pRenderTarget->GetDesc(&surfaceDesc);
-				std::string poolType;
-
-				short pool = surfaceDesc.Pool;
-
-				switch (pool) {
-					case D3DPOOL_DEFAULT:
-						poolType = "D3DPOOL_DEFAULT";
-						break;
-					case D3DPOOL_MANAGED:
-						poolType = "D3DPOOL_MANAGED";
-						break;
-					case D3DPOOL_SYSTEMMEM:
-						poolType = "D3DPOOL_SYSTEMMEM";
-						break;
-					case D3DPOOL_SCRATCH:
-						poolType = "D3DPOOL_SCRATCH";
-						break;
-					case D3DPOOL_FORCE_DWORD:
-						poolType = "D3DPOOL_FORCE_DWORD";
-						break;
-
-					default:
-							poolType = "UNKNOWN";
-				}
-
-				_LOG("CRCForTexture: RenderTarget(" << i << ")->Pool == " << poolType << std::endl);
-			}
-			else if (rRenderTarget == D3DERR_NOTFOUND)
-			{
-				_LOG_SETLEVEL(LogLevel::Error);
-				_LOG("CRCForTexture: No Render Target At Index: " << i << std::endl);
-			}
-			else
-			{
-				_LOG_SETLEVEL(LogLevel::Error);
-				_LOG("CRCForTexure: pDevice->GetRenderTarget(" << i << ") has an invalid argument" << std::endl);
-			}
-			
-
-			if (pRenderTarget != nullptr)
-				pRenderTarget->Release(); // Gotta release it or it'll leak everywhere.
-		}
-		_LOG_SETLEVEL(LogLevel::Info);
-		_LOG("CRCForTexture: END" << std::endl);
-		return false;
-	}
 }
 

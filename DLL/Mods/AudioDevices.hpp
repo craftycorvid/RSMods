@@ -1,17 +1,5 @@
 #pragma once
 
-#include "Windows.h"
-#include <string>
-#include <map>
-#include <mmdeviceapi.h>
-#include <endpointvolume.h>
-#include <Functiondiscoverykeys_devpkey.h>
-
-#include "../Log.hpp"
-#include "../MemUtil.hpp"
-#include "../Offsets.hpp"
-
-
 namespace AudioDevices {
 	void SetupMicrophones();
 	void SetMicrophoneVolume(std::string microphoneName, int volume);

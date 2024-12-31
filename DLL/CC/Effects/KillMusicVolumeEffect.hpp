@@ -1,8 +1,4 @@
 #pragma once
-#include "../CCEffect.hpp"
-#include "../../Wwise/Types.hpp"
-#include "../../Wwise/SoundEngine.hpp"
-#include "../CCEffectList.hpp"
 
 namespace CrowdControl::Effects {
 	class KillMusicVolumeEffect : public CCEffect

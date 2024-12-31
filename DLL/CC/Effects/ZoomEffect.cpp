@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "ZoomEffect.hpp"
 
 using namespace CrowdControl::Enums;

@@ -1,3 +1,4 @@
+#include "../../stdafx.h"
 #include "WavyNotesEffect.hpp"
 
 using namespace CrowdControl::Enums;

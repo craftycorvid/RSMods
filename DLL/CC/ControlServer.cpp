@@ -1,17 +1,15 @@
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
+#include "../stdafx.h"
 #include "ControlServer.hpp"
-#include "../D3D/D3DHooks.hpp"
+
+#include <process.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <process.h>
-#include "../Lib/Json/json.hpp"
 
 #include "CCEffect.hpp"
 #include "CCEffectList.hpp"
-#include <thread>
+#include "CCStructs.hpp"
+
+#include "../D3D/D3DHooks.hpp"
 
 //Link the winsock2 lib
 #pragma comment(lib, "Ws2_32.lib")
@@ -242,7 +240,7 @@ namespace CrowdControl {
 			Sleep(5000);
 
 		while (!D3DHooks::GameClosing) {
-			if (MemHelpers::IsInSong()) // Guitarcade games crash if UpdateScales is run. So we will just sleep.
+			if (GameState::IsInSong()) // Guitarcade games crash if UpdateScales is run. So we will just sleep.
 				ObjectUtil::UpdateScales();
 
 			Sleep(1000);

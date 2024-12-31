@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Tests.hpp"
 
 namespace Tests
@@ -48,7 +49,7 @@ namespace Tests
 		Sleep(5000);
 
 		// Return if we are in a song or not.
-		return MemHelpers::IsInSong();
+		return GameState::IsInSong();
 	}
 
 

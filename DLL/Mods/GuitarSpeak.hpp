@@ -1,17 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <sstream>
-#include "windows.h"
-
-#include "../Log.hpp"
-#include "../MemHelpers.hpp"
-#include "../Offsets.hpp"
-#include "../MemUtil.hpp"
-#include "../Settings.hpp"
-#include "../Lib/DirectX/d3dx9core.h"
-
 namespace GuitarSpeak {
 	byte GetCurrentNote();
 	std::string GetCurrentNoteName();

@@ -1,4 +1,6 @@
+#include "../stdafx.h"
 #include "CustomSongTitles.hpp"
+
 #pragma warning(disable: 4302) // Typecast truncated from const _Elem* -> char (Leaving this because the user shouldn't have a song list name over 255).
 
 std::vector<std::string> songTitles(20);
