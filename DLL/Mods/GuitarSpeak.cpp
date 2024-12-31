@@ -55,14 +55,14 @@ bool GuitarSpeak::RunGuitarSpeak() {
 		std::string currentMenu = GameState::GetCurrentMenu();
 
 		// If someone wants to tune in the setting menu they skip the check
-		if (Contains(currentMenu, tuningMenus) && Settings::ReturnSettingValue("GuitarSpeakWhileTuning") == "off") {
+		if (GameState::Menus::IsInTuningMenus() && Settings::ReturnSettingValue("GuitarSpeakWhileTuning") == "off") {
 			if (verbose)
 				_LOG("(GS) Entered Tuning Menu! Stopping Guitar Speak." << std::endl);
 			break; // We aren't needed here anymore.
 		}
 
 		// Disabled due to entering Lessons, a song, or a calibration menu.
-		if (Contains(currentMenu, lessonModes) || GameState::IsInSong() || Contains(currentMenu, calibrationMenus)) {
+		if (GameState::Menus::IsInLessonModes() || GameState::IsInSong() || GameState::Menus::IsInCalibrationMenus()) {
 			if (verbose)
 				_LOG("(GS) Entered Song Menu! Stopping Guitar Speak." << std::endl);
 			break; // We aren't needed here anymore.

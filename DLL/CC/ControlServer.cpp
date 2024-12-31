@@ -100,7 +100,7 @@ namespace CrowdControl {
 		int bytesRead = 0;
 		char buffer[1024];
 
-		while (!D3DHooks::GameClosing) {
+		while (!GameState::GameClosing) {
 			//Receive command
 			currentMessageLength = 0;
 
@@ -157,7 +157,7 @@ namespace CrowdControl {
 	unsigned WINAPI CrowdControlThread() {
 		_LOG_INIT;
 
-		while (!D3DHooks::GameLoaded) 
+		while (!GameState::GameLoaded) 
 			Sleep(5000);
 
 		_LOG("Crowd control server starting" << std::endl);
@@ -175,7 +175,7 @@ namespace CrowdControl {
 			return -1;
 		}
 
-		while (!D3DHooks::GameClosing) {
+		while (!GameState::GameClosing) {
 			_LOG("Trying to connect to crowd control" << std::endl);
 
 			//Open socket
@@ -214,10 +214,10 @@ namespace CrowdControl {
 	/// </summary>
 	/// <returns>NULL. Loops while the game is open</returns>
 	unsigned WINAPI EffectRunThread() {
-		while (!D3DHooks::GameLoaded)
+		while (!GameState::GameLoaded)
 			Sleep(5000);
 
-		while (!D3DHooks::GameClosing) {
+		while (!GameState::GameClosing) {
 			// Iterate through all effects
 			for (auto it = AllEffects.begin(); it != AllEffects.end(); ++it) {
 				// Run/Update all effects
@@ -236,10 +236,10 @@ namespace CrowdControl {
 	/// </summary>
 	/// <returns>NULL. Loops while the game is open</returns>
 	unsigned WINAPI ObjectUtilUpdateThread() {
-		while (!D3DHooks::GameLoaded) 
+		while (!GameState::GameLoaded) 
 			Sleep(5000);
 
-		while (!D3DHooks::GameClosing) {
+		while (!GameState::GameClosing) {
 			if (GameState::IsInSong()) // Guitarcade games crash if UpdateScales is run. So we will just sleep.
 				ObjectUtil::UpdateScales();
 

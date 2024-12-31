@@ -35,9 +35,9 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 
 		uintptr_t currentNoteStreak = 0;
 
-		if (Contains(D3DHooks::currentMenu, learnASongModes))
+		if (GameState::Menus::IsInLearnASongModes())
 			currentNoteStreak = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_currentNoteStreak, Offsets::ptr_currentNoteStreakLASOffsets);
-		else if (Contains(D3DHooks::currentMenu, scoreAttackModes))
+		else if (GameState::Menus::IsInScoreAttackModes())
 			currentNoteStreak = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_currentNoteStreak, Offsets::ptr_currentNoteStreakSAOffsets);
 
 		if (currentNoteStreak != 0)

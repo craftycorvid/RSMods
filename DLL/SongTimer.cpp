@@ -6,7 +6,7 @@ float SongTimer::SongTimer() {
 
 	_LOG_SETLEVEL(LogLevel::Error);
 
-	if (Contains(GameState::GetCurrentMenu(), preSongTuners)) {
+	if (GameState::Menus::IsInPreSongTuner()) {
 		return 0.f;
 	}
 
@@ -29,7 +29,7 @@ float SongTimer::SongTimer() {
 	// We entered a song where the base timer does not work.
 	// Cause for this is unknown but we need to check, or time based mods (looping, song timer) will break.
 	// Ex: Desolate Motion, or Rocksmith 2012 Theme.
-	if (Contains(GameState::GetCurrentMenu(), songModes) && *(float*)addrTimerBase == 0.f && *(float*)addrTimerRare != 0.f) {
+	if (GameState::Menus::IsInSongModes() && *(float*)addrTimerBase == 0.f && *(float*)addrTimerRare != 0.f) {
 		return *(float*)addrTimerRare;
 	}
 	// This is the default case, and will be used 99.99% of the time.

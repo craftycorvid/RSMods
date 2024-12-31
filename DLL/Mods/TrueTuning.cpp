@@ -8,12 +8,12 @@ const float ForcedTrueTuning = 440.0f;
 /// </summary>
 bool __cdecl CanDisableTrueTuning()
 {
-	if (D3DHooks::currentMenu.size() < 1)
+	if (GameState::currentMenu.size() < 1)
 	{
 		return false;
 	}
 
-	return D3DHooks::currentMenu[0] != 83;
+	return GameState::currentMenu[0] != 83;
 }
 
 void __declspec(naked) disableTrueTuning()

@@ -266,7 +266,7 @@ namespace Midi {
 		midiin->setCallback(&RespondToMidiIn);
 		midiin->ignoreTypes(false, false, true);
 
-		while (!D3DHooks::GameClosing) {
+		while (!GameState::GameClosing) {
 			Sleep(50);
 		}
 		return 0;

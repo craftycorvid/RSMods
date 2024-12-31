@@ -79,6 +79,4 @@
 /// <param name="valueToCheckIfInsideArray"> - Input</param>
 /// <param name="vec"> - Is input in list | VECTOR? (NULLABLE)</param>
 template <typename T>
-bool Contains(const T& valueToCheckIfInsideArray, const std::vector<T>& vec) {
-	return std::find(vec.begin(), vec.end(), valueToCheckIfInsideArray) != vec.end();
-}
+bool Contains(const T& valueToCheckIfInsideArray, const std::vector<T>& vec);

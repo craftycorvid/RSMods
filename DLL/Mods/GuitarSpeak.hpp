@@ -32,57 +32,6 @@ namespace GuitarSpeak {
 		{"ALT", VK_MENU},        // Alt
 	};
 
-	inline std::vector<std::string> calibrationMenus = {
-		"Guitarcade_Calibration",
-		"Guitarcade_WRDCalibration",
-		"GECalibrationMeter",
-		"NonStopPlay_CalibrationMeter_PreGame",
-		"CalibrationMeter",
-		"CalibrationMeter_MP",
-		"LearnASong_CalibrationMeter_PreGame",
-	};
-
-	inline std::vector<std::string> tuningMenus = { // These are all the menus where you need to tune
-		"SelectionListDialog",
-		"LearnASong_PreSongTuner",
-		"LearnASong_PreSongTunerMP",
-		"NonStopPlay_PreSongTuner",
-		"NonStopPlay_PreSongTunerMP",
-		"ScoreAttack_PreSongTuner",
-		"SessionMode_PreSMTunerMP",
-		"SessionMode_PreSMTuner",
-		"UIMenu_Tuner",
-		"UIMenu_TunerMP",
-		"Guitarcade_Tuner",
-		"Tuner",
-		"Duet_PreSongTuner",
-		"H2H_PreSongTuner",
-		"GETuner",
-		"PreGame_GETuner"
-	};
-
-	inline std::vector<std::string> songMenus = { // These are all the menus where you would play guitar games.
-		"LearnASong_Game",
-		"NonStopPlay_Game",
-		"ScoreAttack_Game",
-		"LearnASong_Pause",
-		"NonStopPlay_Pause",
-		"ScoreAttack_Pause",
-		"LearnASong_RiffRepeater",
-		"RiffRepeater_AdvancedSettings",
-		"SessionMode_Game",
-		"SessionMode_PauseGame",
-		"Guitarcade_Game",
-		"Guitarcade_Pause",
-		"HelpList", // Chords Menu
-		"MixerMenu",
-	};
-
-	inline std::vector<std::string> lessonModes = { // These are the Guided Experience / Lessons modes.
-		"GuidedExperience_Game",
-		"GuidedExperience_Pause",
-	};
-
 	inline std::vector<std::string> noteLetters = {
 		"C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"
 	};

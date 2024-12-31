@@ -82,15 +82,8 @@ namespace D3DHooks {
 	inline bool enableColorBlindCheckboxGUI = false; // Do we allow the user to change Colorblind mode in the imGUI menu?
 	inline std::vector<std::string> GuitarSpeakStartingTexts;
 
-	// Menus
-	inline std::string previousMenu, currentMenu; // What is the last menu, and the current menu?
-	inline bool GameLoaded = false; // Has the game gotten to the main menu where you can pick the gamemodes?
-	inline bool LessonMode = false; // Is the user in LessonMode?
-
 	// Misc
-	inline bool lowPerformancePC = false; // Does your game lag with all of our mods? Toggle on to disable us running mods for an "original DLL" experience.
 	inline bool setAllToNoteGradientTexture = false; // Should we override the 6-string note textures with the 7-string note textures?
-	inline bool GameClosing = false; // Inform the threads that their work is done just before the game closes
 
 	inline const char* windowName = "Rocksmith 2014"; // Console Window Title
 

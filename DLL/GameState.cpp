@@ -5,7 +5,7 @@
 /// Are we in a song?
 /// </summary>
 bool GameState::IsInSong() {
-	if (!D3DHooks::GameLoaded)
+	if (!GameLoaded)
 	{
 		return false;
 	}
@@ -165,4 +165,68 @@ void GameState::ToggleCB(bool enabled) {
 	// JIC, no need to write the same value constantly
 	if (*(byte*)cbEnabled != (byte)enabled)
 		*(byte*)cbEnabled = enabled;
+}
+
+namespace GameState {
+	namespace Menus {
+		bool IsInMultiplayerTunerMenus() {
+			return Contains(currentMenu, learnASongModes);
+		}
+
+		bool IsInScoreMenus() {
+			return Contains(currentMenu, scoreScreens);
+		}
+
+		bool IsInTuningMenus() {
+			return Contains(currentMenu, tuningMenus);
+		}
+
+		bool IsInPreSongTuner() {
+			return Contains(currentMenu, preSongTuners);
+		}
+
+		bool IsInSongModes() {
+			return Contains(currentMenu, songModes);
+		}
+
+		bool IsInScoreAttackModes() {
+			return Contains(currentMenu, scoreAttackModes);
+		}
+
+		bool IsInLearnASongModes() {
+			return Contains(currentMenu, learnASongModes);
+		}
+
+		bool IsInLearnASongPauseModes() {
+			return Contains(currentMenu, lasPauseMenus);
+		}
+
+		bool IsInModesWithAllowedFastRiffRepeater() {
+			return Contains(currentMenu, fastRRModes);
+		}
+
+		bool IsInOnlineModes() {
+			return Contains(currentMenu, onlineModes);
+		}
+
+		bool IsInLASPlayingModes() {
+			return Contains(currentMenu, learnASongPlaying);
+		}
+
+		bool IsOnScoreScreens() {
+			return Contains(currentMenu, scoreScreens);
+		}
+
+		bool IsInLessonModes() {
+			return Contains(currentMenu, lessonModes);
+		}
+
+		bool IsInMenusWithDisallowedAutoEnter() {
+			return Contains(currentMenu, dontAutoEnter);
+		}
+
+		bool IsInCalibrationMenus() {
+			return Contains(currentMenu, calibrationMenus);
+		}
+	}
 }
