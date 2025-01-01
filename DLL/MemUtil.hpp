@@ -1,5 +1,7 @@
 #pragma once
 
+#include "winternl.h"
+
 namespace MemUtil {
 	bool bCompare(const BYTE* pData, const byte* bMask, const char* szMask);
 	bool PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake, size_t len, bool addBaseHandle = false);

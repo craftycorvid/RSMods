@@ -128,10 +128,13 @@ std::string GameState::GetCurrentMenu(bool GameNotLoaded) {
 		}
 	}
 
+	if (!canGetRealMenu)
+		return "pre_enter_prompt";
+
+
 	// If game hasn't loaded, take the safer, but possibly slower route
 
 	uintptr_t currentMenuAddr = MemUtil::FindDMAAddy(Offsets::ptr_currentMenu, Offsets::ptr_currentMenuOffsets, GameNotLoaded);
-
 
 	// Null Pointer Check
 	if (!currentMenuAddr) {

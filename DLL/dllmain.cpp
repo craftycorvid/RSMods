@@ -1004,12 +1004,9 @@ std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds) {
 /// </summary>
 void PatchTwoRTC()
 {
-	MemUtil::PatchAdr((LPVOID)Offsets::ptr_twoRTCBypass, (LPVOID)Offsets::ptr_twoRTCBypass_patch_call, 5);
-	MemUtil::PatchAdr((LPVOID)(Offsets::ptr_twoRTCBypass + 5), (LPVOID)Offsets::ptr_twoRTCBypass_patch_test, 2);
-	MemUtil::PatchAdr((LPVOID)(Offsets::ptr_twoRTCBypass + 7), (LPVOID)Offsets::ptr_twoRTCBypass_patch_jz, 2);
-	MemUtil::PatchAdr((LPVOID)(Offsets::ptr_twoRTCBypass + 9), (LPVOID)Offsets::ptr_twoRTCBypass_patch_mov, 5);
-	MemUtil::PatchAdr((LPVOID)(Offsets::ptr_twoRTCBypass + 14), (LPVOID)Offsets::ptr_twoRTCBypass_patch_lea, 6);
-	MemUtil::PatchAdr((LPVOID)(Offsets::ptr_twoRTCBypass + 20), (LPVOID)Offsets::ptr_twoRTCBypass_patch_call, 5);
+	BYTE patch[25];
+	std::fill_n(patch, 25, 0x90);
+	MemUtil::PatchAdr(Offsets::ptr_twoRTCBypass, patch, sizeof(patch));;
 }
 
 /// <summary>
@@ -1306,10 +1303,10 @@ unsigned WINAPI MainThread() {
 	// Initialize Functions
 	D3DHooks::debug = debug;
 	Offsets::Initialize();
-	MemUtil::PatchAdr((char*)0x0041C640, "\xE0", 1); // Patches out function in Rocksmith.
-	Settings::Initialize();
+	MemUtil::PatchAdr(Offsets::ptr_ModdedPtrCrashFix, "\xE0", 1, true); // Fixes crash when modifying functions in Rocksmith.	Settings::Initialize();
 	UpdateSettings();
 	ERMode::Initialize();
+	
 	GUI();
 	Midi::InitMidi();
 
@@ -1340,7 +1337,7 @@ unsigned WINAPI MainThread() {
 	// Look to see if RS_ASIO applied the 2 RTC input bypass.
 	// If they did, then we disregard the results from our version of the mod.
 	
-	bool rs_asio_BypassTwoRTC = MemUtil::ReadPtr(Offsets::ptr_twoRTCBypass) == 0x90909090;
+	bool rs_asio_BypassTwoRTC = false;
 	_LOG("RS_ASIO Bypass2RTC: " << std::boolalpha << rs_asio_BypassTwoRTC << std::endl);
 	if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on")
 		PatchTwoRTC();
@@ -1388,11 +1385,11 @@ unsigned WINAPI MainThread() {
 			if (!rs_asio_BypassTwoRTC) { 
 
 				// User originally had BypassTwoRTCMessageBox on, but now they want it turned off.
-				if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "off" && *(char*)Offsets::ptr_twoRTCBypass == Offsets::ptr_twoRTCBypass_patch_call[0]) 
-					MemUtil::PatchAdr((LPVOID)Offsets::ptr_twoRTCBypass, (LPVOID)Offsets::ptr_twoRTCBypass_original, 6);
+				if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "off" && *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_patch_call[0])
+					MemUtil::PatchAdr((LPVOID)Offsets::ptr_twoRTCBypass.Get(), (LPVOID)Offsets::ptr_twoRTCBypass_original, 6);
 
 				// User originally had BypassTwoRTCMessageBox off, but now they want it turned on
-				else if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on" && *(char*)Offsets::ptr_twoRTCBypass == Offsets::ptr_twoRTCBypass_original[0])
+				else if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on" && *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_original[0])
 					PatchTwoRTC();
 			}
 
@@ -1660,9 +1657,9 @@ unsigned WINAPI MainThread() {
 				GameState::GameLoaded = true;
 
 			// Set buffer settings if the user uses an alternative sample rate on their audio output.
-			if (Settings::ReturnSettingValue("AltOutputSampleRate") == "on" && Settings::GetModSetting("AlternativeOutputSampleRate") != 48000 && *(int*)Offsets::ptr_sampleRateBuffer != 5 && *(int*)Offsets::ptr_sampleRateBuffer != 2) {
-				*(int*)Offsets::ptr_sampleRateSize = 2;
-				*(int*)Offsets::ptr_sampleRateBuffer = 128;
+			if (Settings::ReturnSettingValue("AltOutputSampleRate") == "on" && Settings::GetModSetting("AlternativeOutputSampleRate") != 48000 && *(int*)Offsets::ptr_sampleRateBuffer.Get() != 5 && *(int*)Offsets::ptr_sampleRateBuffer.Get() != 2) {
+				*(int*)Offsets::ptr_sampleRateSize.Get() = 2;
+				*(int*)Offsets::ptr_sampleRateBuffer.Get() = 128;
 			}
 				
 			// Auto Load Profile. AKA "Fork in the toaster".
@@ -1699,10 +1696,9 @@ unsigned WINAPI MainThread() {
 void Initialize() {
 	LogSettings::startupTime = clock();
 
-	Offsets::Initialize();
 	Wwise::Exports::Initialize();
 
-	//std::thread(MainThread).detach(); // Mod Toggle based on menus
+	std::thread(MainThread).detach(); // Mod Toggle based on menus
 	//std::thread(EnumerationThread).detach(); // Force Enumeration
 	//std::thread(HandleEffectQueueThread).detach(); // Twitch Effects
 	//std::thread(MidiThread).detach(); // MIDI Auto Tuning / True Tuning

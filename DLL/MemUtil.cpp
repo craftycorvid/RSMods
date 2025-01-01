@@ -51,13 +51,15 @@ bool MemUtil::PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake
 /// <param name="len"> - How long is the edit</param>
 /// <returns></returns>
 bool MemUtil::PatchAdr(LPVOID address, LPVOID changeToMake, size_t len) {
-	DWORD dwOldProt, dwDummy;
+	DWORD dwOldProt, dwDummy, ret;
 
 	clock_t before = clock();
+
 	// Save old Virtual Protect status, but allow us to Execute, Read, and Write to the executable's memory so we can place our hook.
-	if (!HookedVirtualProtect(address, len, PAGE_EXECUTE_READWRITE, dwOldProt))
+	ret = HookedVirtualProtect(address, len, PAGE_EXECUTE_READWRITE, dwOldProt);
+	if (!NT_SUCCESS(ret)) 
 	{
-		printf_s("MemUtil::PatchAdr Failed 1: Addr: 0x%X | Error: 0x%X | Time to run in sec: %f\n", (uintptr_t)address, GetLastError(), (float)(clock() - before) / CLOCKS_PER_SEC); // Can't use log here, need to use printf.
+		printf_s("MemUtil::PatchAdr Failed 1: Addr: 0x%X | Status: 0x%08X | Time to run in sec: %f\n", (uintptr_t)address, ret, (float)(clock() - before) / CLOCKS_PER_SEC); // Can't use log here, need to use printf.
 		return false;
 	}
 
@@ -66,9 +68,11 @@ bool MemUtil::PatchAdr(LPVOID address, LPVOID changeToMake, size_t len) {
 
 	// Force the CPU to dump it's cached instruction. Also resets the virtual protect to the status we saved earlier in this function. 
 	FlushInstructionCache(GetCurrentProcess(), address, len);
-	if (!HookedVirtualProtect(address, len, dwOldProt, dwDummy))
+
+	ret = HookedVirtualProtect(address, len, dwOldProt, dwDummy);
+	if (!NT_SUCCESS(ret))
 	{
-		printf_s("MemUtil::PatchAdr Failed 2: Addr: 0x%X | Error: 0x%X\n", (uintptr_t)address, GetLastError()); // Can't use log here, need to use printf.
+		printf_s("MemUtil::PatchAdr Failed 2: Addr: 0x%X | Status: 0x%08X\n", (uintptr_t)address, ret); // Can't use log here, need to use printf.
 		return false;
 	}
 
@@ -94,11 +98,13 @@ bool MemUtil::PlaceHook(void* hookSpot, void* ourFunct, int len)
 		return false;
 
 	// Save old Virtual Protect status, but allow us to Execute, Read, and Write to the executable's memory so we can place our hook.
-	DWORD oldProtect;
+	DWORD oldProtect, ret;
 	clock_t before = clock();
-	if (!HookedVirtualProtect(hookSpot, len, PAGE_EXECUTE_READWRITE, oldProtect))
+	
+	ret = !HookedVirtualProtect(hookSpot, len, PAGE_EXECUTE_READWRITE, oldProtect);
+	if (!NT_SUCCESS(ret)) 
 	{
-		printf_s("MemUtil::PlaceHook Failed 1: Addr: 0x%X | Error: 0x%X | Time to run in sec: %f\n", (uintptr_t)hookSpot, GetLastError(), (float)(clock() - before) / CLOCKS_PER_SEC); // Can't use log here, need to use printf.
+		printf_s("MemUtil::PlaceHook Failed 1: Addr: 0x%X | Status: 0x%08X | Time to run in sec: %f\n", (uintptr_t)hookSpot, ret, (float)(clock() - before) / CLOCKS_PER_SEC); // Can't use log here, need to use printf.
 		return false;
 	}
 		
@@ -114,9 +120,11 @@ bool MemUtil::PlaceHook(void* hookSpot, void* ourFunct, int len)
 
 	// Reset the virtual protect to the status we saved earlier in this function. 
 	DWORD backup;
-	if (!HookedVirtualProtect(hookSpot, len, oldProtect, backup))
+	
+	ret = HookedVirtualProtect(hookSpot, len, oldProtect, backup);
+	if (!NT_SUCCESS(ret))
 	{
-		printf_s("MemUtil::PlaceHook Failed 2: Addr: 0x%X | Error: 0x%X\n", (uintptr_t)hookSpot, GetLastError()); // Can't use log here, need to use printf.
+		printf_s("MemUtil::PlaceHook Failed 2: Addr: 0x%X | Status: 0x%08X\n", (uintptr_t)hookSpot, ret); // Can't use log here, need to use printf.
 		return false;
 	}
 
@@ -176,7 +184,7 @@ bool MemUtil::IsBadReadPtr(void* pointer)
 	//      but for now it will have to do the job until we figure out a better current menu check.
 
 	MEMORY_BASIC_INFORMATION mbi = { 0 };
-	if (HookedQueryVirtualMemory(pointer, &mbi, sizeof(mbi)))
+	if (NT_SUCCESS(HookedQueryVirtualMemory(pointer, &mbi, sizeof(mbi))))
 	{
 		uint32_t mask = (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
 		bool badPtr = !(mbi.Protect & mask);

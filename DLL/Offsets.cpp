@@ -31,7 +31,7 @@ void Offsets::Initialize() {
 	xinputModule = { {0x01360e98, baseHandle + 0x00F61E98 } };				// Code | 56 6a 00 8d b7 80 00 00 00 56 68 ? ? ? ? 68 00 08 00 00 50 (we want the static variable set at the end)
 	xinputEnable = { {0x01360eac, baseHandle + 0x00F61EAC } };				// Code | 56 6a 00 8d b7 80 00 00 00 56 68 ? ? ? ? 68 00 08 00 00 50 (we want the static variable set before the get keystroke - XInputGetDSoundAudioDeviceGuids)
 	ptr_multiplayer = { {0x00F5F57C, 0x00F6057C} };							// Memory | Copied from timer
-	ptr_currentMenu = { {0x135F62C, 0x00F6062C} };							// Memory | Look for menu names with offset matching ptr_currentMenuOffsets.
+	ptr_currentMenu = { {0x135F62C, baseHandle + 0x00F6062C} };				// Memory | Look for menu names with offset matching ptr_currentMenuOffsets; probably easiest way is by x-refing FECalibrationMeter and finding the place where it dereferences the pointer at the beginning of the function
 	ptr_timer = { {0x00F5F57C, 0x00F6057C} };								// Memory | Start song, keep narrowing down with song time increasing. Eventually do pointer map with ptr_timerBaseOffsets.
 	ptr_timerRare = { {0x00F5F54C, 0x00F6054C} };							// Memory | Get ptr_timer, then subtract 0x30 from base address.
 	ptr_greyOutNoteTimer = { {0x00F5F62C, 0x00F6062C} };					// Memory | Copeied from loft
