@@ -101,13 +101,13 @@ bool MemUtil::PlaceHook(void* hookSpot, void* ourFunct, int len)
 	DWORD oldProtect, ret;
 	clock_t before = clock();
 	
-	ret = !HookedVirtualProtect(hookSpot, len, PAGE_EXECUTE_READWRITE, oldProtect);
+	ret = HookedVirtualProtect(hookSpot, len, PAGE_EXECUTE_READWRITE, oldProtect);
 	if (!NT_SUCCESS(ret)) 
 	{
 		printf_s("MemUtil::PlaceHook Failed 1: Addr: 0x%X | Status: 0x%08X | Time to run in sec: %f\n", (uintptr_t)hookSpot, ret, (float)(clock() - before) / CLOCKS_PER_SEC); // Can't use log here, need to use printf.
 		return false;
 	}
-		
+
 	// Place x86 assembly NOP characters where we want our hook to be placed.
 	memset(hookSpot, 0x90, len);
 

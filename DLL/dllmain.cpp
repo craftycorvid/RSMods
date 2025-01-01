@@ -1309,6 +1309,7 @@ unsigned WINAPI MainThread() {
 	
 	GUI();
 	Midi::InitMidi();
+	Enumeration::HookEnumerationService();
 
 	// Misc mods / Bug Prevention that can only be ran on startup.
 	Midi::tuningOffset = Settings::GetModSetting("TuningOffset");
