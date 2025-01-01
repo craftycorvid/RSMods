@@ -16,7 +16,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("TurboSpeedEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -33,7 +33,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("TurboSpeedEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 		
 		RiffRepeater::SetSpeed(200.f, true);

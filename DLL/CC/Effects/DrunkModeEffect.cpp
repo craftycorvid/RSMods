@@ -16,7 +16,7 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 
 		_LOG("DrunkModeEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 			return EffectStatus::Success;
@@ -33,7 +33,7 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 
 		_LOG("DrunkModeEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		Settings::UpdateTwitchSetting("DrunkMode", "on");

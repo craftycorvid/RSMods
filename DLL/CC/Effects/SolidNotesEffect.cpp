@@ -14,7 +14,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("SolidNotesCustomEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -43,7 +43,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("SolidNotesCustomEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		running = true;
@@ -94,7 +94,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("SolidNotesRandomEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -111,7 +111,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("SolidNotesRandomEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		_LOG("SolidNotesRandomEffect - Colors Saved" << std::endl);
@@ -166,7 +166,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("SolidNotesCustomRGBEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -183,7 +183,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("SolidNotesCustomRGBEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		//Get color from parameters

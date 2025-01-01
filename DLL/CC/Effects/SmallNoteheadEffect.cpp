@@ -14,7 +14,7 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 
 		_LOG("SmallNoteheadEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -31,7 +31,7 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 
 		_LOG("SmallNoteheadEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		SetNoteHeadScale(0.5);

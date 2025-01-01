@@ -16,7 +16,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("HighwayScrollSpeedEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -32,7 +32,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("HighwayScrollSpeedEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 		
 		WriteScrollSpeedMultiplier(multiplier);

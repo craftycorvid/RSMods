@@ -14,7 +14,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("RainbowStringsEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -32,7 +32,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("RainbowStringsEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		ERMode::RainbowEnabled = true;

@@ -14,7 +14,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("RemoveInstrumentEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -30,7 +30,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("RemoveInstrumentEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		SetInstrumentScale(0);

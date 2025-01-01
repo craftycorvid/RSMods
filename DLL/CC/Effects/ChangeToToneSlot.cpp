@@ -16,7 +16,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("ChangeToToneSlot::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -33,7 +33,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("ChangeToToneSlot::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		Util::SendKey(Settings::GetVKCodeForString(std::to_string(slot)));

@@ -13,7 +13,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("RainbowNotesEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -31,7 +31,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("RainbowNotesEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		ERMode::ToggleRainbowNotes();

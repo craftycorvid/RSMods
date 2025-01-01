@@ -16,7 +16,7 @@ namespace CrowdControl::Effects { // Changes textures for noteheads to a nonexis
 
 		_LOG("TransparentNotesEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -33,7 +33,7 @@ namespace CrowdControl::Effects { // Changes textures for noteheads to a nonexis
 
 		_LOG("TransparentNotesEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		Settings::UpdateTwitchSetting("TransparentNotes", "on");

@@ -37,10 +37,11 @@ namespace CrowdControl::Effects {
 	}
 
 	bool CCEffect::AreIncompatibleEffectsRunning(const std::map<std::string, CCEffect*>* AllEffects) const {
-		for (auto& effectName : incompatibleEffects)
-			if (AllEffects->at(effectName)->running)
-				return true;
-
-		return false;
+		const auto& allEffects = CrowdControl::EffectList::GetAllEffects();
+		return std::any_of(incompatibleEffects.begin(), incompatibleEffects.end(),
+			[&allEffects](const std::string& effectName) {
+				auto it = allEffects.find(effectName);
+				return it != allEffects.end() && it->second->running;
+			});
 	}
 }

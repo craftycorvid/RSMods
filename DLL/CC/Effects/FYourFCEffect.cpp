@@ -14,7 +14,7 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 
 		_LOG("FYourFC::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -30,7 +30,7 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 
 		_LOG("FYourFC::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		uintptr_t currentNoteStreak = 0;

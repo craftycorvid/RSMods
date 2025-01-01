@@ -37,9 +37,9 @@ namespace CrowdControl {
 		};
 
 		// Find the effect
-		if (AllEffects.find(request.code) != AllEffects.end()) {
+		if (GetAllEffects().find(request.code) != GetAllEffects().end()) {
 			// Get pointer to effect
-			CCEffect* effect = AllEffects[request.code];
+			CCEffect* effect = GetAllEffects()[request.code];
 
 			// Start/Stop the effect
 			switch (request.type)
@@ -219,7 +219,7 @@ namespace CrowdControl {
 
 		while (!GameState::GameClosing) {
 			// Iterate through all effects
-			for (auto it = AllEffects.begin(); it != AllEffects.end(); ++it) {
+			for (auto it = GetAllEffects().begin(); it != GetAllEffects().end(); ++it) {
 				// Run/Update all effects
 				it->second->Run();
 			}

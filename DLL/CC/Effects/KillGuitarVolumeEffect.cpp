@@ -14,7 +14,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("KillGuitarVolumeEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -32,7 +32,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("KillGuitarVolumeEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		RTPCValue_type type = RTPCValue_GameObject; // Save old volume

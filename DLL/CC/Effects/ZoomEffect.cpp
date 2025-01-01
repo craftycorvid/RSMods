@@ -10,7 +10,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("ZoomEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -23,7 +23,7 @@ namespace CrowdControl::Effects {
 
 		_LOG("ZoomEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::AllEffects))
+		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		auto rootObject = ObjectUtil::GetRootObject();
