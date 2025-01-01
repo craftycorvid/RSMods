@@ -27,8 +27,13 @@ namespace CrowdControl::Effects {
 			return EffectStatus::Retry;
 
 		auto rootObject = ObjectUtil::GetRootObject();
-		rootObject->scale = factor;
 
+		if (rootObject)
+		{
+			rootObject->scale = factor;
+		}
+
+		
 		SetDuration(request);
 		running = true;
 
@@ -42,7 +47,11 @@ namespace CrowdControl::Effects {
 		_LOG("ZoomEffect::Stop()" << std::endl);
 
 		auto rootObject = ObjectUtil::GetRootObject();
-		rootObject->scale = 1.0f;
+
+		if (rootObject)
+		{
+			rootObject->scale = 1.0f;
+		}
 
 		running = false;
 

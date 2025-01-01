@@ -116,7 +116,16 @@ void __declspec(naked) hook_timeStretchCalulations() {
 
 		pop EBP // Restore EBP from stack
 
-		jmp Offsets::ptr_timeStretchCalculationsJmpBck  // Skip to the validation checks.
+
+		pushad
+
+		lea ecx, Offsets::ptr_timeStretchCalculationsJmpBck
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+
+		jmp Offsets::runtimeVersionStructValue
 	}
 }
 
@@ -125,7 +134,7 @@ void __declspec(naked) hook_timeStretchCalulations() {
 /// </summary>
 void RiffRepeater::EnableLinearSpeeds() {
 	currentlyEnabled_LinearRR = true;
-	MemUtil::PlaceHook((void*)Offsets::ptr_timeStretchCalculations, hook_timeStretchCalulations, 6);
+	MemUtil::PlaceHook(Offsets::ptr_timeStretchCalculations, hook_timeStretchCalulations, 6);
 }
 
 /// <summary>
@@ -133,5 +142,5 @@ void RiffRepeater::EnableLinearSpeeds() {
 /// </summary>
 void RiffRepeater::DisableLinearSpeeds() {
 	currentlyEnabled_LinearRR = false;
-	MemUtil::PatchAdr((LPVOID)Offsets::ptr_timeStretchCalculations, "\xDD\x05\xA0\x18\x22\x01", 6);
+	MemUtil::PatchAdr(Offsets::ptr_timeStretchCalculations, "\xDD\x05\xA0\x18\x22\x01", 6);
 }

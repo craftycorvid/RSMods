@@ -8,7 +8,6 @@ namespace CrowdControl::Effects {
 	};
 
 	inline Vec3* vec;
-	inline uintptr_t return_ptr = 0x007AE0D6;
 	inline bool wavy_notes_enabled = false;
 
 	inline void __declspec(naked) NotePositionHook()
@@ -56,7 +55,16 @@ namespace CrowdControl::Effects {
 			fstp dword ptr[ebx + 0x74]
 			fld dword ptr[esp + 0x2C]
 			fstp dword ptr[ebx + 0x78]
-			jmp[return_ptr]
+
+			pushad
+
+			lea ecx, Offsets::ptr_wavyNotesJmpBck
+			call VersioningStruct<uintptr_t>::GetValue
+			mov Offsets::runtimeVersionStructValue, eax
+
+			popad
+
+			jmp [Offsets::runtimeVersionStructValue]
 		}
 	}
 
@@ -69,7 +77,7 @@ namespace CrowdControl::Effects {
 
 			incompatibleEffects = { "removenotes" };
 
-			MemUtil::PlaceHook((void*)0x007AE0AD, NotePositionHook, 41);
+			MemUtil::PlaceHook(Offsets::ptr_wavyNotesHook, NotePositionHook, 41);
 		}
 
 		EffectStatus Test(Request request) override;

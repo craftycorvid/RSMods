@@ -34,12 +34,30 @@ void __declspec(naked) disableTrueTuning()
 
 		forceUserToTrueTune:
 		pop EAX										// Restore EAX from the stack
-		jmp Offsets::ptr_disableTrueTuning_forceTT  // Return to the code that sets the true tuning to the one specified in the arrangement. This is needed for some bass songs with a CentOffset of -1200.
+
+		pushad
+
+		lea ecx, Offsets::ptr_disableTrueTuning_forceTT
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+
+		jmp Offsets::runtimeVersionStructValue
 
 		trueTuningForceA440:
 		pop EAX										// Restore EAX from the stack
 		fld ForcedTrueTuning						// Set ST(0) to 440 | A440. This tells note detection that we want to use A440 as our true tuning.
-		jmp Offsets::ptr_disableTrueTuning_jmpBck	// Return to the code we were running.
+
+		pushad
+
+		lea ecx, Offsets::ptr_disableTrueTuning_jmpBck
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+
+		jmp Offsets::runtimeVersionStructValue
 	}
 }
 
@@ -48,8 +66,8 @@ void __declspec(naked) disableTrueTuning()
 /// </summary>
 void TrueTuning::DisableTrueTuning()
 {
-	MemUtil::PatchAdr((char*)0x004DCCBF, "\xEB", 1); // Force a jump into our code, JMP.
-	MemUtil::PlaceHook((void*)Offsets::ptr_disableTrueTuning, disableTrueTuning, 6);
+	MemUtil::PatchAdr(Offsets::ptr_disableTrueTuningGate, "\xEB", 1); // Force a jump into our code, JMP.
+	MemUtil::PlaceHook(Offsets::ptr_disableTrueTuning, disableTrueTuning, 6);
 
 	_LOG_INIT;
 	_LOG("Disabled true tuning" << std::endl);
@@ -60,8 +78,8 @@ void TrueTuning::DisableTrueTuning()
 /// </summary>
 void TrueTuning::EnableTrueTuning()
 {
-	MemUtil::PatchAdr((char*)0x004DCCBF, "\x74", 1); // Change the jump back to a conditional jump, JE.
-	MemUtil::PatchAdr((void*)Offsets::ptr_disableTrueTuning, "\xD9\x05\x68\x44\x22\x01", 6);
+	MemUtil::PatchAdr(Offsets::ptr_disableTrueTuningGate, "\x74", 1); // Change the jump back to a conditional jump, JE.
+	MemUtil::PatchAdr(Offsets::ptr_disableTrueTuning, "\xD9\x05\x68\x44\x22\x01", 6);
 
 	_LOG_INIT;
 	_LOG("Enabled true tuning" << std::endl);

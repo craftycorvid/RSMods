@@ -545,7 +545,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	// Twitch wants to see the user play in Drunk Mode.
 	if (Settings::IsTwitchSettingEnabled("DrunkMode")) {
 		std::uniform_real_distribution<> keepValueWithin(-1.5, 1.5);
-		*(float*)Offsets::ptr_drunkShit = (float)keepValueWithin(rng);
+		MemUtil::SetStaticValue(Offsets::ptr_drunkShit.Get(), (float)keepValueWithin(rng), sizeof(float));
 	}
 
 	// Greenscreen Wall

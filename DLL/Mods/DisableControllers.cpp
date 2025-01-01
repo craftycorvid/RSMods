@@ -7,9 +7,8 @@ LPVOID* DirectInputPointer = NULL;
 /// Disable XInput controlers (Xbox Controllers)
 /// </summary>
 void XInput() {
-	// 0x01c5970e function to remove XInput1_3 devices.
-	*(HMODULE*)0x0135de18 = 0x0; // XInput Library (Tell the game XInput doesn't need to be loaded anymore)
-	*(FARPROC*)0x0135de28 = 0x0; // XInput Enable (to false)
+	MemUtil::SetStaticValue(Offsets::xinputModule.Get(), 0, sizeof(int));
+	MemUtil::SetStaticValue(Offsets::xinputEnable.Get(), 0, sizeof(int));
 }
 
 /// <summary>
@@ -19,7 +18,16 @@ void _declspec(naked) hook_DirectInput() {
 	__asm {
 		mov DirectInputPointer, esi
 		push 0x800
-		jmp[Offsets::hookBackAddr_DirectInput8]
+
+		pushad
+
+		lea ecx, Offsets::hookBackAddr_DirectInput8
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+
+		jmp[Offsets::runtimeVersionStructValue]
 	}
 }
 
@@ -27,7 +35,7 @@ void _declspec(naked) hook_DirectInput() {
 /// Disable DirectInput controllers. Currently not working
 /// </summary>
 void DirectInput() {
-	MemUtil::PlaceHook((void*)Offsets::hookAddr_DirectInput8, hook_DirectInput, 5);
+	MemUtil::PlaceHook(Offsets::hookAddr_DirectInput8, hook_DirectInput, 5);
 }
 
 /// <summary>

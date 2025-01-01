@@ -11,7 +11,7 @@ namespace BugPrevention {
 	void PreventOculusCrash() {
 		_LOG_INIT;
 
-		MemUtil::PatchAdr((LPVOID)Offsets::ptr_OculusCrashJmp, "\xE9\x19\x02\x00\x00\x90", 6);
+		MemUtil::PatchAdr(Offsets::ptr_OculusCrashJmp, "\xE9\x19\x02\x00\x00\x90", 6);
 		_LOG("(BUG PREVENTION) Prevented Oculus Crash" << std::endl);
 	}
 
@@ -23,7 +23,7 @@ namespace BugPrevention {
 	void PreventStuckTone() {
 		_LOG_INIT;
 
-		MemUtil::PatchAdr((LPVOID)Offsets::ptr_StuckToneJmp, "\xEB", 1);
+		MemUtil::PatchAdr(Offsets::ptr_StuckToneJmp, "\xEB", 1);
 		_LOG("(BUG PREVENTION) Prevented Tone Bug" << std::endl);
 	}
 
@@ -34,8 +34,8 @@ namespace BugPrevention {
 	void PreventPnPCrash() {
 		_LOG_INIT;
 
-		MemUtil::PatchAdr((LPVOID)Offsets::ptr_PnpJmp_1, "\xE9\x19\x02\x00\x00\x90", 6);
-		MemUtil::PatchAdr((LPVOID)Offsets::ptr_PnpJmp_2, "\x90\x90\x90\x90\x90\x90", 6);
+		MemUtil::PatchAdr(Offsets::ptr_PnpJmp_1, "\xE9\x19\x02\x00\x00\x90", 6);
+		MemUtil::PatchAdr(Offsets::ptr_PnpJmp_2, "\x90\x90\x90\x90\x90\x90", 6);
 		_LOG("(BUG PREVENTION) Prevented PnP Crash" << std::endl);
 	}
 
@@ -49,8 +49,8 @@ namespace BugPrevention {
 	void AllowComplexPasswords() {
 		_LOG_INIT;
 
-		MemUtil::PatchAdr((LPVOID)Offsets::ptr_Password_LimitCharacters, "\x90\x90", 2);
-		MemUtil::PatchAdr((LPVOID)Offsets::ptr_Password_LimitCharacters_Clipboard, "\x90\x90", 2);
+		MemUtil::PatchAdr(Offsets::ptr_Password_LimitCharacters, "\x90\x90", 2);
+		MemUtil::PatchAdr(Offsets::ptr_Password_LimitCharacters_Clipboard, "\x90\x90", 2);
 
 		_LOG("(BUG PREVENTION) Allowed Complex Uplay Passwords" << std::endl);
 	}
@@ -63,12 +63,19 @@ namespace BugPrevention {
 
 			je prevAdvancedDisplayCrash // If ECX == NULL, then we need to jump to prevAdvancedDisplayCrash
 
-
 			mov DL, BYTE PTR DS : [ECX + 0x4]	// The code we are overwriting to place this hook
 			push EDI						// The code we are overwriting to place this hook
 			MOV EDI, DWORD PTR DS : [ESI + 0xC] // The code we are overwriting to place this hook
 
-			jmp Offsets::ptr_AdvancedDisplayCrashJmpBck // Jump back into the original code.
+			pushad
+
+			lea ecx, Offsets::ptr_AdvancedDisplayCrashJmpBck
+			call VersioningStruct<uintptr_t>::GetValue
+			mov Offsets::runtimeVersionStructValue, eax
+
+			popad
+
+			jmp Offsets::runtimeVersionStructValue
 
 			prevAdvancedDisplayCrash :
 			ret							// ECX is NULL, so we need to leave this function or we will crash.
@@ -82,9 +89,9 @@ namespace BugPrevention {
 	void PreventAdvancedDisplayCrash() {
 		_LOG_INIT;
 
-		MemUtil::PlaceHook((void*)Offsets::ptr_AdvancedDisplayCrash, advancedDisplayCrashHook, 7);
+		MemUtil::PlaceHook(Offsets::ptr_AdvancedDisplayCrash, advancedDisplayCrashHook, 7);
 
-		FlushInstructionCache(GetCurrentProcess(), (void*)Offsets::ptr_AdvancedDisplayCrash, 7);
+		FlushInstructionCache(GetCurrentProcess(), (void*)Offsets::ptr_AdvancedDisplayCrash.Get(), 7);
 
 		_LOG("(BUG PREVENTION) Prevented Advanced Display Crash" << std::endl);
 	}
@@ -101,7 +108,7 @@ namespace BugPrevention {
 		// Overwrite some code that doesn't do null checks with NOP.
 		// Be very careful in this code. If you overwrite the next instruction, then you end up breaking audio input.
 		// NB: JZ has been replaced by JL, now it's 10 bytes in total
-		MemUtil::PatchAdr((LPVOID)Offsets::ptr_PortAudioInCrash, "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90", 10);
+		MemUtil::PatchAdr(Offsets::ptr_PortAudioInCrash, "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90", 10);
 
 		_LOG("(BUG PREVENTION) Prevented Port Audio In Device Crash" << std::endl);
 	}

@@ -63,7 +63,6 @@
 // Internal Dependencies
 #include "D3D/D3D.hpp"
 #include "D3D/D3DHooks.hpp"
-#include "Functions.hpp"
 #include "Log.hpp"
 #include "MemHelpers.hpp"
 #include "MemUtil.hpp"

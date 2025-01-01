@@ -282,7 +282,16 @@ int AudioDevices::GetMicrophoneVolume(std::string microphoneName) {
 void __declspec(naked) hook_changeSampleRate() {
 	__asm {
 		mov EAX, AudioDevices::output_SampleRate					// Move user-provided sample rate into EAX
-		jmp Offsets::ptr_sampleRateRequirementAudioOutput_JmpBck	// Jump back to the original instruction set.
+
+		pushad
+
+		lea ecx, Offsets::ptr_sampleRateRequirementAudioOutput_JmpBck
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+
+		jmp Offsets::runtimeVersionStructValue
 	}
 }
 
@@ -295,7 +304,16 @@ void __declspec(naked) hook_sampleRate_FixDivZeroCrash() {
 
 		mov EBX, 0x1									// Move 1 into the EBX register. This prevents the divide by 0 crash when using a sample rate above 48kHz.
 		shr esi, 0x10									// Replace the original code we overwrote.
-		jmp Offsets::ptr_sampleRateDivZeroCrash_JmpBck	// Jump back to the original instruction set.
+
+		pushad
+
+		lea ecx, Offsets::ptr_sampleRateDivZeroCrash_JmpBck
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+
+		jmp Offsets::runtimeVersionStructValue
 	}
 }
 
@@ -304,6 +322,6 @@ void __declspec(naked) hook_sampleRate_FixDivZeroCrash() {
 /// Must be run on boot. Has no effect when run after the audio engine has initialized.
 /// </summary>
 void AudioDevices::ChangeOutputSampleRate() {
-	MemUtil::PlaceHook((void*)Offsets::ptr_sampleRateRequirementAudioOutput, hook_changeSampleRate, 5);
-	MemUtil::PlaceHook((void*)Offsets::ptr_sampleRateDivZeroCrash, hook_sampleRate_FixDivZeroCrash, 5);
+	MemUtil::PlaceHook(Offsets::ptr_sampleRateRequirementAudioOutput, hook_changeSampleRate, 5);
+	MemUtil::PlaceHook(Offsets::ptr_sampleRateDivZeroCrash, hook_sampleRate_FixDivZeroCrash, 5);
 }

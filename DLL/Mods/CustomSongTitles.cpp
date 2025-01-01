@@ -10,7 +10,15 @@ std::vector<std::string> songTitles(20);
 /// </summary>
 void __declspec(naked) hook_fakeTitles() {
 	__asm {
-		mov ecx, dword ptr ds : [0x135FBFC]		// Store the contents of 0x135FBFC into the ECX register. This is the line we are "replacing" to inject this hook.
+		pushad
+
+		lea ecx, Offsets::ptr_AdvancedDisplayCrashJmpBck
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+
+		mov ecx, dword ptr ds : [Offsets::runtimeVersionStructValue] // Store the contents of 0x135FBFC into the ECX register. This is the line we are "replacing" to inject this hook.
 		pushad									// Save EAX, ECX, and EDX to the stack. 
 		mov ebx, 0x2F							// Sets EBX to 0x2F / 47 / "/" in ASCII. This means that when we add the song index, we start at 0.
 		add ebx, esi							// Add Song List Index to EBX. One-Indexed, but we store it as 0 indexed.
@@ -32,7 +40,15 @@ void __declspec(naked) hook_fakeTitles() {
 
 	ExitHookFakeTitle:
 		popad									// Return EAX, ECX, and EDX from the stack.
-		jmp[Offsets::hookBackAddr_FakeTitles]	// Return to the original code.
+
+		pushad
+
+		lea ecx, Offsets::hookBackAddr_FakeTitles
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+		jmp[Offsets::runtimeVersionStructValue]	// Return to the original code.
 	}
 }
 
@@ -112,7 +128,16 @@ void __declspec(naked) missingLocalizationHookFunc() {
 		
 		add esp, 0x8									// Replace original instruction we were replacing
 		push eax										// Replace original instruction we were replacing
-		jmp[Offsets::hookBackAddr_missingLocalization]	// Jump back to the original instructions.
+
+		pushad
+
+		lea ecx, Offsets::hookBackAddr_missingLocalization
+		call VersioningStruct<uintptr_t>::GetValue
+		mov Offsets::runtimeVersionStructValue, eax
+
+		popad
+
+		jmp[Offsets::runtimeVersionStructValue]	// Jump back to the original instructions.
 	}
 }
 
@@ -120,8 +145,8 @@ void __declspec(naked) missingLocalizationHookFunc() {
 /// Remove spaces and numbers. "SONG LIST 1" -> "SONGLIST"
 /// </summary>
 void CustomSongTitles::PatchSongListAppendages() {
-	MemUtil::PatchAdr((BYTE*)Offsets::patch_addedSpaces, (UINT*)Offsets::patch_ListSpaces, 5);		// Remove the space added between "SONG LIST" and the index.
-	MemUtil::PatchAdr((BYTE*)Offsets::patch_addedNumbers, (UINT*)Offsets::patch_ListNumbers, 5);	// Remove the index from the Song List name.
+	MemUtil::PatchAdr(Offsets::patch_addedSpaces, (UINT*)Offsets::patch_ListSpaces, 5);		// Remove the space added between "SONG LIST" and the index.
+	MemUtil::PatchAdr(Offsets::patch_addedNumbers, (UINT*)Offsets::patch_ListNumbers, 5);	// Remove the index from the Song List name.
 }
 
 /// <summary>
@@ -132,8 +157,8 @@ void CustomSongTitles::SetFakeListNames() {
 
 	len = 6;
 
-	Offsets::hookBackAddr_FakeTitles = Offsets::hookAddr_ModifyLocalized + len;
-	MemUtil::PlaceHook((void*)Offsets::hookAddr_ModifyLocalized, hook_fakeTitles, len);
+	Offsets::hookBackAddr_FakeTitles.Get() = Offsets::hookAddr_ModifyLocalized + len;
+	MemUtil::PlaceHook(Offsets::hookAddr_ModifyLocalized, hook_fakeTitles, len);
 }
 
 /// <summary>
@@ -143,12 +168,12 @@ void CustomSongTitles::HookSongListsKoko() {
 	SetFakeListNames();
 
 	len = 5;
-	Offsets::hookBackAddr_missingLocalization = Offsets::hookAddr_MissingLocalization + len;
+	Offsets::hookBackAddr_missingLocalization.Get() = Offsets::hookAddr_MissingLocalization + len;
 
 	//Skip less printf parameters if those have been removed
-	MemUtil::PatchAdr((BYTE*)Offsets::patch_sprintfArg, (BYTE*)Offsets::patch_SprintfArgs, 1);
+	MemUtil::PatchAdr(Offsets::patch_sprintfArg, (BYTE*)Offsets::patch_SprintfArgs, 1);
 
-	MemUtil::PlaceHook((void*)Offsets::hookAddr_MissingLocalization, missingLocalizationHookFunc, len);
+	MemUtil::PlaceHook(Offsets::hookAddr_MissingLocalization, missingLocalizationHookFunc, len);
 }
 
 /// <summary>
