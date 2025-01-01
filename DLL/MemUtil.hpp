@@ -18,6 +18,10 @@ namespace MemUtil {
 
 	NTSTATUS HookedVirtualProtect(LPVOID address, SIZE_T len, ULONG newProtection, ULONG& oldProtection);
 	NTSTATUS HookedQueryVirtualMemory(LPVOID address, PMEMORY_BASIC_INFORMATION memoryBuffer, SIZE_T dwLength);
+
+	uint32_t GetTextSectionAddress();
+	uint32_t GetTextSectionLength();
+	void CheckMemoryProtection(void* address);
 };
 
 template <typename T>
