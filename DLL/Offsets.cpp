@@ -16,10 +16,10 @@ void Offsets::Initialize() {
 	ptr_guitarSpeak = { {0x00F5F57C, 0x00F6057C} };										// Memory | Copied from timer
 	func_ForceEnumeration = { {0x008c9cb0, baseHandle + 0x004C9310 } };					// Code | c6 86 dc 00 00 00 01 38 5e 05 (we want addresss of the start of the function)
 	ptr_enumerateService = { { 0xF74E90 } };											// Memory |
-	hookAddr_ModifyLocalized = { {0x005511EB, baseHandle + 0x001524F8 } };				// Code | 8b 45 e0 8b ? ? ? ? ? 50 6a 01 51 8d 4d 80 (8b ? is what we want)
+	hookAddr_ModifyLocalized = { {0x005511EB, baseHandle + 0x001524FB } };				// Code | 8b 45 e0 8b ? ? ? ? ? 50 6a 01 51 8d 4d 80 (8b ? near the MOV + DWORD is what we want)
 	hookAddr_ModifyCleanString = { {0x0055120F, baseHandle + 0x0015251F } };			// Code | 89 45 ac 89 55 a8 8d 45 80 39 4d 94 (we want 8d 45 80).
-	hookAddr_MissingLocalization = { {0x00832647, baseHandle + 0x00432917 } };			// Code | 8b 54 24 18 8b 4c 24 14 50 8b 42 2c 50 68 ? ? ? ? (68 is the byte we want)
-	func_ecxAddress = { {0x135FBFC, 0x01130bfc} };							// Code | Addr comes from hookAddr_ModifyLocalized hook place.
+	hookAddr_MissingLocalization = { {0x00832647, baseHandle + 0x00432917 } };			// Code | Only xref for #%d#%s - 8b 54 24 18 8b 4c 24 14 50 8b 42 2c 50 68 ? ? ? ? (68 is the byte we want)
+	func_ecxAddress = { {0x135FBFC, baseHandle + 0x00F60BFC } };						// Code | Addr comes from hookAddr_ModifyLocalized hook place.
 	func_getStringFromCSV = { {0x007bf420, baseHandle + 0x003C0150 } };		// Code | 83 c0 04 89 44 24 18 8b 00 85 c9 0f ? ? ? ? ? 80 38 24 (we want address of the start of the function)
 	func_getLocalizedString = { {0x004079d0, baseHandle + 0x007920 } };		// Code | 81 fb 00 00 00 40 (we want address of the start of the function)
 	func_appendString = { {0x00407710, baseHandle + 0x00007660 } };			// Code | 81 fb ff ff ff 3f 0f ? ? ? ? ? (we want address of the  start of the function)

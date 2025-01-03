@@ -10,15 +10,18 @@ std::vector<std::string> songTitles(20);
 /// </summary>
 void __declspec(naked) hook_fakeTitles() {
 	__asm {
-		pushad
+		push eax
+		push ecx
 
-		lea ecx, Offsets::ptr_AdvancedDisplayCrashJmpBck
+		lea ecx, Offsets::func_ecxAddress
 		call VersioningStruct<uintptr_t>::GetValue
-		mov Offsets::runtimeVersionStructValue, eax
 
-		popad
+		pop ecx
 
-		mov ecx, dword ptr ds : [Offsets::runtimeVersionStructValue] // Store the contents of 0x135FBFC into the ECX register. This is the line we are "replacing" to inject this hook.
+		mov ecx, dword ptr ds : [eax] // Store the contents of the return value into the ECX register to replicate the original instruction.
+		
+		pop eax
+
 		pushad									// Save EAX, ECX, and EDX to the stack. 
 		mov ebx, 0x2F							// Sets EBX to 0x2F / 47 / "/" in ASCII. This means that when we add the song index, we start at 0.
 		add ebx, esi							// Add Song List Index to EBX. One-Indexed, but we store it as 0 indexed.
