@@ -1299,14 +1299,22 @@ unsigned WINAPI MainThread() {
 	bool movedToExternalDisplay = false; // User wants to move the display to a specific location on boot.
 	bool skipERSleep = false; // If using RR past 100%, remove the 1.5s sleep on ER mode, to stop flickering colors.
 	bool forkInToasterNewProfile = false; // If Auto Load Profile has a specified profile, and we can't find it, then this will be true.
-	
+
 	// Initialize Functions
 	D3DHooks::debug = debug;
 	Offsets::Initialize();
-	MemUtil::PatchAdr(Offsets::ptr_ModdedPtrCrashFix, "\xE0", 1, true); // Fixes crash when modifying functions in Rocksmith.	Settings::Initialize();
+
+	// Fixes crash when modifying functions in Rocksmith. 
+	uintptr_t forceSuccessLSBOffset = Offsets::ptr_ModdedPtrCrashFix.Get() + 0x3; // LSB of the MOV is what we are replacing
+	byte forceFailedLSB = MemUtil::ReadValue<byte>(forceSuccessLSBOffset + 0x14, true); // We are replacing it with ForceFailed LSB, which is 0x14 away
+	MemUtil::PatchAdr(forceSuccessLSBOffset, (LPVOID)&forceFailedLSB, 1, true);
+
+	Settings::Initialize();
+	
 	UpdateSettings();
 	ERMode::Initialize();
 	
+
 	GUI();
 	Midi::InitMidi();
 	Enumeration::HookEnumerationService();

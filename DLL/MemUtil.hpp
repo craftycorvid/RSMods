@@ -6,6 +6,7 @@ namespace MemUtil {
 	bool bCompare(const BYTE* pData, const byte* bMask, const char* szMask);
 	bool PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake, size_t len, bool addBaseHandle = false);
 	bool PatchAdr(LPVOID address, LPVOID changeToMake, size_t len);
+	bool PatchAdr(uintptr_t address, LPVOID changeToMake, size_t len, bool addBaseHandle);
 	bool PlaceHook(VersioningStruct<uintptr_t>& hookSpot, void* ourFunct, int len, bool addBaseHandle = false);
 	bool PlaceHook(void* hookSpot, void* ourFunct, int len);
 	PBYTE TrampHook(PBYTE src, PBYTE dst, unsigned int len);
@@ -17,6 +18,9 @@ namespace MemUtil {
 
 	template <typename T>
 	T FindPattern(uint32_t address, size_t size, PBYTE pattern, char* mask);
+
+	template <typename T>
+	T ReadValue(uintptr_t adr, bool addBaseHandle);
 
 	NTSTATUS HookedVirtualProtect(LPVOID address, SIZE_T len, ULONG newProtection, ULONG& oldProtection);
 	NTSTATUS HookedQueryVirtualMemory(LPVOID address, PMEMORY_BASIC_INFORMATION memoryBuffer, SIZE_T dwLength);
@@ -72,4 +76,14 @@ bool MemUtil::SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthO
 	}
 
 	return true;
+}
+
+template <typename T>
+T MemUtil::ReadValue(uintptr_t address, bool addBaseHandle) {
+	if (address == NULL)
+		return NULL;
+
+	uintptr_t addr = address + (addBaseHandle ? Offsets::baseHandle : 0);
+
+	return *(T*)addr;
 }
