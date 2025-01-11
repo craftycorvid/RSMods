@@ -63,9 +63,4 @@ namespace CrowdControl::Structs {
 		 */
 		ResponseType type;
 	};
-
-	extern void to_json_request(json& j, const Request& p);
-	extern void from_json_request(const json& j, Request& p);
-	extern void to_json_response(json& j, const Response& p);
-	extern void from_json_response(const json& j, Response& p);
 }

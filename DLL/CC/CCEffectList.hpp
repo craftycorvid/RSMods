@@ -6,6 +6,6 @@
 namespace CrowdControl::EffectList {
 	std::map<std::string, CrowdControl::Effects::CCEffect*>& GetAllEffects();
 
-	bool AreIncompatibleEffectsEnabled(std::vector<std::string> incompatibleEffects);
-	bool IsEffectEnabled(std::string effectName);
+	bool AreIncompatibleEffectsEnabled(const std::vector<std::string>& incompatibleEffects);
+	bool IsEffectEnabled(const std::string& effectName);
 }

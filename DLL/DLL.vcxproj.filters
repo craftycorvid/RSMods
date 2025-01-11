@@ -117,9 +117,6 @@
     <ClCompile Include="D3D/D3D.cpp">
       <Filter>D3D</Filter>
     </ClCompile>
-    <ClCompile Include="CC\CCStructs.cpp">
-      <Filter>CrowdControl</Filter>
-    </ClCompile>
     <ClCompile Include="CC\ControlServer.cpp">
       <Filter>CrowdControl</Filter>
     </ClCompile>
