@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Linq;
 
 namespace RS2014_Mod_Installer
 {
@@ -82,13 +80,6 @@ namespace RS2014_Mod_Installer
             }
         }
 
-        /// <summary>
-        /// Hash for Rocksmith2014.exe for the Remastered Update | SHA256
-        /// </summary>
-        readonly static byte[] HASH_EXE = { 0xA7, 0x25, 0x84, 0x61, 0x10, 0x1D, 0xA0, 0x20, 0x17, 0x07, 0xF5, 0xC2, 0x72, 0xBA, 0xAA, 0x62, 0xA3, 0xD3, 0xD1, 0x0B, 0x3D, 0x22, 0x13, 0xC0, 0xD0, 0xF2, 0x1C, 0xC8, 0x3B, 0x45, 0x88, 0xDA };
-        readonly static byte[] HASH_EXE_NEW = { 0x0d, 0x42, 0xe2, 0xff, 0x3c, 0x7a, 0xf6, 0x84, 0x3e, 0xcb, 0x81, 0x25, 0x9c, 0xc6, 0x4f, 0x1d, 0xde, 0xfa, 0x13, 0x97, 0xb7, 0xce, 0x53, 0xfd, 0xcf, 0x0a, 0x05, 0xd0, 0xb6, 0x1a, 0x0d, 0xc3 };
-        readonly static byte[] HASH_EXE_NEW_LP = { 0xBB, 0x05, 0x69, 0x59, 0xC0, 0xC6, 0x37, 0x1D, 0x4E, 0xCF, 0x78, 0xF8, 0x4C, 0x5D, 0x27, 0xE2, 0xFA, 0xE9, 0x3A, 0x9D, 0x02, 0x58, 0x83, 0x0C, 0x2A, 0x36, 0xF3, 0x3E, 0x6A, 0x27, 0x78, 0xEB };
-
         public static void IsVoid(string installLocation) // Anti-Piracy Check (False = Real, True = Pirated) || Modified from Beat Saber Mod Assistant
         {
             string reason = string.Empty;
@@ -115,7 +106,7 @@ namespace RS2014_Mod_Installer
                 reason += "\nParts of game crack are present in the folder.";
             }
 
-            bool isExeInvalid = !CheckExecutable(installLocation);
+            bool isExeInvalid = !ExeUtil.CheckExecutable(installLocation);
 
             if (isExeInvalid)
             {
@@ -124,32 +115,10 @@ namespace RS2014_Mod_Installer
 
             if (areCrackIndicationsPresent || fakeSteamApi || isExeInvalid)
             {
-                MessageBox.Show($"Incompatible Rocksmith version detected! Only the newest RS version is supported - RSMods doesn't support pirated / stolen copies of Rocksmith 2014! {Environment.NewLine}Reason: {reason}", "Incompatible Rocksmith version", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Incompatible Rocksmith version detected! Only the Steam versions of RS are supported - make sure you are not using a pirated / stolen copy of Rocksmith 2014! {Environment.NewLine}Reason: {reason}", "Incompatible Rocksmith version", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Process.Start("https://store.steampowered.com/app/221680/");
                 Environment.Exit(1);
                 return;
-            }
-        }
-
-        private static bool CheckExecutable(string installLocation)
-        {
-            try
-            {
-                using (SHA256 sha256 = SHA256.Create())
-                {
-                    FileStream exeStream = File.Open(Path.Combine(installLocation, "Rocksmith2014.exe"), FileMode.Open);
-                    exeStream.Position = 0;
-
-                    byte[] hash = sha256.ComputeHash(exeStream);
-
-                    return hash.SequenceEqual(HASH_EXE) || hash.SequenceEqual(HASH_EXE_NEW)|| hash.SequenceEqual(HASH_EXE_NEW_LP); // True - User is using Remastered game, False - User is using a NON-Remastered game (VOID).
-                }
-            }
-            catch // Game was open when performing the check
-            {
-                MessageBox.Show("Please close Rocksmith2014, then re-open this tool!");
-                Environment.Exit(1);
-                return true;
             }
         }
     }

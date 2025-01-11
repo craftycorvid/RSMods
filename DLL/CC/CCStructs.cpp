@@ -1,5 +1,4 @@
 #include "../stdafx.h"
-#include "CCStructs.hpp"
 
 #include "CCEnums.hpp"
 
