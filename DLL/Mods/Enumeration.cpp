@@ -30,22 +30,27 @@ void __declspec(naked) Hook_EnumerationService() {
 }
 
 void Enumeration::HookEnumerationService() {
-	if (Enumeration::rsSteamServiceFlagsPtr == nullptr) {
-		uint32_t BaseTextAddress = MemUtil::GetTextSectionAddress();
+	_LOG_INIT;
 
-		const char* sig = "\x55\x8B\xEC\x6A\x00\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\x00\x53\x57\x50\x8D\x45\x00\x64\xA3\x00\x00\x00\x00\x33\xDB\x38\x5E\x00\x0F\x84";
-		char* mask = "xxxx?x????xx????xxx?x????xxxx?xxxxx?xx????xxxx?xx";
+	uint32_t BaseTextAddress = MemUtil::GetTextSectionAddress();
 
-		uint32_t hookAddr = MemUtil::FindPattern<uint32_t>(BaseTextAddress, (size_t)MemUtil::GetTextSectionLength(), (uint8_t*)sig, mask);
-		short len = 0x5;
+	const char* sig = "\x55\x8B\xEC\x6A\x00\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\x00\x53\x57\x50\x8D\x45\x00\x64\xA3\x00\x00\x00\x00\x33\xDB\x38\x5E\x00\x0F\x84";
+	char* mask = "xxxx?x????xx????xxx?x????xxxx?xxxxx?xx????xxxx?xx";
 
-		hookBackAddr = hookAddr + len;
-		if (MemUtil::PlaceHook((void*)hookAddr, Hook_EnumerationService, len)) {
-			std::cout << "Hooked function successfully!" << std::endl;
-		}
-		else {
-			std::cerr << "Failed to hook function!" << std::endl;
-		}
+	uint32_t hookAddr = MemUtil::FindPattern<uint32_t>(BaseTextAddress, (size_t)MemUtil::GetTextSectionLength(), (uint8_t*)sig, mask);
+	short len = 0x5;
+
+	if (hookAddr == NULL) {
+		_LOG("Failed to find Steam enumeration location!");
+		return;
+	}
+
+	hookBackAddr = hookAddr + len;
+	if (MemUtil::PlaceHook((void*)hookAddr, Hook_EnumerationService, len)) {
+		_LOG("Hooked Steam enumeration function successfully!");
+	}
+	else {
+		_LOG("Failed to hook function!");
 	}
 }
 
