@@ -888,19 +888,19 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 				GameOverlay::DX9DrawText(
 					GuitarSpeak::GetCurrentNoteName(),
 					whiteText,
-					(int)(WindowSize.width / 5.5),		// 349 pixels left of the center in 1920x1080 resolution.
-					(int)(WindowSize.height / 1.75),	// 617 pixels from the top
-					(int)(WindowSize.width / 5.75),		// 334 pixels right of center
-					(int)(WindowSize.height / 8),		// 135 pixels from the top
+					static_cast<int>(WindowSize.width / 5.5),		// 349 pixels left of the center in 1920x1080 resolution.
+					static_cast<int>(WindowSize.height / 1.75),	// 617 pixels from the top
+					static_cast<int>(WindowSize.width / 5.75),		// 334 pixels right of center
+					static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
 					pDevice);
 			else // Show outside of the song at the top of the screen.
 				GameOverlay::DX9DrawText(
 					"Current Note: " + GuitarSpeak::GetCurrentNoteName(),
 					whiteText,
-					(int)(WindowSize.width / 3.87),		// 496 pixels left of the center in 1920x1080 resolution
-					(int)(WindowSize.height / 30.85),	// 35 pixels from the top
-					(int)(WindowSize.width / 4),		// 480 pixel right of the center
-					(int)(WindowSize.height / 8),		// 135 pixels from the top
+					static_cast<int>(WindowSize.width / 3.87),		// 496 pixels left of the center in 1920x1080 resolution
+					static_cast<int>(WindowSize.height / 30.85),	// 35 pixels from the top
+					static_cast<int>(WindowSize.width / 4),		// 480 pixel right of the center
+					static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
 					pDevice);
 		}
 
@@ -909,10 +909,10 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 			GameOverlay::DX9DrawText(
 				"Auto Tune For: " + Midi::GetTuningOffsetName(Midi::tuningOffset),
 				whiteText, 
-				(int)(WindowSize.width / 5.5),		// 349 pixels left of the center in 1920x1080 resolution
-				(int)(WindowSize.height / 30.85),	// 35 pixels from the top
-				(int)(WindowSize.width / 5.65),		// 339 pixels right of center
-				(int)(WindowSize.height / 8),		// 135 pixels from the top
+				static_cast<int>(WindowSize.width / 5.5),		// 349 pixels left of the center in 1920x1080 resolution
+				static_cast<int>(WindowSize.height / 30.85),	// 35 pixels from the top
+				static_cast<int>(WindowSize.width / 5.65),		// 339 pixels right of center
+				static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
 				pDevice);
 		}
 
@@ -1241,6 +1241,19 @@ void GUI() {
 	oEndScene = (tEndScene)MemUtil::TrampHook((PBYTE)vTable[D3DInfo::EndScene_Index], (PBYTE)D3DHooks::Hook_EndScene, 7); // https://docs.microsoft.com/en-us/windows/win32/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-endscene
 	oDrawIndexedPrimitive = (tDrawIndexedPrimitive)MemUtil::TrampHook((PBYTE)vTable[D3DInfo::DrawIndexedPrimitive_Index], (PBYTE)D3DHooks::Hook_DIP, 5); // https://docs.microsoft.com/en-us/windows/win32/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-drawindexedprimitive
 	oDrawPrimitive = (tDrawPrimitive)MemUtil::TrampHook((PBYTE)vTable[D3DInfo::DrawPrimitive_Index], (PBYTE)D3DHooks::Hook_DP, 7); // https://docs.microsoft.com/en-us/windows/win32/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-drawprimitive
+}
+
+void SendEscapeKey() {
+	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYDOWN, VK_ESCAPE, 0);
+	Sleep(30);
+	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYUP, VK_ESCAPE, 0);
+}
+
+void PressDownArrowKey() 
+{
+	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYDOWN, VK_DOWN, 0);
+	Sleep(30);
+	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYUP, VK_DOWN, 0);
 }
 
 /// <summary>
@@ -1658,7 +1671,7 @@ unsigned WINAPI MainThread() {
 			// It is only used while the game boots, else the game may crash.
 			GameState::currentMenu = GameState::GetCurrentMenu(true);
 
-			_LOG("Menu Loop: " << GameState::currentMenu << std::endl);
+			_LOG("Menu Loop: " << GameState::currentMenu << ", enabled: " << Settings::ReturnSettingValue("ForceProfileEnabled") << std::endl);
 
 			// Have We Loaded? Or has the user opened a new user profile?
 			// This prevents the user from being locked in a loop.
@@ -1673,8 +1686,13 @@ unsigned WINAPI MainThread() {
 				
 			// Auto Load Profile. AKA "Fork in the toaster".
 			if (Settings::ReturnSettingValue("ForceProfileEnabled") == "on" && !GameState::Menus::IsInMenusWithDisallowedAutoEnter() && !forkInToasterNewProfile) {
+				// Skip UPlay login dialog - depending on the menu it might be necessary to press either ESC or Enter, so just spam both
+				if (GameState::currentMenu == (std::string)"SelectionListDialog" || GameState::currentMenu == (std::string)"UplayLoginDialog") {
+					SendEscapeKey();
+					AutoEnterGame();
+				}
 				// If the user user says "I want to always load this profile"
-				if (Settings::ReturnSettingValue("ProfileToLoad") != "" && GameState::currentMenu == (std::string)"ProfileSelect") {
+				else if (Settings::ReturnSettingValue("ProfileToLoad") != "" && GameState::currentMenu == (std::string)"ProfileSelect") {
 					selectedUser = GameState::CurrentSelectedUser();
 					if (selectedUser == Settings::ReturnSettingValue("ProfileToLoad")) // The profile we're looking for
 						AutoEnterGame();
@@ -1685,9 +1703,7 @@ unsigned WINAPI MainThread() {
 						forkInToasterNewProfile = true;
 					}
 					else { // Not the profile we're looking for. Move down 1.
-						PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYDOWN, VK_DOWN, 0);
-						Sleep(30);
-						PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYUP, VK_DOWN, 0);
+						PressDownArrowKey();
 					} 
 				}
 				// User doesn't care what profile we select, just select the first / top one.
