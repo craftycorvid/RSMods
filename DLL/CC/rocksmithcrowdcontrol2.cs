@@ -4,20 +4,21 @@ using CrowdControl.Common;
 using CrowdControl.Games.Packs;
 using ConnectorType = CrowdControl.Common.ConnectorType;
 
-public class Rocksmith2014 : SimpleTCPPack
-{
-    public override string Host => "127.0.0.1";
-
-    public override ushort Port => 45659;
-
-    public override ISimpleTCPPack.MessageFormat MessageFormat => ISimpleTCPPack.MessageFormat.CrowdControl;
-
-    public Rocksmith2014(UserRecord player, Func<CrowdControlBlock, bool> responseHandler, Action<object> statusUpdateHandler) : base(player, responseHandler, statusUpdateHandler) { }
-
-    public override Game Game => new("Rocksmith 2014", "Rocksmith2014", "PC", ConnectorType.SimpleTCPServerConnector);
-
-    public override EffectList Effects { get; } = new Effect[]
+namespace CrowdControl.Games.Packs.Rocksmith2014y {
+    public class Rocksmith2014 : SimpleTCPPack
     {
+        public override string Host => "127.0.0.1";
+
+        public override ushort Port => 45659;
+
+        public override ISimpleTCPPack.MessageFormat MessageFormat => ISimpleTCPPack.MessageFormat.CrowdControl;
+
+        public Rocksmith2014(UserRecord player, Func<CrowdControlBlock, bool> responseHandler, Action<object> statusUpdateHandler) : base(player, responseHandler, statusUpdateHandler) { }
+
+        public override Game Game => new("Rocksmith 2014", "Rocksmith2014", "PC", ConnectorType.SimpleTCPServerConnector);
+
+        public override EffectList Effects { get; } = new Effect[]
+        {
         new Effect("Rainbow Strings", "rainbowstrings")
         {
             Duration = 20,
@@ -70,7 +71,7 @@ public class Rocksmith2014 : SimpleTCPPack
             Duration = 20,
             IsDurationEditable = false
         },
-        
+
         new Effect("Change Tone to Slot 1", "changetoneslot1") { Category = "Change Tone" },
         new Effect("Change Tone to Slot 2", "changetoneslot2") { Category = "Change Tone" },
         new Effect("Change Tone to Slot 3", "changetoneslot3") { Category = "Change Tone" },
@@ -146,5 +147,7 @@ public class Rocksmith2014 : SimpleTCPPack
             Duration = 20,
             IsDurationEditable = false
         }
-    };
+        };
+    }
 }
+

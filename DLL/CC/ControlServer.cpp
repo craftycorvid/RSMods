@@ -186,9 +186,10 @@ namespace CrowdControl {
 			}
 
 			//Connect
-			if (connect(sock, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
+			int connectErr = connect(sock, (struct sockaddr*)&server_address, sizeof(server_address));
+			if (connectErr < 0) {
 				_LOG_SETLEVEL(LogLevel::Error);
-				_LOG("Unable to connect to crowd control" << std::endl);
+				_LOG("Unable to connect to crowd control - " << connectErr << std::endl);
 				return -1;
 			}
 			else
@@ -300,20 +301,23 @@ namespace CrowdControl {
 		/// <param name="p"> - Destination Request struct</param>
 		/// <returns>Request object describing the current effect</returns>
 		void from_json_request(const json& j, Request& p) {
-			j.at("id").get_to(p.id);
-			j.at("code").get_to(p.code);
-			j.at("viewer").get_to(p.viewer);
-			j.at("type").get_to(p.type);
+			if (j.contains("id"))
+				j.at("id").get_to(p.id);
+
+			if (j.contains("code"))
+				j.at("code").get_to(p.code);
+
+			if (j.contains("viewer"))
+				j.at("viewer").get_to(p.viewer);
+
+			if (j.contains("type"))
+				j.at("type").get_to(p.type);
 
 			if (j.contains("duration"))
-			{
 				j.at("duration").get_to(p.duration);
-			}
 
 			if (j.contains("parameters"))
-			{
 				j.at("parameters").get_to(p.parameters);
-			}
 		}
 
 		/// <summary>

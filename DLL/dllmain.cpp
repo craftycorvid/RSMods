@@ -1671,7 +1671,7 @@ unsigned WINAPI MainThread() {
 			// It is only used while the game boots, else the game may crash.
 			GameState::currentMenu = GameState::GetCurrentMenu(true);
 
-			_LOG("Menu Loop: " << GameState::currentMenu << ", enabled: " << Settings::ReturnSettingValue("ForceProfileEnabled") << std::endl);
+			//_LOG("Menu Loop: " << GameState::currentMenu << ", enabled: " << Settings::ReturnSettingValue("ForceProfileEnabled") << std::endl);
 
 			// Have We Loaded? Or has the user opened a new user profile?
 			// This prevents the user from being locked in a loop.
@@ -1724,13 +1724,13 @@ void Initialize() {
 	Wwise::Exports::Initialize();
 
 	std::thread(MainThread).detach(); // Mod Toggle based on menus
-	//std::thread(EnumerationThread).detach(); // Force Enumeration
-	//std::thread(HandleEffectQueueThread).detach(); // Twitch Effects
-	//std::thread(MidiThread).detach(); // MIDI Auto Tuning / True Tuning
-	//std::thread(RiffRepeaterThread).detach(); // RR Speed Above 100% Log
+	std::thread(EnumerationThread).detach(); // Force Enumeration
+	std::thread(HandleEffectQueueThread).detach(); // Twitch Effects
+	std::thread(MidiThread).detach(); // MIDI Auto Tuning / True Tuning
+	std::thread(RiffRepeaterThread).detach(); // RR Speed Above 100% Log
 
 	// Probably check ini setting before starting this thing
-	//CrowdControl::StartServer(); // Twitch Effects Server
+	CrowdControl::StartServer(); // Twitch Effects Server
 }
 
 /// <summary>
