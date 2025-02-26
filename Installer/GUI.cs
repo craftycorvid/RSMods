@@ -13,41 +13,49 @@ namespace RS2014_Mod_Installer
             InitializeComponent();
         }
 
+        private string rsLocation = string.Empty;
+
+        private string WhereIsRocksmith()
+        {
+            if (rsLocation?.Length == 0)
+                rsLocation = RSMods.Util.GenUtil.GetRSDirectory();
+
+            return rsLocation;
+        }
+
         private void UseModsButton_Click(object sender, EventArgs e)
         {
             string originalButtonText = UseModsButton.Text;
-            UseModsButton.Text += "\n(Please wait as we get the mods setup).";
-            // Can we find Rocksmith's install?
-            if (Worker.WhereIsRocksmith() == string.Empty)
+            UseModsButton.Text += "\n(Please wait as we get the mods setup. This should take but a moment).";
+
+            string rsPath = WhereIsRocksmith();
+            if (string.IsNullOrEmpty(rsPath))
             {
                 MessageBox.Show("It looks like your current Rocksmith2014 install folder cannot be found. Please tell us where it is located!", "Error: RSLocation Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                string newRSFolder = RSMods.Util.GenUtil.AskUserForRSFolder();
-                if (newRSFolder == string.Empty)
+               
+                rsPath = RSMods.Util.GenUtil.AskUserForRSFolder();
+
+                if (string.IsNullOrEmpty(rsPath))
                 {
                     MessageBox.Show("We cannot detect where you have Rocksmith located. Please try reinstalling your game on Steam.", "Error: RSLocation Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Environment.Exit(1);
                     return;
                 }
 
-                Worker.RSLocation = newRSFolder;
+                rsLocation = rsPath;
             }
 
-            IsVoid(Worker.WhereIsRocksmith());
+            IsVoid(rsPath);
 
-            // Get DLL from Installer
-            if (DLLStuff.InjectDLL(Worker.WhereIsRocksmith()))
+            if (DLLStuff.InjectDLL(rsPath) && DLLStuff.InjectGUI(rsPath))
             {
-                // Get GUI from Installer
-                if (DLLStuff.InjectGUI(Worker.WhereIsRocksmith()))
-                {
-                    string rsModsPath = Path.Combine(Worker.WhereIsRocksmith(), "RSMods") + "\\RSMods.exe";
-                    MessageBox.Show("This version of the installer allows you to take advantage of the new mod settings available by opening: " + rsModsPath, "New Mod Settings Available!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string rsModsPath = Path.Combine(rsPath, "RSMods") + "\\RSMods.exe";
+                MessageBox.Show("This version of the installer allows you to take advantage of the new mod settings available by opening: " + rsModsPath, "New Mod Settings Available!", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    Process.Start(rsModsPath);
-                    CreateDesktopShortcut(rsModsPath);
+                Process.Start(rsModsPath);
+                CreateDesktopShortcut(rsModsPath);
 
-                    this.Close();
-                }
+                Close();
             }
 
             UseModsButton.Text = originalButtonText;

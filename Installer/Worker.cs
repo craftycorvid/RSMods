@@ -3,18 +3,6 @@ using System.Windows.Forms;
 
 namespace RS2014_Mod_Installer
 {
-    class Worker
-    {
-        public static string RSLocation = string.Empty;
-
-        public static string WhereIsRocksmith()
-        {
-            if (RSLocation == string.Empty)
-                RSLocation = RSMods.Util.GenUtil.GetRSDirectory();
-
-            return RSLocation;
-        }
-    }
     class DLLStuff
     {
         public static bool InjectDLL(string rocksmithLocation)
@@ -22,6 +10,7 @@ namespace RS2014_Mod_Installer
             try
             {
                 File.WriteAllBytes(Path.Combine(@rocksmithLocation, "xinput1_3.dll"), Properties.Resources.xinput1_3);
+                File.WriteAllBytes(Path.Combine(@rocksmithLocation, "xinput1_3.pdb"), Properties.Resources.xinput1_3_pdb);
 
                 if (File.Exists(Path.Combine(@rocksmithLocation, "D3DX9_42.dll")) && new FileInfo(Path.Combine(@rocksmithLocation, "D3DX9_42.dll")).Length >= 300000)
                     File.Delete(Path.Combine(@rocksmithLocation, "D3DX9_42.dll"));

@@ -47,12 +47,16 @@ namespace RSMods.Util
 
             string[] names = resourceAssembly.GetManifestResourceNames();
 
-            string resourcePath = String.Empty;
+            string resourcePath = string.Empty;
             foreach (string file in files)
             {
                 resourcePath = Path.Combine(outputDir, file);
 
                 Stream stream = resourceAssembly.GetManifestResourceStream(String.Format("{0}.{1}", resourceLocation, file));
+
+                if (stream == null)
+                    return;
+
                 using (FileStream fileStream = new FileStream(resourcePath, FileMode.Create))
                     stream.CopyTo(fileStream);
             }
@@ -146,13 +150,14 @@ namespace RSMods.Util
             try
             {
                 var retValue = (string)Registry.GetValue(keyName, valueName, "");
-                return retValue == null ? String.Empty : retValue;
+                return retValue == null ? string.Empty : retValue;
             }
             catch (Exception)
             {
-                return String.Empty;
+                return string.Empty;
             }
         }
+
         private static List<string> GetCustomSteamappsFolders(string mainSteamPath)
         {
             string libRegex = "(^\\t\"[1-9]\").*(\".*\")";
@@ -164,16 +169,19 @@ namespace RSMods.Util
             if (!File.Exists(libVdf))
                 return new List<string>();
 
-            var content = File.ReadAllLines(libVdf);
-            foreach (string l in content)
+            foreach (string l in File.ReadAllLines(libVdf))
             {
                 var reg = Regex.Match(l, libRegex);
-                string dir = reg.Groups[2].Value;
 
-                if (dir != string.Empty)
+                if (reg.Success)
                 {
-                    string ndir = dir.Trim('\"');
-                    libDirs.Add(ndir);
+                    string dir = reg.Groups[2].Value;
+
+                    if (dir != string.Empty)
+                    {
+                        string ndir = dir.Trim('\"');
+                        libDirs.Add(ndir);
+                    }
                 }
             }
 
@@ -183,40 +191,32 @@ namespace RSMods.Util
             return libDirs;
         }
 
-
         private static string GetCustomRSFolder(string mainSteamPath)
         {
-            var customSteamppsFolders = GetCustomSteamappsFolders(mainSteamPath);
-            string finalPath = string.Empty;
+            var customSteamappsFolders = GetCustomSteamappsFolders(mainSteamPath);
             string rsFolderPath = string.Empty;
-            bool found = false;
 
-            foreach (var customSteamappsFolder in customSteamppsFolders)
+            if (customSteamappsFolders == null || customSteamappsFolders.Count == 0)
+                return string.Empty;
+
+            foreach (var customSteamappsFolder in customSteamappsFolders)
             {
                 string dirPath = Path.Combine(customSteamappsFolder, "steamapps", "appmanifest_221680.acf");
 
-                if (File.Exists(dirPath))
-                {
-                    finalPath = Path.GetDirectoryName(dirPath);
+                if (!File.Exists(dirPath))
+                    continue;
 
-                    rsFolderPath = Path.Combine(finalPath, "common", "Rocksmith2014");
+                string finalPath = Path.GetDirectoryName(dirPath);
+                if (string.IsNullOrEmpty(finalPath))
+                    continue;
 
-                    if (rsFolderPath.IsRSFolder())
-                    {
-                        found = true;
-                        break;
-                    }
-                }
+                rsFolderPath = Path.Combine(finalPath, "common", "Rocksmith2014");
+
+                if (rsFolderPath.IsRSFolder())
+                    return rsFolderPath;
             }
 
-            if (found)
-            {
-                //  MessageBox.Show("Found Custom RS2014 Installation Directory ...");
-                return rsFolderPath;
-            }
-
-            // MessageBox.Show("<WARNING> Custom RS2014 Installation Directory not found ...");
-            return String.Empty;
+            return string.Empty;
         }
 
         public static string GetSteamDirectory()
@@ -226,7 +226,7 @@ namespace RSMods.Util
             return GetStringValueFromRegistry(steamRegPath, "SteamPath").Replace('/', '\\');
         }
 
-        public static List<Tuple<string, string>> InstallRegKeys = new List<Tuple<string, string>>()
+        public static List<Tuple<string, string>> InstallRegKeys { get; set; } = new List<Tuple<string, string>>()
         {
             new Tuple<string, string>(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Ubisoft\Rocksmith2014", "installdir"),
             new Tuple<string, string>(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 221680", "InstallLocation"),
@@ -332,15 +332,15 @@ namespace RSMods.Util
 
             try
             {
-                var rs2RootDir = String.Empty;
+                var rs2RootDir = string.Empty;
                 var steamRootPath = GetSteamDirectory();
 
                 if (Directory.GetParent(Application.StartupPath).FullName.IsRSFolder()) // Before we ask the user to say where RS is located, lets check to see if we are located in a RS Install folder.
                     return Directory.GetParent(Application.StartupPath).FullName;
 
-                if (!String.IsNullOrEmpty(steamRootPath))
+                if (!string.IsNullOrEmpty(steamRootPath))
                 {
-                    rs2RootDir = Path.Combine(steamRootPath, "SteamApps\\common\\Rocksmith2014");
+                    rs2RootDir = Path.Combine(steamRootPath, "steamapps\\common\\Rocksmith2014");
 
                     if (!Directory.Exists(rs2RootDir)) // RS-Folder doesn't exist
                     {
@@ -356,9 +356,12 @@ namespace RSMods.Util
                             }
                         }
 
-                        rs2RootDir = GetCustomRSFolder(steamRootPath); // Grab custom Steam library paths from .vdf file
+                        if (string.IsNullOrEmpty(rs2RootDir))
+                        {
+                            rs2RootDir = GetCustomRSFolder(steamRootPath); // Grab custom Steam library paths from .vdf file
+                        }
 
-                        if (String.IsNullOrEmpty(rs2RootDir) || !rs2RootDir.IsRSFolder()) // If neither that's OK, ask the user to point the GUI to the correct location
+                        if (string.IsNullOrEmpty(rs2RootDir) || !rs2RootDir.IsRSFolder()) // If neither that's OK, ask the user to point the GUI to the correct location
                         {
                             MessageBox.Show("We were unable to detect your Rocksmith 2014 folder, please select it manually!", "Your help is required!");
                             return AskUserForRSFolder();
@@ -371,7 +374,7 @@ namespace RSMods.Util
                             MessageBox.Show("We cannot verify your installation of Rocksmith 2014. It appears the folder we have saved doesn't contain a cache.psarc which is REQUIRED for Rocksmith 2014 to boot.", "Your help is required!");
                             rs2RootDir = AskUserForRSFolder();
 
-                            if (rs2RootDir == String.Empty)
+                            if (rs2RootDir == string.Empty)
                             {
                                 MessageBox.Show("We were unable to detect your Rocksmith 2014 folder, and you didn't give us a valid RS Folder.", "Closing Application");
                                 Application.Exit();
@@ -393,24 +396,28 @@ namespace RSMods.Util
         public static string AskUserForRSFolder()
         {
             FolderPicker dialog = new FolderPicker();
-            if (dialog.ShowDialog(IntPtr.Zero) == true) // Would have been better to pass in the handle of the main form, but that would require a bit too much refactoring
+
+            IntPtr ownerHandle = Application.OpenForms.Count > 0 ? Application.OpenForms[0].Handle : IntPtr.Zero;
+            if (dialog.ShowDialog(ownerHandle) == true)
             {
                 string rsFolder = dialog.ResultPath;
 
-                if (rsFolder.IsRSFolder())
+                if (!string.IsNullOrEmpty(rsFolder) && rsFolder.IsRSFolder())
                 {
                     Constants.RSFolder = rsFolder;
                     return rsFolder;
                 }
             }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         public static string AskUserForSavePath()
         {
             FolderPicker dialog = new FolderPicker();
-            if (dialog.ShowDialog(IntPtr.Zero) == true)
+
+            IntPtr ownerHandle = Application.OpenForms.Count > 0 ? Application.OpenForms[0].Handle : IntPtr.Zero;
+            if (dialog.ShowDialog(ownerHandle) == true)
             {
                 string savePath = dialog.ResultPath;
 

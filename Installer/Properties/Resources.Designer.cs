@@ -19,7 +19,7 @@ namespace RS2014_Mod_Installer.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -140,7 +140,7 @@ namespace RS2014_Mod_Installer.Properties {
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;2&quot; maxChordNotes=&quot;6&quot;/&gt;
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;3&quot; maxChordNotes=&quot;6&quot;/&gt;
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;4&quot; maxChordNotes=&quot;6&quot;/&gt;
-        ///  &lt;level maxCategory=&quot;4&quot; maxS [rest of string was truncated]&quot;;.
+        ///  &lt;level maxCategory [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ddc_chords_protector {
             get {
@@ -158,7 +158,7 @@ namespace RS2014_Mod_Installer.Properties {
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;2&quot; maxChordNotes=&quot;1&quot;/&gt;
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;3&quot; maxChordNotes=&quot;1&quot;/&gt;
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;4&quot; maxChordNotes=&quot;1&quot;/&gt;
-        ///  &lt;level maxCategory=&quot;4&quot; maxS [rest of string was truncated]&quot;;.
+        ///  &lt;level maxCategory [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ddc_chords_remover {
             get {
@@ -198,7 +198,7 @@ namespace RS2014_Mod_Installer.Properties {
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;2&quot; maxChordNotes=&quot;1&quot;/&gt;
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;2&quot; maxChordNotes=&quot;2&quot;/&gt;
         ///  &lt;level maxCategory=&quot;4&quot; maxSubCategory= &quot;3&quot; maxChordNotes=&quot;2&quot;/&gt;
-        ///  &lt;level maxCategory=&quot;4&quot; maxS [rest of string was truncated]&quot;;.
+        ///  &lt;level maxCategory [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ddc_default1 {
             get {
@@ -246,8 +246,7 @@ namespace RS2014_Mod_Installer.Properties {
         ///    (at your option) any later version.
         ///
         ///    This program is distributed in the hope that it will be useful,
-        ///    but WITHOUT ANY WARRANTY; without even the implied warranty of
-        ///    ME [rest of string was truncated]&quot;;.
+        ///    but WITHOUT ANY WARRANTY; without even the implied warranty  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string license {
             get {
@@ -510,8 +509,7 @@ namespace RS2014_Mod_Installer.Properties {
         ///- Open a Windows command-line interpreter
         ///- Execute the &quot;ddc.exe&quot; tool with the following parameters :
         ///
-        ///  C:\ddc_v3.6&gt;ddc.exe
-        ///  ------------- [rest of string was truncated]&quot;;.
+        ///  C:\ddc_v3.6&gt;ddc.exe        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string readme {
             get {
@@ -898,6 +896,16 @@ namespace RS2014_Mod_Installer.Properties {
         internal static byte[] xinput1_3 {
             get {
                 object obj = ResourceManager.GetObject("xinput1_3", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] xinput1_3_pdb {
+            get {
+                object obj = ResourceManager.GetObject("xinput1_3_pdb", resourceCulture);
                 return ((byte[])(obj));
             }
         }
