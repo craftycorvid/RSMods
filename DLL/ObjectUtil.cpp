@@ -44,6 +44,11 @@ namespace ObjectUtil {
 
 		for (auto child : children)
 		{
+			if (!child->className || MemUtil::IsBadReadPtr(child->className))
+			{
+				continue;
+			}
+
 			std::string className = child->className;
 
 			//If object class name is in object scale map
