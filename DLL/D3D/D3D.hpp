@@ -45,14 +45,17 @@ inline unsigned long crcNotewayFretNumbers = 0x00090000, crcNoteLanes = 0x005a00
 inline unsigned long crcSkylinePurple = 0x65b846aa, crcSkylineOrange = 0xbad9e064, crcSkylineBackground = 0xc605fbd2, crcSkylineShadow = 0xff1c61ff;
 inline unsigned long crcHeadstock0 = 0x008d5439, crcHeadstock1 = 0x000d4439, crcHeadstock2 = 0x00000000, crcHeadstock3 = 0xa55470f6, crcHeadstock4 = 0x008f4039;
 inline unsigned long crcLyrics = 0x00000000;
+inline unsigned long crcChordPanelFHM1 = 0x4a79e046, crcChordPanelFHM2 = 0x1540d75c, crcChordPanelFHM3 = 0xfaa66ca;
 
 inline float rainbowSpeed = 2.f;
 inline const int randomTextureCount = 10;
 inline LPDIRECT3DTEXTURE9 Red, Green, Blue, Yellow;
-inline LPDIRECT3DTEXTURE9 pCurrTexture, pCurrRainbowTexture, pCurrNotewayTexture;
+inline LPDIRECT3DTEXTURE9 pCurrTexture, pCurrRainbowTexture, pCurrNotewayTexture, pCurrentChordPanelTexture;
 inline LPDIRECT3DTEXTURE9 gradientTextureNormal, gradientTextureSeven, nonexistentTexture, additiveNoteTexture, customStringColorTexture, customNoteColorTexture, twitchUserDefinedTexture, notewayTexture, gutterTexture, fretNumTexture;
 inline LPDIRECT3DTEXTURE9 customHeadstockTexture;
 inline LPDIRECT3DTEXTURE9 customGreenScreenWall_Stage0, customGreenScreenWall_Stage1, customGreenScreenWall_Stage2, customGreenScreenWall_Stage3, customGreenScreenWall_Stage4, customGreenScreenWall_Stage5, customGreenScreenWall_Stage6;
+inline LPDIRECT3DTEXTURE9 customChordPanelFHMTexture;
+inline LPDIRECT3DBASETEXTURE9 pBaseChordPanelTexture;
 inline std::vector<LPDIRECT3DTEXTURE9> randomTextures(randomTextureCount);
 inline std::vector<LPDIRECT3DTEXTURE9> rainbowTextures((const unsigned int)(360.0f / rainbowSpeed));
 inline ColorList randomTextureColors;
@@ -166,6 +169,7 @@ inline std::vector<ThiccMesh> greenScreenWallMesh{ { 92, 2, 6, 0, 0, 4, 2, 8, 9 
 inline std::vector<ThiccMesh> nostrings{ { 12, 1536, 1199, 0, 0, 4, 2, 9, 4 } };
 inline std::vector<ThiccMesh> drunkMode{ { 12, 2, 4, 0, 0, 4, 2, 12, 2 } };
 inline std::vector<ThiccMesh> preSongTunerFog{ { 12, 2, 4, 0, 0, 4, 2, 4, 2 } };
+inline std::vector<ThiccMesh> chordPanel{ { 32, 32, 64, 0, 0, 4, 2, 9, 3 } };
 
 // All the single (thin) ladies
 inline std::vector<Mesh> noteHighway{ { 32, 2, 4} };

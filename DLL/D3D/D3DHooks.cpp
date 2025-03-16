@@ -293,6 +293,28 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 		}
 	}
 
+	//if (IsExtraRemoved(chordPanel, currentThicc))
+	//{
+	//	pDevice->GetTexture(0, &pBaseChordPanelTexture);
+	//	pCurrentChordPanelTexture = (IDirect3DTexture9*)pBaseChordPanelTexture;
+
+	//	if (pBaseChordPanelTexture)
+	//	{
+	//		if (D3D::CRCForTexture(pCurrentChordPanelTexture, pDevice, crc))
+	//		{
+	//			if (crc == crcChordPanelFHM1 || crc == crcChordPanelFHM2 || crc == crcChordPanelFHM3)
+	//			{
+	//				pDevice->SetTexture(0, customChordPanelFHMTexture);
+	//				return SHOW_TEXTURE;
+	//			}
+	//			//else
+	//			//{
+	//			//	_LOG("Chord panel texture CRC: 0x" << std::hex << crc << std::endl);
+	//			//}
+	//		}
+	//	}
+	//}
+
 
 	// // Custom Loft Gameplay Wall / Narnia / Portal / Venue wall
 	//if (IsExtraRemoved(greenScreenWallMesh, currentThicc)) {

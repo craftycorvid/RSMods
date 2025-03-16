@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Main.hpp"
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(_WWISE_LOGS)
 bool debug = true; // You ARE on a debug build.
 #else
 bool debug = false; // You are NOT on a debug build.
@@ -604,6 +604,7 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 		D3DXCreateTextureFromFile(pDevice, L"stage4.png", &customGreenScreenWall_Stage4); // White square
 		D3DXCreateTextureFromFile(pDevice, L"stage5.png", &customGreenScreenWall_Stage5); // Pipes and wall trim
 		D3DXCreateTextureFromFile(pDevice, L"stage6.png", &customGreenScreenWall_Stage6); // N Mask of Background tile
+		D3DXCreateTextureFromFile(pDevice, L"ChordFHM.png", &customChordPanelFHMTexture); // Custom Chord Panel FHM (for Metallica93).
 	}
 
 	// Start new ImGUI Frame
@@ -996,7 +997,18 @@ std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds) {
 	minutes = (int)(timeInSeconds / 60) % 60;
 	hours = timeInSeconds / 3600;
 
-	return std::to_string(hours) + "h:" + std::to_string(minutes) + "m:" + std::to_string(seconds) + "s";
+	char buffer[64];
+
+	if (hours > 0)
+	{
+		sprintf_s(buffer, "%02dh:%02dm:%02ds", hours, minutes, seconds);
+	}
+	else
+	{
+		sprintf_s(buffer, "%02dm:%02ds", minutes, seconds);
+	}
+
+	return std::string(buffer);
 }
 
 /// <summary>
@@ -1326,7 +1338,7 @@ unsigned WINAPI MainThread() {
 	
 	UpdateSettings();
 	ERMode::Initialize();
-	
+
 
 	GUI();
 	Midi::InitMidi();
