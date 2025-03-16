@@ -74,7 +74,8 @@ namespace Wwise::Logging {
 				  << " on object 0x"
 				  << std::hex << in_gameObjectID
 				  << " at time "
-				  << (float)(in_iPosition / 1000)
+				  << std::dec
+				  << (float)(in_iPosition / 1000.f)
 				  << " seconds. Seek to nearest marker: "
 				  << std::boolalpha << in_bSeekToNearestMarker
 				  << std::endl);

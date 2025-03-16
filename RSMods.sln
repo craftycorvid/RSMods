@@ -17,6 +17,7 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug with Wwise Logging|Win32 = Debug with Wwise Logging|Win32
 		Debug|Win32 = Debug|Win32
+		Release with Wwise Logging|Win32 = Release with Wwise Logging|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -24,18 +25,24 @@ Global
 		{E312CF39-2170-4C1A-AC11-3A9C1C2E7399}.Debug with Wwise Logging|Win32.Build.0 = Debug with Wwise Logging|Win32
 		{E312CF39-2170-4C1A-AC11-3A9C1C2E7399}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E312CF39-2170-4C1A-AC11-3A9C1C2E7399}.Debug|Win32.Build.0 = Debug|Win32
+		{E312CF39-2170-4C1A-AC11-3A9C1C2E7399}.Release with Wwise Logging|Win32.ActiveCfg = Release with Wwise Logging|Win32
+		{E312CF39-2170-4C1A-AC11-3A9C1C2E7399}.Release with Wwise Logging|Win32.Build.0 = Release with Wwise Logging|Win32
 		{E312CF39-2170-4C1A-AC11-3A9C1C2E7399}.Release|Win32.ActiveCfg = Release|Win32
 		{E312CF39-2170-4C1A-AC11-3A9C1C2E7399}.Release|Win32.Build.0 = Release|Win32
 		{0EDA6FC0-DD23-45FF-94D4-B242D04F97A8}.Debug with Wwise Logging|Win32.ActiveCfg = Debug|x64
 		{0EDA6FC0-DD23-45FF-94D4-B242D04F97A8}.Debug with Wwise Logging|Win32.Build.0 = Debug|x64
 		{0EDA6FC0-DD23-45FF-94D4-B242D04F97A8}.Debug|Win32.ActiveCfg = Debug|x64
 		{0EDA6FC0-DD23-45FF-94D4-B242D04F97A8}.Debug|Win32.Build.0 = Debug|x64
+		{0EDA6FC0-DD23-45FF-94D4-B242D04F97A8}.Release with Wwise Logging|Win32.ActiveCfg = Release|Any CPU
+		{0EDA6FC0-DD23-45FF-94D4-B242D04F97A8}.Release with Wwise Logging|Win32.Build.0 = Release|Any CPU
 		{0EDA6FC0-DD23-45FF-94D4-B242D04F97A8}.Release|Win32.ActiveCfg = Release|x64
 		{0EDA6FC0-DD23-45FF-94D4-B242D04F97A8}.Release|Win32.Build.0 = Release|x64
 		{9E11FD67-DFFE-40F1-8E69-26D359F896EC}.Debug with Wwise Logging|Win32.ActiveCfg = Debug|Any CPU
 		{9E11FD67-DFFE-40F1-8E69-26D359F896EC}.Debug with Wwise Logging|Win32.Build.0 = Debug|Any CPU
 		{9E11FD67-DFFE-40F1-8E69-26D359F896EC}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{9E11FD67-DFFE-40F1-8E69-26D359F896EC}.Debug|Win32.Build.0 = Debug|Any CPU
+		{9E11FD67-DFFE-40F1-8E69-26D359F896EC}.Release with Wwise Logging|Win32.ActiveCfg = Release|Any CPU
+		{9E11FD67-DFFE-40F1-8E69-26D359F896EC}.Release with Wwise Logging|Win32.Build.0 = Release|Any CPU
 		{9E11FD67-DFFE-40F1-8E69-26D359F896EC}.Release|Win32.ActiveCfg = Release|Any CPU
 		{9E11FD67-DFFE-40F1-8E69-26D359F896EC}.Release|Win32.Build.0 = Release|Any CPU
 	EndGlobalSection

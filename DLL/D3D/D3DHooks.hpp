@@ -26,7 +26,7 @@ namespace D3DHooks {
 	inline UINT Offset = 0;
 	inline UINT vertexBufferSize;
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(_WWISE_LOGS)
 	inline bool debug = true;
 #else
 	inline bool debug = false;

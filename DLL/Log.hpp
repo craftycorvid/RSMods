@@ -2,7 +2,7 @@
 
 /// If changing this file, be sure to do a clean build, else some changes might not go into effect.
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(_WWISE_LOGS)
 #ifndef _LOG_INIT
 #define _LOG_INIT Log LOG; Log LOG_DEV; LOG_DEV.isConsole = true // Use log in place of cout or cerr, to help consolidate logging.
 #endif

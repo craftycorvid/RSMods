@@ -15,4 +15,9 @@
     <LocalDebuggerCommandArguments>-applaunch 221680</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with Wwise Logging|Win32'">
+    <LocalDebuggerCommand>C:\Program Files (x86)\Steam\steam.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>-applaunch 221680</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>
