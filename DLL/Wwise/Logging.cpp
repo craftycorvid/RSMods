@@ -1,6 +1,9 @@
 #include "../stdafx.h"
 #include "Logging.hpp"
 
+#include "../GameState.hpp"
+#include "Exports.hpp"
+
 #ifdef _WWISE_LOGS
 namespace Wwise::Logging {
 
@@ -116,7 +119,7 @@ namespace Wwise::Logging {
 	{
 		_LOG_INIT;
 
-		if (!MemHelpers::Contains(std::string(in_pszRtpcName), SetRTPCBlacklist))
+		if (!Contains(std::string(in_pszRtpcName), SetRTPCBlacklist))
 		{
 			_LOG("(Wwise) SetRTPCValue: "
 					  << in_pszRtpcName
@@ -140,10 +143,10 @@ namespace Wwise::Logging {
 	/// </summary>
 	void Init()
 	{
-		oSetRTPCValue_Char = (tSetRTPCValue_Char)DetourFunction((PBYTE)Exports::func_Wwise_Sound_SetRTPCValue_Char, (PBYTE)log_SetRTPCValue);
-		oCloneBusEffect = (tCloneBusEffect)DetourFunction((PBYTE)Exports::func_Wwise_Sound_CloneBusEffect, (PBYTE)log_CloneBusEffect);
-		oSeekOnEvent = (tSeekOnEvent_Char_Int32)DetourFunction((PBYTE)Exports::func_Wwise_Sound_SeekOnEvent_Char_Int32, (PBYTE)log_SeekOnEvent);
-		oPostEvent = (tPostEvent_Char)DetourFunction((PBYTE)Exports::func_Wwise_Sound_PostEvent_Char, (PBYTE)log_PostEvent_Name);
+		oSetRTPCValue_Char = (tSetRTPCValue_Char)DetourFunction((PBYTE)Exports::func_Wwise_Sound_SetRTPCValue_Char.Get(), (PBYTE)log_SetRTPCValue);
+		oCloneBusEffect = (tCloneBusEffect)DetourFunction((PBYTE)Exports::func_Wwise_Sound_CloneBusEffect.Get(), (PBYTE)log_CloneBusEffect);
+		oSeekOnEvent = (tSeekOnEvent_Char_Int32)DetourFunction((PBYTE)Exports::func_Wwise_Sound_SeekOnEvent_Char_Int32.Get(), (PBYTE)log_SeekOnEvent);
+		oPostEvent = (tPostEvent_Char)DetourFunction((PBYTE)Exports::func_Wwise_Sound_PostEvent_Char.Get(), (PBYTE)log_PostEvent_Name);
 	}
 }
 #endif

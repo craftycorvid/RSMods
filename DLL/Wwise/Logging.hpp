@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SoundEngine.hpp"
+
 #ifdef _WWISE_LOGS
 namespace Wwise::Logging {
 	void Init();
