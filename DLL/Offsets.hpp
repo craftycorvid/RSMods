@@ -153,7 +153,8 @@ namespace Offsets {
 	inline VersioningStruct<uintptr_t> ptr_Password_LimitCharacters;
 	inline VersioningStruct<uintptr_t> ptr_AdvancedDisplayCrash;
 	inline VersioningStruct<uintptr_t> ptr_AdvancedDisplayCrashJmpBck;
-	inline VersioningStruct<uintptr_t> ptr_PortAudioInCrash;
+	inline VersioningStruct<uintptr_t> ptr_PortAudioInCrash; 
+	inline VersioningStruct<uintptr_t> ptr_AdditionalAudioDevicesCrash;
 	inline VersioningStruct<uintptr_t> ptr_ModdedPtrCrashFix;
 
 	// Audio In Background

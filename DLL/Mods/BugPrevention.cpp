@@ -112,4 +112,15 @@ namespace BugPrevention {
 
 		_LOG("(BUG PREVENTION) Prevented Port Audio In Device Crash" << std::endl);
 	}
+
+	/// <summary>
+	/// Prevention for crash caused by certain audio devices (like Voicemeter virtual cables).
+	/// </summary>
+	void PreventExtraAudioDevicesCrash() {
+		_LOG_INIT;
+
+		MemUtil::PatchAdr(Offsets::ptr_AdditionalAudioDevicesCrash, "\x90\x90\x90\x90\x90\x31\xC9\x31\xDB", 9);
+
+		_LOG("(BUG PREVENTION) Prevented Additional Audio Devices Crash" << std::endl);
+	}
 }
