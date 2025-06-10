@@ -1764,12 +1764,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, uint32_t dwReason, LPVOID lpReserved) {
 		FILE* streamRead, *streamConsole;
 
 		// If running a debug build, give us a console.
-		if (debug) 
+		if (debug) {
 			AllocConsole();
 
-		// Connect stdin, stdout to the debug console.
-		freopen_s(&streamRead, "CONIN$", "r", stdin);
-		freopen_s(&streamConsole, "CONOUT$", "w", stdout);
+			// Connect stdin, stdout to the debug console.
+			freopen_s(&streamRead, "CONIN$", "r", stdin);
+			freopen_s(&streamConsole, "CONOUT$", "w", stdout);
+		}
 
 		// Create log file to both help with debugging release builds,
 		// and allow the user to examine their debug logs after a crash.
