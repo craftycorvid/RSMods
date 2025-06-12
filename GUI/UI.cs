@@ -3031,7 +3031,10 @@ namespace RSMods
         {
             try
             {
-                File.WriteAllText("twitchLog.txt", TwitchSettings.Get.Log);
+                string exePath = AppDomain.CurrentDomain.BaseDirectory;
+                string logPath = Path.Combine(exePath, "twitchLog.txt");
+
+                File.WriteAllText(logPath, TwitchSettings.Get.Log);
                 MessageBox.Show("Saved log to RS folder/RSMods/twitchLog.txt!", "Saved!");
             }
             catch (IOException ioex)
