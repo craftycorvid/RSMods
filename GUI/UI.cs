@@ -2756,7 +2756,11 @@ namespace RSMods
                     using (XmlWriter writer = XmlWriter.Create(sww, new XmlWriterSettings { Indent = true }))
                     {
                         xs.Serialize(writer, TwitchSettings.Get.Rewards);
-                        File.WriteAllText("TwitchEnabledEffects.xml", sww.ToString());
+
+                        string exePath = AppDomain.CurrentDomain.BaseDirectory;
+                        string effectListPath = Path.Combine(exePath, "TwitchEnabledEffects.xml");
+
+                        File.WriteAllText(effectListPath, sww.ToString());
                     }
                 }
             });

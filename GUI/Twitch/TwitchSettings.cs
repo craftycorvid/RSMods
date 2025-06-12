@@ -248,10 +248,13 @@ namespace RSMods.Twitch
 
         public void LoadEnabledEffects()
         {
-            if (!File.Exists("TwitchEnabledEffects.xml"))
+            string exePath = AppDomain.CurrentDomain.BaseDirectory;
+            string effectListPath = Path.Combine(exePath, "TwitchEnabledEffects.xml");
+
+            if (!File.Exists(effectListPath))
                 return;
 
-            using (var reader = new StreamReader("TwitchEnabledEffects.xml"))
+            using (var reader = new StreamReader(effectListPath))
             {
                 XmlSerializer deserializer = new XmlSerializer(typeof(List<TwitchReward>));
                 Rewards = (List<TwitchReward>)deserializer.Deserialize(reader);
