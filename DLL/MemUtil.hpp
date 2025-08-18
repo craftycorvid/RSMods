@@ -57,21 +57,22 @@ template <typename T>
 /// <param name="data"> - Data we should change the staticValue to.</param>
 /// <param name="lengthOfData"> - Length of the data (needed for VirtualProtect).</param>
 /// <returns>Successfully able to set the value.</returns>
+
 bool MemUtil::SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthOfData) {
 	DWORD dwOldProt, dwDummy;
 
-	// Save old Virtual Protect status, but allow us to Execute, Read, and Write to the executable's memory so we can make this change.
-	if (!HookedVirtualProtect((LPVOID)staticValue, lengthOfData, PAGE_EXECUTE_READWRITE, dwOldProt))
-	{
+	// Change memory protection to allow writing
+	NTSTATUS status = HookedVirtualProtect((LPVOID)staticValue, lengthOfData, PAGE_EXECUTE_READWRITE, dwOldProt);
+	if (!NT_SUCCESS(status)) {
 		return false;
 	}
 
-	// Write what we had in data to the staticValue.
+	// Write the data
 	*(T*)staticValue = data;
 
-	// Resets the virtual protect to the status we saved earlier in this function. 
-	if (!HookedVirtualProtect((LPVOID)staticValue, lengthOfData, dwOldProt, dwDummy))
-	{
+	// Restore original protection
+	status = HookedVirtualProtect((LPVOID)staticValue, lengthOfData, dwOldProt, dwDummy);
+	if (!NT_SUCCESS(status)) {
 		return false;
 	}
 
