@@ -1,6 +1,6 @@
 // DLL Hijack. Do NOT remove this line!
 #include "Proxy.hpp"
-
+#include "D3DInfo.h"
 #include "Tests.hpp"
 #include "CC/ControlServer.hpp"
 #include "Mods/Enumeration.hpp"

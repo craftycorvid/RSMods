@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "../Log.hpp"
-#include "../Structs.hpp"
+#include "../VoiceOver.h"
 #include "../Wwise/SoundEngine.hpp"
 
 namespace VoiceOverControl {

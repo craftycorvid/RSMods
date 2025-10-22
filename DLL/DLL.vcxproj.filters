@@ -61,6 +61,9 @@
     <Filter Include="Wwise\Headers">
       <UniqueIdentifier>{e3351a06-44ce-49d9-bd8b-d3ed727b7c58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Main Headers\Structs">
+      <UniqueIdentifier>{c933318d-bc01-4c38-adc2-0ccdeb45535d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -291,9 +294,6 @@
       <Filter>Main Headers</Filter>
     </ClInclude>
     <ClInclude Include="Settings.hpp">
-      <Filter>Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Structs.hpp">
       <Filter>Main Headers</Filter>
     </ClInclude>
     <ClInclude Include="Lib\DirectX\d3d9.h">
@@ -553,6 +553,27 @@
     </ClInclude>
     <ClInclude Include="Mods\Loft.hpp">
       <Filter>Mods\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Resolution.h">
+      <Filter>Main Headers\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DInfo.h">
+      <Filter>Main Headers\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="VoiceOver.h">
+      <Filter>Main Headers\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="RSColor.h">
+      <Filter>Main Headers\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="Tuning.h">
+      <Filter>Main Headers\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="StringState.h">
+      <Filter>Main Headers\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="MidiPedal.h">
+      <Filter>Main Headers\Structs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

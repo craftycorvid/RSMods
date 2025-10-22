@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RiffRepeater.hpp"
+#include "../MidiPedal.h"
 #include <mmeapi.h>
 
 namespace Midi {

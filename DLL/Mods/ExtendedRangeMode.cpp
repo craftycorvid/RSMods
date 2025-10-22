@@ -1,5 +1,6 @@
 #include "../stdafx.h"
 #include "ExtendedRangeMode.hpp"
+#include "../StringState.h"
 
 /// <param name="stringnum"> - Number of string</param>
 /// <param name="state"> - Structs::string_state</param>

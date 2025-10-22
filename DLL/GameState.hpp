@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Structs.hpp"
 
 /// <param name="valueToCheckIfInsideArray"> - Input</param>
 /// <param name="vec"> - Is input in list | VECTOR? (NULLABLE)</param>
@@ -31,7 +30,7 @@ namespace GameState {
 	inline bool lowPerformancePC = false; // Does your game lag with all of our mods? Toggle on to disable us running mods for an "original DLL" experience.
 	inline bool GameClosing = false; // Inform the threads that their work is done just before the game closes
 
-	inline std::vector<std::string> calibrationMenus = {
+	const std::vector<std::string> calibrationMenus = {
 		"Guitarcade_Calibration",
 		"Guitarcade_WRDCalibration",
 		"GECalibrationMeter",
@@ -41,7 +40,7 @@ namespace GameState {
 		"LearnASong_CalibrationMeter_PreGame",
 	};
 
-	inline std::vector<std::string> tuningMenus = { // These are all the menus where you need to tune
+	const std::vector<std::string> tuningMenus = { // These are all the menus where you need to tune
 		"SelectionListDialog",
 		"LearnASong_PreSongTuner",
 		"LearnASong_PreSongTunerMP",
@@ -60,7 +59,7 @@ namespace GameState {
 		"PreGame_GETuner"
 	};
 
-	inline std::vector<std::string> songMenus = { // These are all the menus where you would play guitar games.
+	const std::vector<std::string> songMenus = { // These are all the menus where you would play guitar games.
 		"LearnASong_Game",
 		"NonStopPlay_Game",
 		"ScoreAttack_Game",
@@ -77,12 +76,12 @@ namespace GameState {
 		"MixerMenu",
 	};
 
-	inline std::vector<std::string> lessonModes = { // These are the Guided Experience / Lessons modes.
+	const std::vector<std::string> lessonModes = { // These are the Guided Experience / Lessons modes.
 		"GuidedExperience_Game",
 		"GuidedExperience_Pause",
 	};
 
-	inline std::vector<std::string> preSongTuners = { // Tuning menus where we aren't in the song
+	const std::vector<std::string> preSongTuners = { // Tuning menus where we aren't in the song
 		"SelectionListDialog",
 		"LearnASong_PreSongTuner",
 		"LearnASong_PreSongTunerMP",
@@ -96,7 +95,7 @@ namespace GameState {
 		"PreGame_GETuner"
 	};
 
-	inline std::vector<std::string> songModes = { // These are all the menus where you would play guitar games.
+	const std::vector<std::string> songModes = { // These are all the menus where you would play guitar games.
 		"LearnASong_Game",
 		"NonStopPlay_Game",
 		"ScoreAttack_Game",
@@ -119,7 +118,7 @@ namespace GameState {
 
 	};
 
-	inline std::vector<std::string> multiplayerTuners = {
+	const std::vector<std::string> multiplayerTuners = {
 		"LearnASong_PreSongTunerMP",
 		"NonStopPlay_PreSongTunerMP",
 		"SessionMode_PreSMTunerMP",
@@ -128,24 +127,24 @@ namespace GameState {
 		"H2H_PreSongTuner",
 	};
 
-	inline std::vector<std::string> learnASongModes = {
+	const std::vector<std::string> learnASongModes = {
 		"LearnASong_Game",
 		"NonStopPlay_Game",
 		"LearnASong_Pause",
 		"NonStopPlay_Pause",
 	};
 
-	inline std::vector<std::string> learnASongPlaying = {
+	const std::vector<std::string> learnASongPlaying = {
 		"LearnASong_Game",
 		"NonStopPlay_Game"
 	};
 
-	inline std::vector<std::string> lasPauseMenus = {
+	const std::vector<std::string> lasPauseMenus = {
 		"LearnASong_Pause",
 		"NonStopPlay_Pause",
 	};
 
-	inline std::vector<std::string> fastRRModes = {
+	const std::vector<std::string> fastRRModes = {
 		"LearnASong_Game",
 		"NonStopPlay_Game",
 		"LearnASong_Pause",
@@ -156,24 +155,24 @@ namespace GameState {
 		"RiffRepeater_Pause",
 	};
 
-	inline std::vector<std::string> scoreAttackModes = {
+	const std::vector<std::string> scoreAttackModes = {
 		"ScoreAttack_Game",
 		"ScoreAttack_Pause",
 	};
 
-	inline std::vector<std::string> scoreScreens = { // Screens for us to take score screenshots in
+	const std::vector<std::string> scoreScreens = { // Screens for us to take score screenshots in
 		"LearnASong_SongReview",
 		"ScoreAttack_SongReview",
 		"Duet_SongReview",
 		"H2H_SongReview",
 	};
 
-	inline std::vector<std::string> onlineModes = {
+	const std::vector<std::string> onlineModes = {
 		"ScoreAttack_Game",
 		"Guitarcade_Game",
 	};
 
-	inline std::vector<std::string> dontAutoEnter = { // Don't use the auto load last profile mode if we are on these screens.
+	const std::vector<std::string> dontAutoEnter = { // Don't use the auto load last profile mode if we are on these screens.
 		// First time Player
 		"TextEntryDialog", // Prompts to enter profile name / uplay name / etc.
 		"PlayedRS1Select", // Did you play the original Rocksmith?

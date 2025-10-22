@@ -262,12 +262,14 @@
     <ClInclude Include="CC\Effects\KillGuitarVolumeEffect.hpp" />
     <ClInclude Include="CC\Effects\KillMusicVolumeEffect.hpp" />
     <ClInclude Include="CC\Effects\HighwayScrollSpeedEffect.hpp" />
+    <ClInclude Include="D3DInfo.h" />
     <ClInclude Include="D3DOverlay.hpp" />
     <ClInclude Include="GameState.hpp" />
     <ClInclude Include="Lib\Ini\SimpleIni.h" />
     <ClInclude Include="Lib\Json\json.hpp" />
     <ClInclude Include="Lib\Midi\RtMidi.h" />
     <ClInclude Include="Log.hpp" />
+    <ClInclude Include="MidiPedal.h" />
     <ClInclude Include="Mods\AudioDevices.hpp" />
     <ClInclude Include="Mods\BugPrevention.hpp" />
     <ClInclude Include="Mods\DisableControllers.hpp" />
@@ -281,11 +283,15 @@
     <ClInclude Include="ObjectUtil.hpp" />
     <ClInclude Include="CC\Effects\ShuffleTonesEffect.hpp" />
     <ClInclude Include="CC\Effects\SmallNoteheadEffect.hpp" />
+    <ClInclude Include="Resolution.h" />
+    <ClInclude Include="RSColor.h" />
     <ClInclude Include="SongTimer.hpp" />
     <ClInclude Include="SongTuning.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Tests.hpp" />
+    <ClInclude Include="Tuning.h" />
     <ClInclude Include="VersioningStruct.h" />
+    <ClInclude Include="VoiceOver.h" />
     <ClInclude Include="Wwise\Logging.hpp" />
     <ClInclude Include="Wwise\MemoryMgr.hpp" />
     <ClInclude Include="Wwise\Monitor.hpp" />
@@ -431,7 +437,7 @@
     <ClInclude Include="MemUtil.hpp" />
     <ClInclude Include="Offsets.hpp" />
     <ClInclude Include="Settings.hpp" />
-    <ClInclude Include="Structs.hpp" />
+    <ClInclude Include="StringState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CC\rocksmithcrowdcontrol2.cs" />

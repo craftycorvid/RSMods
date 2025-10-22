@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Structs.hpp"
+#include "../RSColor.h"
 
 namespace ERMode {
 	void Toggle7StringMode();

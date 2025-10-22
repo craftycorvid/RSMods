@@ -1,9 +1,6 @@
 #pragma once
 
-#include "Windows.h"
-#include "Structs.hpp"
 #include "stdafx.h"
-#include "Log.hpp"
 
 namespace SongTuning {
 	byte getLowestStringTuning();
