@@ -697,3 +697,25 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	
 	return SHOW_TEXTURE; // KEEP THIS LINE. This translates to "Display Graphics".
 }
+
+std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds) 
+{
+	int seconds = 0, minutes = 0, hours = 0;
+
+	seconds = (int)timeInSeconds % 60;
+	minutes = (int)(timeInSeconds / 60) % 60;
+	hours = timeInSeconds / 3600;
+
+	char buffer[64];
+
+	if (hours > 0)
+	{
+		sprintf_s(buffer, "%02dh:%02dm:%02ds", hours, minutes, seconds);
+	}
+	else
+	{
+		sprintf_s(buffer, "%02dm:%02ds", minutes, seconds);
+	}
+
+	return std::string(buffer);
+}

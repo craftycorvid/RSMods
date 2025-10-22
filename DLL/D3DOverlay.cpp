@@ -3,13 +3,13 @@
 
 /// <returns>Size of Rocksmith Window</returns>
 Resolution GameOverlay::GetWindowSize() {
-	RECT WindowSize;
+	RECT windowSize;
 
 	Resolution currentSize;
-	if (GetWindowRect(FindWindow(NULL, L"Rocksmith 2014"), &WindowSize))
+	if (GetWindowRect(FindWindow(nullptr, L"Rocksmith 2014"), &windowSize))
 	{
-		currentSize.width = WindowSize.right - WindowSize.left;
-		currentSize.height = WindowSize.bottom - WindowSize.top;
+		currentSize.width = windowSize.right - windowSize.left;
+		currentSize.height = windowSize.bottom - windowSize.top;
 	}
 
 	return currentSize;
@@ -78,4 +78,141 @@ void GameOverlay::DX9DrawText(const std::string& textToDraw, int textColorHex, i
 		DX9FontEncapsulation->Release();
 		DX9FontEncapsulation = NULL;
 	}
+}
+
+void GameOverlay::DisplayMixer() {
+	// Display the whole mixer if displayMixer is true
+	if (Settings::ReturnSettingValue("VolumeControlEnabled") == "on" && displayMixer) {
+
+		float offset = 0;
+		for (int volumeIndex = 0; volumeIndex < mixerInternalNames.size(); ++volumeIndex) {
+
+			float volume = 0;
+			RTPCValue_type type = RTPCValue_GameObject;
+			Wwise::SoundEngine::Query::GetRTPCValue(mixerInternalNames[volumeIndex].c_str(), AK_INVALID_GAME_OBJECT, &volume, &type);
+
+			GameOverlay::DX9DrawText(
+				drawMixerTextName[volumeIndex] + std::to_string(static_cast<int>(volume)) + "%",
+				whiteText,
+				static_cast<int>(WindowSize.width / 96.0f),  // 20 pixels from left in 1920x1080 resolution
+				static_cast<int>(WindowSize.height / 54.0f + offset), // 20 pixels from top (plus an offset to display multiple values)
+				static_cast<int>(WindowSize.width / 19.2f),  // 120 pixels from left
+				static_cast<int>(WindowSize.height / 16.0f), // 120 pixels from top
+				pDevice);
+
+			// Adjust the offset to display the next value
+			offset += WindowSize.height / 54.0f;
+		}
+	}
+	// Display just the current volume based on context (This will display the last volume that was adjusted for a few seconds after adjusting it)
+	else if (Settings::ReturnSettingValue("VolumeControlEnabled") == "on" && displayCurrentVolume) {
+		float volume = 0;
+		RTPCValue_type type = RTPCValue_GameObject;
+		Wwise::SoundEngine::Query::GetRTPCValue(mixerInternalNames[currentVolumeIndex].c_str(), AK_INVALID_GAME_OBJECT, &volume, &type);
+
+		GameOverlay::DX9DrawText(
+			drawMixerTextName[currentVolumeIndex] + std::to_string(static_cast<int>(volume)) + "%",
+			whiteText,
+			static_cast<int>(WindowSize.width / 96.0f),  // 20 pixels from left in 1920x1080 resolution
+			static_cast<int>(WindowSize.height / 54.0f), // 20 pixels from top 
+			static_cast<int>(WindowSize.width / 19.2f),  // 120 pixels from left
+			static_cast<int>(WindowSize.height / 16.0f), // 120 pixels from top
+			pDevice);
+	}
+}
+
+void GameOverlay::SetPDevice(IDirect3DDevice9* device, Resolution windowSize)
+{
+	pDevice = device;
+	WindowSize = windowSize;
+}
+
+void GameOverlay::DisplaySongTimer()
+{
+	if (D3DHooks::showSongTimerOnScreen && SongTimer::SongTimer() != 0.f) {
+		GameOverlay::DX9DrawText(
+			D3DHooks::ConvertFloatTimeToStringTime(SongTimer::SongTimer()),
+			whiteText,
+			static_cast<int>(WindowSize.width - WindowSize.width / 16.0f), // 120 pixels left from right edge in 1920x1080 resolution
+			static_cast<int>(WindowSize.height / 54.0f),                   // 20 pixels from top
+			static_cast<int>(WindowSize.width - WindowSize.width / 96.0f), // 20 left from right edge
+			static_cast<int>(WindowSize.height / 16.0f),                   // 120 pixels from top
+			pDevice,
+			{ NULL, NULL },
+			DT_RIGHT | DT_NOCLIP);
+	}
+}
+
+void GameOverlay::DisplayCurrentNote()
+{
+	if (Settings::ReturnSettingValue("ShowCurrentNoteOnScreen") == "on" && GuitarSpeak::GetCurrentNoteName() != (std::string)"") {
+
+		if (GameState::IsInSong()) {
+			GameOverlay::DX9DrawText(
+				GuitarSpeak::GetCurrentNoteName(),
+				whiteText,
+				static_cast<int>(WindowSize.width / 5.5),		// 349 pixels left of the center in 1920x1080 resolution.
+				static_cast<int>(WindowSize.height / 1.75),	// 617 pixels from the top
+				static_cast<int>(WindowSize.width / 5.75),		// 334 pixels right of center
+				static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
+				pDevice);
+		}
+		else { // Show outside of the song at the top of the screen.
+			GameOverlay::DX9DrawText(
+				"Current Note: " + GuitarSpeak::GetCurrentNoteName(),
+				whiteText,
+				static_cast<int>(WindowSize.width / 3.87),		// 496 pixels left of the center in 1920x1080 resolution
+				static_cast<int>(WindowSize.height / 30.85),	// 35 pixels from the top
+				static_cast<int>(WindowSize.width / 4),		// 480 pixel right of the center
+				static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
+				pDevice);
+		}
+	}
+}
+
+void GameOverlay::DisplayRiffRepeaterOverHundredPercentSpeed()
+{
+	if (Settings::ReturnSettingValue("RRSpeedAboveOneHundred") == "on" && RiffRepeater::loggedCurrentSongID &&
+		(GameState::Menus::IsInModesWithAllowedFastRiffRepeater() || GameState::Menus::IsOnScoreScreens()) || RiffRepeater::currentlyEnabled_Above100) {
+		realSongSpeed = RiffRepeater::GetSpeed(true); // While this should almost always be the same value, the user might enable riff repeater, which could cause this number to be wrong.
+
+		GameOverlay::DX9DrawText(
+			"Song Speed: " + std::to_string(static_cast<int>(roundf(realSongSpeed))) + "%",
+			whiteText,
+			static_cast<int>(WindowSize.width / 2.0f - WindowSize.width / 38.4f), // 50 pixels left of center in 1920x1080 resolution
+			static_cast<int>(WindowSize.height / 54.0f),                          // 20 pixels from top
+			static_cast<int>(WindowSize.width / 2.0f + WindowSize.width / 38.4f), // 50 pixels right of center
+			static_cast<int>(WindowSize.height / 16.0f),                          // 120 pixels from top
+			pDevice,
+			{ NULL, NULL },
+			DT_CENTER | DT_NOCLIP);
+	}
+}
+
+void GameOverlay::DisplayCurrentTuningForAutoTune()
+{
+	if (Settings::ReturnSettingValue("AutoTuneForSong") == "on" && Settings::GetKeyBind("TuningOffsetKey") != NULL && GameState::Menus::IsInTuningMenus()) {
+		GameOverlay::DX9DrawText(
+			"Auto Tune For: " + Midi::GetTuningOffsetName(Midi::tuningOffset),
+			whiteText,
+			static_cast<int>(WindowSize.width / 5.5),		// 349 pixels left of the center in 1920x1080 resolution
+			static_cast<int>(WindowSize.height / 30.85),	// 35 pixels from the top
+			static_cast<int>(WindowSize.width / 5.65),		// 339 pixels right of center
+			static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
+			pDevice);
+	}
+}
+
+void GameOverlay::DisplayLoopStartEndTimes(float loopStart, float loopEnd)
+{
+	GameOverlay::DX9DrawText(
+		"Loop: " + D3DHooks::ConvertFloatTimeToStringTime(loopStart) + " - " + D3DHooks::ConvertFloatTimeToStringTime(loopEnd),
+		whiteText,
+		static_cast<int>(WindowSize.width / 2.0f - WindowSize.width / 38.4f), // 50 pixels left of center in 1920x1080 resolution
+		static_cast<int>(WindowSize.height / 21.6f),                          // 50 pixels from top
+		static_cast<int>(WindowSize.width / 2.0f + WindowSize.width / 38.4f), // 50 pixels right of center
+		static_cast<int>(WindowSize.height / 7.2f),                           // 150 pixels from top
+		pDevice,
+		{ NULL, NULL },
+		DT_CENTER | DT_NOCLIP);
 }

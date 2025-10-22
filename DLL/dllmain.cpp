@@ -212,10 +212,10 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 
 			// Changed Displayed Volume mod
 			else if (keyPressed == Settings::GetKeyBind("ChangedSelectedVolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				currentVolumeIndex++;
+				GameOverlay::currentVolumeIndex++;
 
-				if (currentVolumeIndex > (mixerInternalNames.size() - 1)) // There are only so many values we know we can edit, so loop back.
-					currentVolumeIndex = 0;
+				if (GameOverlay::currentVolumeIndex > (GameOverlay::mixerInternalNames.size() - 1)) // There are only so many values we know we can edit, so loop back.
+					GameOverlay::currentVolumeIndex = 0;
 			}
 
 			// Change Tuning Offset mod
@@ -281,7 +281,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 				// SongTimer is stored in seconds, while RewindBy is stored in milliseconds.
 				// We need milliseconds to send to Wwise, so change SongTimer to milliseconds, then subtract the Rewind value.
 				AkTimeMs seekTo = (AkTimeMs)((SongTimer::SongTimer() * 1000) - Settings::GetModSetting("RewindBy"));
-																													  
+
 				// RewindBy is greater than the amount of time we've been in the song.
 				// Reset seekTo to 0 to prevent seeking to a negative time.
 				if (seekTo < 0) {
@@ -312,9 +312,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 					VolumeControl::MutePlayer();
 				}
 
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 2;
+				GameOverlay::displayCurrentVolume = true;
+				GameOverlay::displayVolumeStartTime = std::chrono::steady_clock::now();
+				GameOverlay::currentVolumeIndex = 2;
 			}
 
 			else if (keyPressed == Settings::GetKeyBind("MutePlayer2Key"))
@@ -328,14 +328,14 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 					VolumeControl::MutePlayer(true);
 				}
 
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 3;
+				GameOverlay::displayCurrentVolume = true;
+				GameOverlay::displayVolumeStartTime = std::chrono::steady_clock::now();
+				GameOverlay::currentVolumeIndex = 3;
 			}
 
 			// Hide the mixer if it is not actively being pressed
 			else if (keyPressed == Settings::GetKeyBind("DisplayMixerKey")) {
-				displayMixer = false;
+				GameOverlay::displayMixer = false;
 			}
 
 			// Auto Tuning via MIDI mod. 
@@ -373,10 +373,10 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 				// Cap at 400. Plugin only goes down to 25. 10000 / 25 = 400.
 				// Cap at 25. Plugin only goes up to 400. 10000 / 400 = 25.
 
-				if (realSongSpeed > 400.f) 
+				if (realSongSpeed > 400.f)
 					realSongSpeed = 400.f;
 
-				if (realSongSpeed < 25.f) 
+				if (realSongSpeed < 25.f)
 					realSongSpeed = 25.f;
 
 				// Save new speed, and save it to a file (for streamers to use as a custom on-screen overlay)
@@ -389,7 +389,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 
 			// Display Mixer  mod
 			else if (keyPressed == Settings::GetKeyBind("DisplayMixerKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				displayMixer = true;
+				GameOverlay::displayMixer = true;
 			}
 
 			// Change Master Volume mod
@@ -803,140 +803,27 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 		generateTexture = false;
 	}
 
-	int whiteText = 0xFFFFFFFF;
-	Resolution WindowSize = GameOverlay::GetWindowSize();
-
 	// Draw text on screen
 	// NOTE: NEVER USE SET VALUES. Always do division of WindowSize width AND heigh so every resolution should have the text in around the same spot.
 	if (GameState::GameLoaded) {
+		Resolution WindowSize = GameOverlay::GetWindowSize();
 
-		// Show Selected Volume mod.
-		// Display the whole mixer if displayMixer is true
-		if (Settings::ReturnSettingValue("VolumeControlEnabled") == "on" && displayMixer) {
-
-			float offset = 0;
-			for (int volumeIndex = 0; volumeIndex < mixerInternalNames.size(); ++volumeIndex) {
-
-				float volume = 0;
-				RTPCValue_type type = RTPCValue_GameObject;
-				Wwise::SoundEngine::Query::GetRTPCValue(mixerInternalNames[volumeIndex].c_str(), AK_INVALID_GAME_OBJECT, &volume, &type);
-
-				GameOverlay::DX9DrawText(
-						drawMixerTextName[volumeIndex] + std::to_string(static_cast<int>(volume)) + "%",
-						whiteText,
-						static_cast<int>(WindowSize.width / 96.0f),  // 20 pixels from left in 1920x1080 resolution
-						static_cast<int>(WindowSize.height / 54.0f + offset), // 20 pixels from top (plus an offset to display multiple values)
-						static_cast<int>(WindowSize.width / 19.2f),  // 120 pixels from left
-						static_cast<int>(WindowSize.height / 16.0f), // 120 pixels from top
-						pDevice);
-
-				// Adjust the offset to display the next value
-				offset += WindowSize.height / 54.0f;
-			}
-		}
-
-		// Display just the current volume based on context (This will display the last volume that was adjusted for a few seconds after adjusting it)
-		else if (Settings::ReturnSettingValue("VolumeControlEnabled") == "on" && displayCurrentVolume) {
-			float volume = 0;
-			RTPCValue_type type = RTPCValue_GameObject;
-			Wwise::SoundEngine::Query::GetRTPCValue(mixerInternalNames[currentVolumeIndex].c_str(), AK_INVALID_GAME_OBJECT, &volume, &type);
-
-			GameOverlay::DX9DrawText(
-					drawMixerTextName[currentVolumeIndex] + std::to_string(static_cast<int>(volume)) + "%",
-					whiteText,
-					static_cast<int>(WindowSize.width / 96.0f),  // 20 pixels from left in 1920x1080 resolution
-					static_cast<int>(WindowSize.height / 54.0f), // 20 pixels from top 
-					static_cast<int>(WindowSize.width / 19.2f),  // 120 pixels from left
-					static_cast<int>(WindowSize.height / 16.0f), // 120 pixels from top
-					pDevice);
-		}
-
-		// Show Song Timer mod.
-		if ((D3DHooks::showSongTimerOnScreen && SongTimer::SongTimer() != 0.f)) {
-			GameOverlay::DX9DrawText(
-					ConvertFloatTimeToStringTime(SongTimer::SongTimer()),
-					whiteText,
-					static_cast<int>(WindowSize.width - WindowSize.width / 16.0f), // 120 pixels left from right edge in 1920x1080 resolution
-					static_cast<int>(WindowSize.height / 54.0f),                   // 20 pixels from top
-					static_cast<int>(WindowSize.width - WindowSize.width / 96.0f), // 20 left from right edge
-					static_cast<int>(WindowSize.height / 16.0f),                   // 120 pixels from top
-					pDevice,
-					{ NULL, NULL },
-					DT_RIGHT | DT_NOCLIP);
-		}
-
-		// Riff Repeater > 100% mod.
-		if (Settings::ReturnSettingValue("RRSpeedAboveOneHundred") == "on" && RiffRepeater::loggedCurrentSongID &&
-			(GameState::Menus::IsInModesWithAllowedFastRiffRepeater() || GameState::Menus::IsOnScoreScreens()) || RiffRepeater::currentlyEnabled_Above100) {
-			realSongSpeed = RiffRepeater::GetSpeed(true); // While this should almost always be the same value, the user might enable riff repeater, which could cause this number to be wrong.
-
-			GameOverlay::DX9DrawText(
-					"Song Speed: " + std::to_string(static_cast<int>(roundf(realSongSpeed))) + "%",
-					whiteText,
-					static_cast<int>(WindowSize.width / 2.0f - WindowSize.width / 38.4f), // 50 pixels left of center in 1920x1080 resolution
-					static_cast<int>(WindowSize.height / 54.0f),                          // 20 pixels from top
-					static_cast<int>(WindowSize.width / 2.0f + WindowSize.width / 38.4f), // 50 pixels right of center
-					static_cast<int>(WindowSize.height / 16.0f),                          // 120 pixels from top
-					pDevice,
-					{ NULL, NULL },
-					DT_CENTER | DT_NOCLIP);
-		}
-
-		// Show Current Note On Screen mod
-		if (Settings::ReturnSettingValue("ShowCurrentNoteOnScreen") == "on" && GuitarSpeak::GetCurrentNoteName() != (std::string)"") {
-
-			if (GameState::IsInSong())
-				GameOverlay::DX9DrawText(
-					GuitarSpeak::GetCurrentNoteName(),
-					whiteText,
-					static_cast<int>(WindowSize.width / 5.5),		// 349 pixels left of the center in 1920x1080 resolution.
-					static_cast<int>(WindowSize.height / 1.75),	// 617 pixels from the top
-					static_cast<int>(WindowSize.width / 5.75),		// 334 pixels right of center
-					static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
-					pDevice);
-			else // Show outside of the song at the top of the screen.
-				GameOverlay::DX9DrawText(
-					"Current Note: " + GuitarSpeak::GetCurrentNoteName(),
-					whiteText,
-					static_cast<int>(WindowSize.width / 3.87),		// 496 pixels left of the center in 1920x1080 resolution
-					static_cast<int>(WindowSize.height / 30.85),	// 35 pixels from the top
-					static_cast<int>(WindowSize.width / 4),		// 480 pixel right of the center
-					static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
-					pDevice);
-		}
-
-		// Show current tuning for Auto Tune via MIDI mod.
-		if (Settings::ReturnSettingValue("AutoTuneForSong") == "on" && Settings::GetKeyBind("TuningOffsetKey") != NULL && GameState::Menus::IsInTuningMenus()) {
-			GameOverlay::DX9DrawText(
-				"Auto Tune For: " + Midi::GetTuningOffsetName(Midi::tuningOffset),
-				whiteText, 
-				static_cast<int>(WindowSize.width / 5.5),		// 349 pixels left of the center in 1920x1080 resolution
-				static_cast<int>(WindowSize.height / 30.85),	// 35 pixels from the top
-				static_cast<int>(WindowSize.width / 5.65),		// 339 pixels right of center
-				static_cast<int>(WindowSize.height / 8),		// 135 pixels from the top
-				pDevice);
-		}
+		GameOverlay::SetPDevice(pDevice, WindowSize);
+		GameOverlay::DisplayMixer();
+		GameOverlay::DisplaySongTimer();
+		GameOverlay::DisplayRiffRepeaterOverHundredPercentSpeed();
+		GameOverlay::DisplayCurrentNote();
+		GameOverlay::DisplayCurrentTuningForAutoTune();
 
 		// Looping mod.
 		if (Settings::ReturnSettingValue("AllowLooping") == "on" && (loopStart != NULL || loopEnd != NULL)) {
 
 			// Only enable looping in learn a song modes (learn a song & non-stop play)
 			if (GameState::Menus::IsInLearnASongModes()) {
-
-				// Display loop start/end times
-				GameOverlay::DX9DrawText(
-						"Loop: " + ConvertFloatTimeToStringTime(loopStart) + " - " + ConvertFloatTimeToStringTime(loopEnd),
-						whiteText,
-						static_cast<int>(WindowSize.width / 2.0f - WindowSize.width / 38.4f), // 50 pixels left of center in 1920x1080 resolution
-						static_cast<int>(WindowSize.height / 21.6f),                          // 50 pixels from top
-						static_cast<int>(WindowSize.width / 2.0f + WindowSize.width / 38.4f), // 50 pixels right of center
-						static_cast<int>(WindowSize.height / 7.2f),                           // 150 pixels from top
-						pDevice,
-						{ NULL, NULL },
-						DT_CENTER | DT_NOCLIP);
+				GameOverlay::DisplayLoopStartEndTimes(loopStart, loopEnd);
 
 				// Prevent the user from creating a loop that starts at a negative timestamp.
-				if ((Settings::GetModSetting("LoopingLeadUp") / 1000.f) >= loopStart) { 
+				if ((Settings::GetModSetting("LoopingLeadUp") / 1000.f) >= loopStart) {
 					roughLoopStart = 0.f;
 				}
 				else {
@@ -969,10 +856,8 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 		// Regenerate Twitch Solid Note Color for a new color
 		if (D3DHooks::regenerateUserDefinedTexture) {
 			RSColor userDefColor = Settings::ConvertHexToColor(Settings::ReturnSettingValue("SolidNoteColor"));
-			//unsigned int red = userDefColor.r * 255, green = userDefColor.g * 255, blue = userDefColor.b * 255;
-			//D3D::GenerateSolidTexture(pDevice, &twitchUserDefinedTexture, D3DCOLOR_ARGB(255, red, green, blue));
 
-			ColorList customColorList(16, userDefColor); 
+			ColorList customColorList(16, userDefColor);
 			D3D::GenerateTexture(pDevice, &twitchUserDefinedTexture, customColorList);
 
 			ERMode::customSolidColor.clear();
@@ -986,37 +871,11 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 }
 
 /// <summary>
-/// Convert time stored as a float of seconds, to h:m:s
-/// </summary>
-/// <param name="timeInSeconds"> - Float containing number of seconds elapsed.</param>
-/// <returns>std::string of time in "h:m:s" format.</returns>
-std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds) {
-	int seconds = 0, minutes = 0, hours = 0;
-
-	seconds = (int)timeInSeconds % 60;
-	minutes = (int)(timeInSeconds / 60) % 60;
-	hours = timeInSeconds / 3600;
-
-	char buffer[64];
-
-	if (hours > 0)
-	{
-		sprintf_s(buffer, "%02dh:%02dm:%02ds", hours, minutes, seconds);
-	}
-	else
-	{
-		sprintf_s(buffer, "%02dm:%02ds", minutes, seconds);
-	}
-
-	return std::string(buffer);
-}
-
-/// <summary>
 /// Patches Two RTC cables error message.
 /// </summary>
 void PatchTwoRTC()
 {
-	BYTE patch[25];
+	char patch[25];
 	std::fill_n(patch, 25, 0x90);
 	MemUtil::PatchAdr(Offsets::ptr_twoRTCBypass, patch, sizeof(patch));;
 }

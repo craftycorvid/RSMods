@@ -87,7 +87,12 @@ namespace D3DHooks {
 
 	inline const char* windowName = "Rocksmith 2014"; // Console Window Title
 
-	extern std::string ConvertFloatTimeToStringTime(float timeInSeconds);
+	/// <summary>
+	/// Convert time stored as a float of seconds, to h:m:s
+	/// </summary>
+	/// <param name="timeInSeconds"> - Float containing number of seconds elapsed.</param>
+	/// <returns>std::string of time in "h:m:s" format.</returns>
+	std::string ConvertFloatTimeToStringTime(float timeInSeconds);
 }
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
