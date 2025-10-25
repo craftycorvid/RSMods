@@ -549,7 +549,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 	_LOG_INIT;
 
-	HRESULT hRet = oEndScene(pDevice); // Get real result so we can call it later.
+	HRESULT originalReturn = oEndScene(pDevice);
 	uint32_t returnAddress = (uint32_t)_ReturnAddress(); // EndScene is called both by the game and by Steam's overlay renderer, and there's no need to draw our stuff twice
 
 	if (returnAddress > Offsets::baseEnd.Get())
@@ -926,121 +926,11 @@ void StopTwoRSInstances() {
 	}
 }
 
-/// <summary>
-/// Handle Twitch Toggle Message.
-/// </summary>
-/// <param name="currMsg"> - Mod to Trigger.</param>
-/// <param name="type"> - Should We Enable or Disable.</param>
-/// <returns>BOOL. If effects triggered.</returns>
-bool HandleMessage(std::string currMsg, std::string type) {
-	
-	// Twitch wants Rainbow String mod.
-	if (Contains(currMsg, "RainbowStrings")) {
-		if (type == "enable")
-			ERMode::RainbowEnabled = true;
-		else
-			ERMode::RainbowEnabled = false;
-	}
-
-	// Twitch wants Drunk Mode.
-	else if (Contains(currMsg, "DrunkMode")) {
-		Loft::ToggleDrunkMode(type == "enable");
-		Settings::ParseTwitchToggle(currMsg, type);
-	}
-	
-	// Twitch wants Solid Note colors.
-	else if (Contains(currMsg, "SolidNotes")) {
-		// Don't apply any effects if we haven't even been in a song yet
-		if (!ERMode::ColorsSaved) 
-			return false;
-
-		if (type == "enable") {
-
-			// For Random Colors
-			if (Contains(currMsg, "Random")) {
-				static std::uniform_real_distribution<> urd(0, 9);
-				currentRandomTexture = (int)urd(rng);
-
-				ERMode::customSolidColor.clear();
-				ERMode::customSolidColor.insert(ERMode::customSolidColor.begin(), 6, randomTextureColors[currentRandomTexture]);
-
-				//if(twitchUserDefinedTexture != NULL) //determine why this crashes if you send multiple in a row
-				//	twitchUserDefinedTexture->Release();
-
-				twitchUserDefinedTexture = randomTextures[currentRandomTexture];
-			}
-
-			// If colors are not random, set colors which the user defined for this reward
-			else { 
-				Settings::ParseSolidColorsMessage(currMsg);
-				D3DHooks::regenerateUserDefinedTexture = true;
-			}
-		}
-		else
-			ERMode::ResetAllStrings();
-	}
-
-	Settings::ParseTwitchToggle(currMsg, type);
-	return true;
-}
-
-/// <summary>
-/// Trigger Twitch Effect
-/// </summary>
-/// <param name="currEffectMsg"> - Mod to Trigger.</param>
-void HandleEffect(std::string currEffectMsg) {
-	_LOG_INIT;
-
-	// Split message into chunks
-	auto msgParts = Settings::SplitByWhitespace(currEffectMsg);
-	std::string effectName = msgParts[1];
-	_LOG("Entering the thread for: " << currEffectMsg << std::endl);
-
-	// Don't allow the current effect to apply twice. Also blocks mods from triggering when not in a song.
-	while (Contains(effectName, enabledEffects) && !GameState::IsInSong())
-		Sleep(150);
-	_LOG(enabledEffects.size() << std::endl);
-
-	// Enable Effect
-	_LOG("Enabling " << effectName << std::endl);
-	if (HandleMessage(currEffectMsg, "enable")) {
-		// Sleep for the duration of the effect.
-		Sleep(std::stoi(msgParts.back()) * 1000);
-
-		// Disable the effect after it's done
-		HandleMessage(currEffectMsg, "disable");
-		_LOG("Disabling " << effectName << std::endl);
-		if (Contains(effectName, enabledEffects)) // JIC
-			enabledEffects.erase(std::find(enabledEffects.begin(), enabledEffects.end(), effectName));
-	}
-}
-
-/// <summary>
-/// Manage Queue of Twitch Effects. TODO: This is fairly crude, so if it takes a while to get CC in place, improve synchronization of this (cond_variables, etc.)
-/// </summary>
 /// <returns>NULL. Loops while game is open.</returns>
 unsigned WINAPI HandleEffectQueueThread() {
 	while (!GameState::GameClosing) {
-
-		// If in a song, and there is an effect.
-		if (effectQueue.size() > 0 && GameState::IsInSong()) {
-			for (auto it = effectQueue.begin(); it != effectQueue.end();) {
-				std::string effectName = Settings::SplitByWhitespace(*it)[1];
-
-				// Make sure we don't already have this effect in the queue.
-				if (!Contains(effectName, enabledEffects)) {
-					enabledEffects.push_back(effectName);
-
-					// Send full effect message to the thread
-					std::thread effectThrd(HandleEffect, *it); 
-					effectThrd.detach();
-
-					// Remove effect from queue.
-					it = effectQueue.erase(it);
-				}
-				else
-					++it;
-			}
+		if (Twitch::effectQueue.empty() && GameState::IsInSong()) {
+			Twitch::ParseEffectQueue();
 		}
 
 		Sleep(250);
