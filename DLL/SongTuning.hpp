@@ -3,11 +3,10 @@
 #include "stdafx.h"
 
 namespace SongTuning {
-	byte getLowestStringTuning();
-	byte* GetCurrentTuning(bool verbose = false);
+	std::array<byte, 6> GetCurrentTuning(bool verbose = false);
 	bool IsExtendedRangeSong();
-	int* GetHighestLowestString();
-	int* GetHighestLowestString(Tuning tuningOverride);
+	std::array<int, 2> GetHighestLowestString();
+	std::array<int, 2> GetHighestLowestString(Tuning tuningOverride);
 	bool IsSongInDrop(Tuning tuning);
 	bool IsSongInStandard(Tuning tuning);
 	int GetTrueTuning();

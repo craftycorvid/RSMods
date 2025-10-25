@@ -233,3 +233,7 @@ namespace GameState {
 		}
 	}
 }
+
+bool Contains(std::string_view text, std::string_view key) {
+	return text.find(key) != std::string_view::npos;
+}

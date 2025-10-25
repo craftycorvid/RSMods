@@ -284,7 +284,7 @@ struct AkExternalSourceInfo
 	)
 		: iExternalSrcCookie(in_iExternalSrcCookie)
 		, idCodec(in_idCodec)
-		, szFile(0)
+		, szFile(nullptr)
 		, pInMemory(in_pInMemory)
 		, uiMemorySize(in_uiMemorySize)
 		, idFile(0) {}
@@ -297,7 +297,7 @@ struct AkExternalSourceInfo
 		: iExternalSrcCookie(in_iExternalSrcCookie)
 		, idCodec(in_idCodec)
 		, szFile(in_pszFileName)
-		, pInMemory(0)
+		, pInMemory(nullptr)
 		, uiMemorySize(0)
 		, idFile(0) {}
 
@@ -308,8 +308,8 @@ struct AkExternalSourceInfo
 	)
 		: iExternalSrcCookie(in_iExternalSrcCookie)
 		, idCodec(in_idCodec)
-		, szFile(0)
-		, pInMemory(0)
+		, szFile(nullptr)
+		, pInMemory(nullptr)
 		, uiMemorySize(0)
 		, idFile(in_idFile) {}
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include <functional> 
 
 namespace Settings {
 	void Initialize(); // Default Settings
@@ -13,37 +14,34 @@ namespace Settings {
 	void ToggleExtendedRangeMode();
 
 	// Return INI Settings
-	unsigned int GetKeyBind(std::string name);
-	int GetModSetting(std::string name);
-	std::string ReturnSettingValue(std::string name);
-	std::string ReturnNotewayColor(std::string name);
+	unsigned int GetKeyBind(const std::string& name);
+	int GetModSetting(const std::string& name);
+	std::string ReturnSettingValue(const std::string& name);
+	std::string ReturnNotewayColor(const std::string& name);
 
-	// Functions
-	int GetVKCodeForString(std::string vkString);
-	// float GetStringColor(std::string);
+	int GetVKCodeForString(const std::string& vkString);
 	std::vector<RSColor> GetStringColors(bool CB);
 	std::vector<RSColor> GetNoteColors(bool CB);
 	void SetStringColors(int strIndex, RSColor c, bool CB);
 	void SetNoteColors(int strIndex, RSColor c, bool CB);
 	void UpdateSettings();
-	void UpdateModSetting(std::string name, std::string newValue);
-	void UpdateCustomSetting(std::string name, int newValue);
-	void UpdateTwitchSetting(std::string name, std::string newValue);
-	void ParseSettingUpdate(std::string updateMessage);
-	void ParseTwitchToggle(std::string twitchMsg, std::string toggleType);
-	void ParseSolidColorsMessage(std::string twitchMsg);
-	bool IsTwitchSettingEnabled(std::string name);
+	void UpdateModSetting(const std::string& name, const std::string_view& newValue);
+	void UpdateCustomSetting(const std::string& name, int newValue);
+	void UpdateTwitchSetting(const std::string& name, const std::string_view& newValue);
+	void ParseSettingUpdate(const std::string& updateMessage);
+	void ParseTwitchToggle(const std::string& twitchMsg, const std::string_view& toggleType);
+	void ParseSolidColorsMessage(const std::string& twitchMsg);
+	bool IsTwitchSettingEnabled(const std::string& name);
 	std::vector<std::string> SplitByWhitespace(const std::string& input);
 
-	// INI Setting Maps
-	inline std::map<std::string, std::string> keyBinds;
-	inline std::map<std::string, std::string> modSettings;
-	inline std::map<std::string, int> customSettings;
-	inline std::map<std::string, std::string> twitchSettings;
-	inline std::map<std::string, std::string> notewayColors;
+	inline std::map<std::string, std::string, std::less<>> keyBinds;
+	inline std::map<std::string, std::string, std::less<>> modSettings;
+	inline std::map<std::string, int, std::less<>> customSettings;
+	inline std::map<std::string, std::string, std::less<>> twitchSettings;
+	inline std::map<std::string, std::string, std::less<>> notewayColors;
 
 	// Misc 
-	inline std::map<std::string, unsigned int> keyMap = { // Talk about taking the easy way out ;)
+	inline std::map<std::string, unsigned int, std::less<>> keyMap = {
 		{ "VK_LBUTTON" , 0x01 },
 		{ "VK_RBUTTON" , 0x02 },
 		{ "VK_CANCEL" , 0x03 },
@@ -221,7 +219,7 @@ namespace Settings {
 		{ "VK_OEM_CLEAR" , 0xFE }
 	};
 	
-	RSColor ConvertHexToColor(std::string hexStr);
+	RSColor ConvertHexToColor(const std::string& hexStr);
 
 	inline std::vector<RSColor> customStringColorsNormal;
 	inline std::vector<RSColor> customStringColorsCB;
@@ -230,11 +228,11 @@ namespace Settings {
 
 	inline bool async_UpdateMidiSettings = false;
 
-	inline std::vector<std::string> defaultStrColors = {
+	const std::vector<std::string> defaultStrColors = {
 		"FF4F5A", "E2C102", "1DACF9", "FF9216", "3FCC0C", "C825ED", "0ABCB9", "909090"
 	};
 
-	inline std::vector<std::string> defaultStrColorsCB = {
+	const std::vector<std::string> defaultStrColorsCB = {
 		"C12A2A", "A3F400", "1DACF9", "DB7F41", "00C68E", "7648A8", "493647", "4C4C4C"
 	};
 };

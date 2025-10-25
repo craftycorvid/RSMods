@@ -8,7 +8,6 @@
 void Settings::Initialize()
 {
 	modSettings = {
-
 		{"CustomSongListTitles", "K"},
 		{"ToggleLoftKey", "T"},
 		{"ShowSongTimerKey", "S"},
@@ -171,36 +170,33 @@ void Settings::ReadKeyBinds() {
 		return;
 	}
 
-	//_LOG(reader.GetValue("Keybinds", "ToggleLoftKey", "T") << std::endl);
 	modSettings = {
-		// Mods
-			{ "ToggleLoftKey", reader.GetValue("Keybinds", "ToggleLoftKey", "T") },
-			{ "CustomSongListTitles", reader.GetValue("Keybinds", "CustomSongListTitles", "K")},
-			{ "ShowSongTimerKey", reader.GetValue("Keybinds", "ShowSongTimerKey", "N")},
-			{ "ForceReEnumerationKey", reader.GetValue("Keybinds", "ForceReEnumerationKey", "F")},
-			{ "MenuToggleKey", reader.GetValue("Keybinds", "MenuToggleKey", "M")},
-			{ "RainbowStringsKey", reader.GetValue("Keybinds", "RainbowStringsKey", "V")},
-			{ "RainbowNotesKey", reader.GetValue("Keybinds", "RainbowNotesKey", "N")},
-			{ "RemoveLyricsKey", reader.GetValue("Keybinds", "RemoveLyricsKey", "L")},
-			{ "RRSpeedKey", reader.GetValue("Keybinds", "RRSpeedKey", "R")},
-			{ "TuningOffsetKey", reader.GetValue("Keybinds", "TuningOffsetKey", "O")},
-			{ "ToggleExtendedRangeKey", reader.GetValue("Keybinds", "ToggleExtendedRangeKey", "E")},
-			{ "LoopStartKey", reader.GetValue("Keybinds", "LoopStartKey", "Y")},
-			{ "LoopEndKey", reader.GetValue("Keybinds", "LoopEndKey", "U")},
-			{ "RewindKey", reader.GetValue("Keybinds", "RewindKey", "Z")},
+		{ "ToggleLoftKey", reader.GetValue("Keybinds", "ToggleLoftKey", "T") },
+		{ "CustomSongListTitles", reader.GetValue("Keybinds", "CustomSongListTitles", "K")},
+		{ "ShowSongTimerKey", reader.GetValue("Keybinds", "ShowSongTimerKey", "N")},
+		{ "ForceReEnumerationKey", reader.GetValue("Keybinds", "ForceReEnumerationKey", "F")},
+		{ "MenuToggleKey", reader.GetValue("Keybinds", "MenuToggleKey", "M")},
+		{ "RainbowStringsKey", reader.GetValue("Keybinds", "RainbowStringsKey", "V")},
+		{ "RainbowNotesKey", reader.GetValue("Keybinds", "RainbowNotesKey", "N")},
+		{ "RemoveLyricsKey", reader.GetValue("Keybinds", "RemoveLyricsKey", "L")},
+		{ "RRSpeedKey", reader.GetValue("Keybinds", "RRSpeedKey", "R")},
+		{ "TuningOffsetKey", reader.GetValue("Keybinds", "TuningOffsetKey", "O")},
+		{ "ToggleExtendedRangeKey", reader.GetValue("Keybinds", "ToggleExtendedRangeKey", "E")},
+		{ "LoopStartKey", reader.GetValue("Keybinds", "LoopStartKey", "Y")},
+		{ "LoopEndKey", reader.GetValue("Keybinds", "LoopEndKey", "U")},
+		{ "RewindKey", reader.GetValue("Keybinds", "RewindKey", "Z")},
 
-			{ "MasterVolumeKey", reader.GetValue("Audio Keybindings", "MasterVolumeKey", "5") },
-			{ "SongVolumeKey", reader.GetValue("Audio Keybindings", "SongVolumeKey", "6") },
-			{ "Player1VolumeKey", reader.GetValue("Audio Keybindings", "Player1VolumeKey", "7") },
-			{ "Player2VolumeKey", reader.GetValue("Audio Keybindings", "Player2VolumeKey", "8") },
-			{ "MicrophoneVolumeKey", reader.GetValue("Audio Keybindings", "MicrophoneVolumeKey", "9") },
-			{ "VoiceOverVolumeKey", reader.GetValue("Audio Keybindings", "VoiceOverVolumeKey", "0") },
-			{ "SFXVolumeKey", reader.GetValue("Audio Keybindings", "SFXVolumeKey", "S") },
-			{ "DisplayMixerKey", reader.GetValue("Audio Keybindings", "DisplayMixerKey", "P") },
-			{ "MutePlayer1Key", reader.GetValue("Audio Keybindings", "MutePlayer1Key", "X")},
-			{ "MutePlayer2Key", reader.GetValue("Audio Keybindings", "MutePlayer2Key", "C")}
+		{ "MasterVolumeKey", reader.GetValue("Audio Keybindings", "MasterVolumeKey", "5") },
+		{ "SongVolumeKey", reader.GetValue("Audio Keybindings", "SongVolumeKey", "6") },
+		{ "Player1VolumeKey", reader.GetValue("Audio Keybindings", "Player1VolumeKey", "7") },
+		{ "Player2VolumeKey", reader.GetValue("Audio Keybindings", "Player2VolumeKey", "8") },
+		{ "MicrophoneVolumeKey", reader.GetValue("Audio Keybindings", "MicrophoneVolumeKey", "9") },
+		{ "VoiceOverVolumeKey", reader.GetValue("Audio Keybindings", "VoiceOverVolumeKey", "0") },
+		{ "SFXVolumeKey", reader.GetValue("Audio Keybindings", "SFXVolumeKey", "S") },
+		{ "DisplayMixerKey", reader.GetValue("Audio Keybindings", "DisplayMixerKey", "P") },
+		{ "MutePlayer1Key", reader.GetValue("Audio Keybindings", "MutePlayer1Key", "X")},
+		{ "MutePlayer2Key", reader.GetValue("Audio Keybindings", "MutePlayer2Key", "C")}
 	};
-	// _LOG("Read " << modSettings["ToggleLoftKey"] << std::endl);
 }
 
 /// <summary>
@@ -317,13 +313,11 @@ void Settings::ReadStringColors() {
 	if (reader.LoadFile("RSMods.ini") < 0)
 		return;
 
-	// Clear the previous string colors
 	customStringColorsNormal.clear();
 	customStringColorsCB.clear();
 	customNoteColorsNormal.clear();
 	customNoteColorsCB.clear();
 
-	// Loop throught the strings to make the code easier to read.
 	for (int stringIdx = 0; stringIdx < 6; stringIdx++) {
 		std::string strKey = "";
 		std::string val;
@@ -394,7 +388,7 @@ void Settings::ToggleExtendedRangeMode()
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
 /// <returns>Virtual Key | uint</returns>
-unsigned int Settings::GetKeyBind(std::string name) {
+unsigned int Settings::GetKeyBind(const std::string& name) {
 	return GetVKCodeForString(modSettings[name]);
 }
 
@@ -403,7 +397,7 @@ unsigned int Settings::GetKeyBind(std::string name) {
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
 /// <returns>Int for mod setting</returns>
-int Settings::GetModSetting(std::string name) {
+int Settings::GetModSetting(const std::string& name) {
 	return customSettings[name];
 }
 
@@ -412,7 +406,7 @@ int Settings::GetModSetting(std::string name) {
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
 /// <returns>Value of mod toggle</returns>
-std::string Settings::ReturnSettingValue(std::string name) {
+std::string Settings::ReturnSettingValue(const std::string& name) {
 	return modSettings[name];
 }
 
@@ -421,7 +415,7 @@ std::string Settings::ReturnSettingValue(std::string name) {
 /// </summary>
 /// <param name="vkString"> - std::map[key]</param>
 /// <returns></returns>
-int Settings::GetVKCodeForString(std::string vkString) {
+int Settings::GetVKCodeForString(const std::string& vkString) {
 	return keyMap[vkString];
 }
 
@@ -429,7 +423,7 @@ int Settings::GetVKCodeForString(std::string vkString) {
 /// Is the twitch effect on
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
-bool Settings::IsTwitchSettingEnabled(std::string name) {
+bool Settings::IsTwitchSettingEnabled(const std::string& name) {
 	if (twitchSettings.count(name) == 0) // JIC
 		return false;
 
@@ -441,7 +435,7 @@ bool Settings::IsTwitchSettingEnabled(std::string name) {
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
 /// <returns>HEX color</returns>
-std::string Settings::ReturnNotewayColor(std::string name) {
+std::string Settings::ReturnNotewayColor(const std::string& name) {
 	return notewayColors[name];
 }
 
@@ -452,7 +446,9 @@ std::string Settings::ReturnNotewayColor(std::string name) {
 /// <returns>List of strings taken from input, that were seperated by spaces.</returns>
 std::vector<std::string> Settings::SplitByWhitespace(const std::string& input) {
 	std::regex re("\\s+");
-	std::sregex_token_iterator first{ input.begin(), input.end(), re, -1 }, last;
+	std::sregex_token_iterator first{ input.begin(), input.end(), re, -1 };
+	std::sregex_token_iterator last;
+
 	return { first, last };
 }
 
@@ -461,7 +457,7 @@ std::vector<std::string> Settings::SplitByWhitespace(const std::string& input) {
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
 /// <param name="newValue"> - new setting value</param>
-void Settings::UpdateModSetting(std::string name, std::string newValue) {
+void Settings::UpdateModSetting(const std::string& name, const std::string_view& newValue) {
 	modSettings[name] = newValue;
 }
 
@@ -470,7 +466,7 @@ void Settings::UpdateModSetting(std::string name, std::string newValue) {
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
 /// <param name="newValue"> - new setting value</param>
-void Settings::UpdateCustomSetting(std::string name, int newValue) {
+void Settings::UpdateCustomSetting(const std::string& name, int newValue) {
 	customSettings[name] = newValue;
 }
 
@@ -479,7 +475,7 @@ void Settings::UpdateCustomSetting(std::string name, int newValue) {
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
 /// <param name="newValue"> - new setting value</param>
-void Settings::UpdateTwitchSetting(std::string name, std::string newValue) {
+void Settings::UpdateTwitchSetting(const std::string& name, const std::string_view& newValue) {
 	twitchSettings[name] = newValue;
 }
 
@@ -487,7 +483,7 @@ void Settings::UpdateTwitchSetting(std::string name, std::string newValue) {
 /// Trigger single setting update.
 /// </summary>
 /// <param name="updateMessage"> - Format: update (custom|mod) name newValue</param>
-void Settings::ParseSettingUpdate(std::string updateMessage) {
+void Settings::ParseSettingUpdate(const std::string& updateMessage) {
 	auto msgParts = SplitByWhitespace(updateMessage);
 
 	if (msgParts.size() < 4)
@@ -511,7 +507,7 @@ void Settings::ParseSettingUpdate(std::string updateMessage) {
 /// </summary>
 /// <param name="twitchMsg"> - twitch message with mod</param>
 /// <param name="toggleType"> - "enable" / "disable"</param>
-void Settings::ParseTwitchToggle(std::string twitchMsg, std::string toggleType) {
+void Settings::ParseTwitchToggle(const std::string& twitchMsg, const std::string_view& toggleType) {
 	auto msgParts = SplitByWhitespace(twitchMsg);
 
 	if (msgParts.size() < 2)
@@ -526,7 +522,7 @@ void Settings::ParseTwitchToggle(std::string twitchMsg, std::string toggleType) 
 /// Twitch: Solid note color
 /// </summary>
 /// <param name="twitchMsg"> - twitch message with new color</param>
-void Settings::ParseSolidColorsMessage(std::string twitchMsg) {
+void Settings::ParseSolidColorsMessage(const std::string& twitchMsg) {
 	auto msgParts = SplitByWhitespace(twitchMsg);
 
 	if (msgParts.size() < 3)
@@ -534,12 +530,6 @@ void Settings::ParseSolidColorsMessage(std::string twitchMsg) {
 
 	UpdateModSetting("SolidNoteColor", msgParts[2]);
 }
-
-/*
-float cSettings::GetStringColor(std::string string) {
-	return stringColors[string];
-}
-*/
 
 /// <summary>
 /// Get color list of strings
@@ -605,15 +595,12 @@ void Settings::UpdateSettings() {
 	D3DHooks::RecreateTextures = true;
 }
 
-
-// Misc
-
 /// <summary>
 /// Convert HEX -> Color struct
 /// </summary>
 /// <param name="hexStr"> - String of hex, without #</param>
 /// <returns>Color struct</returns>
-RSColor Settings::ConvertHexToColor(std::string hexStr) {
+RSColor Settings::ConvertHexToColor(const std::string& hexStr) {
 	int r, g, b;
 	if (sscanf_s(hexStr.c_str(), "%02x%02x%02x", &r, &g, &b) != EOF) {
 		RSColor c((float)r / 255, (float)g / 255, (float)b / 255);

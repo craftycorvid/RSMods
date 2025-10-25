@@ -13,13 +13,11 @@ float SongTimer::SongTimer() {
 	uintptr_t addrTimerBase = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_timer, Offsets::ptr_timerBaseOffsets);
 	uintptr_t addrTimerRare = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_timerRare, Offsets::ptr_timerRareOffsets, true);
 
-	// Null Pointer Check
 	if (!addrTimerBase) {
 		_LOG("Invalid Pointer: (BASE) ShowSongTimer" << std::endl);
 		return 0.f;
 	}
 
-	// Null Pointer Check
 	// At this point, we can verify that the timer is a valid time.
 	if (!addrTimerRare) {
 		_LOG("Invalid Pointer: (RARE) ShowSongTimer" << std::endl);
@@ -32,9 +30,8 @@ float SongTimer::SongTimer() {
 	if (GameState::Menus::IsInSongModes() && *(float*)addrTimerBase == 0.f && *(float*)addrTimerRare != 0.f) {
 		return *(float*)addrTimerRare;
 	}
-	// This is the default case, and will be used 99.99% of the time.
 	else {
-		return *(float*)addrTimerBase;
+		return *(float*)addrTimerBase; 	// This is the default case, and will be used 99.99% of the time.
 	}
 }
 

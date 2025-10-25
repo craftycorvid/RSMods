@@ -90,7 +90,7 @@ namespace ObjectUtil {
 	/// Set object scales by class name
 	/// </summary>
 	/// <param name="scales"></param>
-	extern void SetObjectScales(std::map<std::string, float> scales);
+	extern void SetObjectScales(const std::map<std::string, float>& scales);
 
 	/// <summary>
 	/// Map of classname, scale, applied every UpdateScales() call

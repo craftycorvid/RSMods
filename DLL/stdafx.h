@@ -81,3 +81,5 @@
 /// <param name="vec"> - Is input in list | VECTOR? (NULLABLE)</param>
 template <typename T>
 bool Contains(const T& valueToCheckIfInsideArray, const std::vector<T>& vec);
+
+bool Contains(std::string_view text, std::string_view key);

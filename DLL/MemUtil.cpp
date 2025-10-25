@@ -103,7 +103,8 @@ bool MemUtil::PlaceHook(void* hookSpot, void* ourFunct, int len)
 		return false;
 
 	// Save old Virtual Protect status, but allow us to Execute, Read, and Write to the executable's memory so we can place our hook.
-	DWORD oldProtect, ret;
+	DWORD oldProtect;
+	DWORD ret;
 	clock_t before = clock();
 	
 	ret = HookedVirtualProtect(hookSpot, len, PAGE_EXECUTE_READWRITE, oldProtect);
@@ -151,7 +152,7 @@ PBYTE MemUtil::TrampHook(PBYTE src, PBYTE dst, unsigned int len)
 	}
 
 	// Create the gateway (len + 5 for the overwritten bytes + the jmp)
-	PBYTE gateway = (PBYTE)VirtualAlloc(NULL, len + 5, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+	auto gateway = (PBYTE)VirtualAlloc(nullptr, len + 5, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 	// Makes sure gateway doesn't equal null
 	if (!gateway)
@@ -163,7 +164,7 @@ PBYTE MemUtil::TrampHook(PBYTE src, PBYTE dst, unsigned int len)
 	memcpy(gateway, src, len);
 
 	// Get the gateway to destination addy
-	uintptr_t gateJmpAddy = (uintptr_t)(src - gateway - 5);
+	auto gateJmpAddy = (uintptr_t)(src - gateway - 5);
 
 	// Add the jmp opcode to the end of the gateway
 	*(gateway + len) = (unsigned char)0xE9;
@@ -209,30 +210,25 @@ bool MemUtil::IsBadReadPtr(void* pointer)
 /// <param name="offsets"> - Cheat Engine Offsets</param>
 /// <param name="safe"> - Should we trust this to not crash our game?</param>
 /// <returns>Memory Address</returns>
-uintptr_t MemUtil::FindDMAAddy(uintptr_t ptr, std::vector<unsigned int> offsets, bool safe)
+uintptr_t MemUtil::FindDMAAddy(uintptr_t ptr, const std::vector<unsigned int>& offsets, bool safe)
 {
 	// Set addr to the base pointer.
 	uintptr_t addr = ptr;
 
-	for (unsigned int i = 0; i < offsets.size(); ++i)
+	for (const auto& offset : offsets)
 	{
-		// Is it safe to read this next pointer?
 		if (safe && IsBadReadPtr((void*)addr))
-			return NULL;
+			return 0;
 
-		// The pointer we have is NULL
 		if (!addr)
-			return NULL;
+			return 0;
 
-		// Get the dereferened pointer.
 		addr = *(uintptr_t*)addr;
 
-		// Is the dereferenced pointer NULL?
-		if (addr == NULL)
-			return NULL;
+		if (!addr)
+			return 0;
 
-		// Add our pointer offset value.
-		addr += offsets[i];
+		addr += offset;
 	}
 	return addr;
 }
@@ -251,14 +247,12 @@ uintptr_t MemUtil::ReadPtr(uintptr_t adr) {
 
 NTSTATUS MemUtil::HookedVirtualProtect(LPVOID address, SIZE_T len, ULONG newProtection, ULONG& oldProtection)
 {
-	//return VirtualProtect(address, len, newProtection, &oldProtection);
 	return NtProtectVirtualMemory(GetCurrentProcess(), &address, &len, newProtection, &oldProtection);
 }
 
 NTSTATUS MemUtil::HookedQueryVirtualMemory(LPVOID address, PMEMORY_BASIC_INFORMATION memoryBuffer, SIZE_T dwLength)
 {
 	SIZE_T returnLength = 0;
-	//return VirtualQuery(address, memoryBuffer, dwLength);
 	return NtQueryVirtualMemory(GetCurrentProcess(), address, MemoryBasicInformation, memoryBuffer, dwLength, &returnLength);
 }
 

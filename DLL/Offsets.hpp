@@ -1,5 +1,8 @@
 #pragma once
 
+#include "VersioningStruct.h"
+#include <vector>
+
 namespace Offsets {
 	extern uintptr_t baseHandle; // Beginning of Rocksmith
 	inline VersioningStruct<uintptr_t> baseEnd; // End of Rocksmith

@@ -11,7 +11,7 @@ namespace MemUtil {
 	bool PlaceHook(void* hookSpot, void* ourFunct, int len);
 	PBYTE TrampHook(PBYTE src, PBYTE dst, unsigned int len);
 	bool IsBadReadPtr(void* pointer);
-	uintptr_t FindDMAAddy(uintptr_t ptr, std::vector<unsigned int> offsets, bool safe = false);
+	uintptr_t FindDMAAddy(uintptr_t ptr, const std::vector<unsigned int>& offsets, bool safe = false);
 	uintptr_t ReadPtr(uintptr_t adr);
 	template <typename T>
 	bool SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthOfData);

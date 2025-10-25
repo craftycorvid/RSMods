@@ -2,57 +2,41 @@
 #include "SongTuning.hpp"
 
 /// <summary>
-/// **DEPRECATED | USE GetCurrentTuning(false)**
-/// </summary>
-/// <returns>NULL if invalid address, else if ExtendedRangeDropTuning == true LowE-String Tuning else A-String Tuning.</returns>
-byte SongTuning::getLowestStringTuning() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-	uintptr_t addrTuning = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_tuning, Offsets::ptr_tuningOffsets);
-
-	// Null Pointer Check
-	if (!addrTuning) {
-		_LOG("Invalid Pointer: getLowestStringTuning" << std::endl);
-		return NULL;
-	}
-
-
-	if (Settings::ReturnSettingValue("ExtendedRangeDropTuning") == "on")
-		return (*(Tuning*)addrTuning).lowE;
-
-	return (*(Tuning*)addrTuning).strA;
-}
-
-/// <summary>
 /// Get Tuning of all 6 strings (even on bass)
 /// </summary>
 /// <param name="verbose"> - Should we show the tuning in the console **DEBUG BUILD ONLY**</param>
 /// <returns>Current Tuning in a Byte[6] array.</returns>
-byte* SongTuning::GetCurrentTuning(bool verbose) {
+std::array<byte, 6> SongTuning::GetCurrentTuning(bool verbose) {
 	_LOG_INIT;
 
 	_LOG_SETLEVEL(LogLevel::Error);
 	uintptr_t addrTuning = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_tuning, Offsets::ptr_tuningOffsets, true);
 
-	// Null Pointer Check
 	if (!addrTuning) {
-		// _LOG("Invalid Pointer: GetCurrentTuning" << std::endl); // Disabled because it causes log to get huge real quick
-		return NULL;
+		return {};
 	}
 
+	auto tuningData = reinterpret_cast<Tuning*>(addrTuning);
 
-	byte* AllTunings = new byte[6]{ (*(Tuning*)addrTuning).lowE, (*(Tuning*)addrTuning).strA, (*(Tuning*)addrTuning).strD, (*(Tuning*)addrTuning).strG, (*(Tuning*)addrTuning).strB, (*(Tuning*)addrTuning).highE };
+	std::array<byte, 6> allTunings = {
+		tuningData->lowE,
+		tuningData->strA,
+		tuningData->strD,
+		tuningData->strG,
+		tuningData->strB,
+		tuningData->highE
+	};
 
 	// Print tuning to console. **DEBUG BUILD ONLY**
-	if (verbose) {
+	if (verbose) 
+	{
 		for (int i = 0; i < 6; i++)
 		{
-			_LOG("String" << i << " - " << (int)AllTunings[i] << std::endl);
+			_LOG("String" << i << " - " << static_cast<int>(allTunings[i]) << std::endl);
 		}
 	}
 
-	return AllTunings;
+	return allTunings;
 }
 
 /// <summary>
@@ -79,28 +63,28 @@ Tuning SongTuning::GetTuningAtTuner() {
 		return Tuning();
 	}
 
-	std::string unsanitized_tuningText = std::string((const char*)addrTuningText);
+	auto unsanitizedTuningText = std::string((const char*)addrTuningText);
 
 	// Rocksmith converts all ASCII "#" to the unicode version. Since we have to use std::string (and can't use std::wstring) with nlohmann, we convert the corrupt character combination to an ASCII "#".
-	while (unsanitized_tuningText.find("\xe2\x99\xaf") != std::string::npos) { // Unicode # (sharp)
-		size_t badHash = unsanitized_tuningText.find("\xe2\x99\xaf");
-		std::string partOne = unsanitized_tuningText.substr(0, badHash);
-		std::string partTwo = unsanitized_tuningText.substr(badHash + 2, unsanitized_tuningText.length() - 1);
-		unsanitized_tuningText = partOne + partTwo;
-		unsanitized_tuningText.at(badHash) = '#';
+	while (unsanitizedTuningText.find("\xe2\x99\xaf") != std::string::npos) { // Unicode # (sharp)
+		size_t badHash = unsanitizedTuningText.find("\xe2\x99\xaf");
+		std::string partOne = unsanitizedTuningText.substr(0, badHash);
+		std::string partTwo = unsanitizedTuningText.substr(badHash + 2, unsanitizedTuningText.length() - 1);
+		unsanitizedTuningText = partOne + partTwo;
+		unsanitizedTuningText.at(badHash) = '#';
 	}
 
 	// Rocksmith converts all ASCII "b" to the unicode version. Since we have to use std::string (and can't use std::wstring) with nlohmann, we convert the corrupt character combination to an ASCII "b".
 	// Note "b" is capitalized at the end because we later assume all tunings are capital since Rocksmith will parse tuning names as uppercase. Since we use the non-UTF value we have to convert the "b" to a "B" for our later comparison to work.
-	while (unsanitized_tuningText.find('\xe2\x99\xad') != std::string::npos) { // Unicode b (flat)
-		size_t badFlat = unsanitized_tuningText.find("\xe2\x99\xad");
-		std::string partOne = unsanitized_tuningText.substr(0, badFlat);
-		std::string partTwo = unsanitized_tuningText.substr(badFlat + 2, unsanitized_tuningText.length() - 1);
-		unsanitized_tuningText = partOne + partTwo;
-		unsanitized_tuningText.at(badFlat) = 'B';
+	while (unsanitizedTuningText.find('\xe2\x99\xad') != std::string::npos) { // Unicode b (flat)
+		size_t badFlat = unsanitizedTuningText.find("\xe2\x99\xad");
+		std::string partOne = unsanitizedTuningText.substr(0, badFlat);
+		std::string partTwo = unsanitizedTuningText.substr(badFlat + 2, unsanitizedTuningText.length() - 1);
+		unsanitizedTuningText = partOne + partTwo;
+		unsanitizedTuningText.at(badFlat) = 'B';
 	}
 
-	std::string tuningText = unsanitized_tuningText;
+	std::string tuningText = unsanitizedTuningText;
 
 	_LOG_SETLEVEL(LogLevel::Warning);
 
@@ -120,9 +104,10 @@ Tuning SongTuning::GetTuningAtTuner() {
 	jsonFile.close();
 	tuningJson = tuningJson["Static"]["TuningDefinitions"]; // Skip directly to the part we are interested in
 
-	// Unforunately we can't use json.contains due to difference in formatting
-	for (auto& tuning : tuningJson.items()) {
-		std::string jsonKeyUpper = tuning.key(), jsonKeyOriginal = tuning.key(); // Also you can't just make a separate copy of the uppercase string, so we keep both 
+	// Unfortunately we can't use json.contains due to difference in formatting
+	for (auto const& tuning : tuningJson.items()) {
+		std::string jsonKeyUpper = tuning.key();
+		std::string jsonKeyOriginal = tuning.key(); // Also you can't just make a separate copy of the uppercase string, so we keep both 
 		std::transform(jsonKeyUpper.begin(), jsonKeyUpper.end(), jsonKeyUpper.begin(), ::toupper);
 
 		if (jsonKeyOriginal == tuningText || jsonKeyUpper == tuningText) { // If the tuning is all uppercase or if standard-case matches
@@ -138,12 +123,9 @@ Tuning SongTuning::GetTuningAtTuner() {
 /// <returns>Should we Display The Extended Range Colors?</returns>
 bool SongTuning::IsExtendedRangeSong() {
 	_LOG_INIT;
-
 	_LOG_SETLEVEL(LogLevel::Error);
 
 	uintptr_t addrTimerEnabled = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_timer, Offsets::ptr_timerBaseOffsets);
-
-	// Null Pointer Check
 	if (!addrTimerEnabled) {
 		_LOG("Invalid Pointer: IsExtendedRangeSong" << std::endl);
 		return false;
@@ -152,20 +134,16 @@ bool SongTuning::IsExtendedRangeSong() {
 	if (Settings::ReturnSettingValue("ExtendedRangeEnabled") != "on")
 		return false;
 
-	// Get lowest tuned string
-	int* highestLowest = GetHighestLowestString();
+	auto highestLowest = GetHighestLowestString();
 	int lowestTuning = highestLowest[1];
 
 	// Get the current tuning if available
-	byte* currentTuning = GetCurrentTuning();
-	Tuning tuning = Tuning();
-	if (currentTuning)
-		tuning = Tuning(currentTuning[0], currentTuning[1], currentTuning[2], currentTuning[3], currentTuning[4], currentTuning[5]);
+	auto currentTuning = GetCurrentTuning();
 
-	// Cleanup Duty
-	delete[] highestLowest;
-	if (currentTuning)
-		delete[] currentTuning;
+	auto tuning = Tuning();
+	if (currentTuning != std::array<byte, 6>{}) {
+		tuning = Tuning(currentTuning[0], currentTuning[1], currentTuning[2], currentTuning[3], currentTuning[4], currentTuning[5]);
+	}
 
 	// When a charter makes a bad bass tuning, and leaves the last two strings blank, let's fix that.
 	if (Settings::ReturnSettingValue("ExtendedRangeFixBassTuning") == "on") {
@@ -193,7 +171,7 @@ bool SongTuning::IsExtendedRangeSong() {
 		return true;
 	}
 
-	// Does the user's settings allow us to toggle Exteneded Range Mode for this tuning
+	// Does the user's settings allow us to toggle Extended Range Mode for this tuning
 	if (lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") && (!dropTuning || lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") - 2)) {
 		_LOG("Successful: IsExtendedRangeSong in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << " minus 2. Drop Tuned: " << std::boolalpha << dropTuning << std::endl);
 		return true;
@@ -211,7 +189,7 @@ bool SongTuning::IsExtendedRangeTuner() {
 
 	uintptr_t addrTuningText = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_tuningText, Offsets::ptr_tuningTextOffsets);
 
-	// Null Pointer Check or not in a pre-song tuner
+	// Either null or is not in a pre-song tuner
 	if (!addrTuningText) {
 		_LOG("Invalid Pointer: IsExtendedRangeTuner" << std::endl);
 		return false;
@@ -221,15 +199,15 @@ bool SongTuning::IsExtendedRangeTuner() {
 	if (Settings::ReturnSettingValue("ExtendedRangeEnabled") != "on")
 		return false;
 
-	Tuning tuner_songTuning = GetTuningAtTuner();
+	Tuning tunerSongTuning = GetTuningAtTuner();
 
 	// Tuning Not Found
-	if (tuner_songTuning.lowE == 69) {
+	if (tunerSongTuning.lowE == 69) {
 		_LOG("Invalid Tuning: IsExtendedRangeTuner" << std::endl);
 		return false;
 	}
 
-	int lowestTuning = tuner_songTuning.lowE;
+	int lowestTuning = tunerSongTuning.lowE;
 
 	// Bass below C standard fix (A220 range)
 	if (GetTrueTuning() <= 260)
@@ -237,7 +215,7 @@ bool SongTuning::IsExtendedRangeTuner() {
 
 	_LOG_SETLEVEL(LogLevel::Info);
 
-	bool inDrop = IsSongInDrop(tuner_songTuning);
+	bool inDrop = IsSongInDrop(tunerSongTuning);
 
 	// The games stores tunings in unsigned chars (bytes) so we need to convert it to our int Extended Range toggle.
 	if (lowestTuning > 24)
@@ -249,7 +227,7 @@ bool SongTuning::IsExtendedRangeTuner() {
 		return true;
 	}
 
-	// Does the user's settings allow us to toggle Exteneded Range Mode for this tuning
+	// Does the user's settings allow us to toggle Extended Range Mode for this tuning
 	if (lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") && (!inDrop || lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") - 2)) {
 		_LOG("Successful: IsExtendedRangeTuner in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << " minus 2. Drop Tuned: " << std::boolalpha << inDrop << std::endl);
 		return true;
@@ -263,19 +241,18 @@ bool SongTuning::IsExtendedRangeTuner() {
 /// Gets the highest tuned string, and the lowest tuned string.
 /// </summary>
 /// <returns>[0] - Highest, [1] - Lowest</returns>
-int* SongTuning::GetHighestLowestString() {
+std::array<int, 2> SongTuning::GetHighestLowestString() {
 	_LOG_INIT;
 
 	_LOG_SETLEVEL(LogLevel::Error);
 
-	int highestTuning = 0, lowestTuning = 256, currentStringTuning = 0;
-	std::unique_ptr<byte[]> songTuning = std::unique_ptr<byte[]>(GetCurrentTuning());
+	int highestTuning = 0;
+	int lowestTuning = 256;
+	int currentStringTuning = 0;
 
-	// Null Pointer Check
-	if (!songTuning) {
-		int* fakeReturns = new int[2] { 666, 666 };
-		// _LOG("Failed: GetHighestLowestString. GetCurrentTuning returned an invalid tuning" << std::endl); // Disabled because it causes log to get huge real quick
-		return fakeReturns;
+	auto songTuning = GetCurrentTuning();
+	if (songTuning == std::array<byte, 6>{}) {
+		return { 666, 666 };
 	}
 
 	int numberOfStrings = (Settings::ReturnSettingValue("ExtendedRangeFixBassTuning") == "on" && (songTuning[4] == 0 || songTuning[4] == 12) && (songTuning[5] == 0 || songTuning[5] == 12)) ? 4 : 6; // When a charter makes a bad bass tuning, and leaves the last two strings blank, let's fix that.
@@ -315,23 +292,20 @@ int* SongTuning::GetHighestLowestString() {
 	if (lowestTuning != 0)
 		lowestTuning -= 256;
 
-	int* returnValue = new int[2] { highestTuning, lowestTuning };
-
-	return returnValue;
+	return { highestTuning, lowestTuning };
 }
 
 /// <summary>
 /// Gets the highest tuned string, and the lowest tuned string.
 /// </summary>
 /// <returns>[0] - Highest, [1] - Lowest</returns>
-int* SongTuning::GetHighestLowestString(Tuning tuningOverride) {
-	int highestTuning = 0, lowestTuning = 256, currentStringTuning = 0;
+std::array<int, 2> SongTuning::GetHighestLowestString(Tuning tuningOverride) {
+	int highestTuning = 0;
+	int lowestTuning = 256;
 
 	// Null Pointer Check
 	if (tuningOverride.lowE == 69) {
-		int* fakeReturns = new int[2] { 666, 666 };
-		// _LOG("Failed: GetHighestLowestString. GetCurrentTuning returned an invalid tuning" << std::endl); // Disabled because it causes log to get huge real quick
-		return fakeReturns;
+		return { 666, 666 };
 	}
 
 	int numberOfStrings = (Settings::ReturnSettingValue("ExtendedRangeFixBassTuning") == "on" && (tuningOverride.strB == 0 || tuningOverride.strB == 12) && (tuningOverride.highE == 0 || tuningOverride.highE == 12)) ? 4 : 6; // When a charter makes a bad bass tuning, and leaves the last two strings blank, let's fix that.
@@ -348,7 +322,6 @@ int* SongTuning::GetHighestLowestString(Tuning tuningOverride) {
 		tuningOverride.highE -= 12;
 	}
 
-	// Get the value for the strings.
 	int string_lowE = tuningOverride.lowE <= 24 ? tuningOverride.lowE + 256 : tuningOverride.lowE;
 	int string_A = tuningOverride.strA <= 24 ? tuningOverride.strA + 256 : tuningOverride.strA;
 	int string_D = tuningOverride.strD <= 24 ? tuningOverride.strD + 256 : tuningOverride.strD;
@@ -390,9 +363,7 @@ int* SongTuning::GetHighestLowestString(Tuning tuningOverride) {
 	if (lowestTuning != 0)
 		lowestTuning -= 256;
 
-	int* returnValue = new int[2] { highestTuning, lowestTuning };
-
-	return returnValue;
+	return { highestTuning, lowestTuning };
 }
 
 
@@ -418,12 +389,11 @@ int SongTuning::GetTrueTuning() {
 
 	uintptr_t trueTunePointer = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_trueTuning, Offsets::ptr_trueTuningOffsets);
 
-	// Null Pointer Check
 	if (!trueTunePointer) {
-		// _LOG("Invalid Pointer: GetTrueTuning" << std::endl); // Disabled because it causes log to get huge real quick
 		return 440;
 	}
 
-	int trueTuning = floor(*(float*)trueTunePointer);
+	float rawTuningValue = *(float*)trueTunePointer;
+	auto trueTuning = static_cast<int>(floor(rawTuningValue));
 	return trueTuning;
 }

@@ -399,7 +399,7 @@ namespace Midi {
 
 			Sleep(1500); // The menu is called when the animation starts. The tuning isn't set at that point, so we need to wait to get the value. This doesn't seem to lag the game.
 
-			int* highestLowestTuning = SongTuning::GetHighestLowestString();
+			std::array<int, 2> highestLowestTuning = SongTuning::GetHighestLowestString();
 
 			int highestTuning = highestLowestTuning[0];
 			int lowestTuning = highestLowestTuning[1];
@@ -409,8 +409,6 @@ namespace Midi {
 				_LOG("(MIDI) Unable to read tuning in song." << std::endl);
 				return;
 			}
-			
-			delete[] highestLowestTuning;
 
 			int TrueTuning_Hertz = SongTuning::GetTrueTuning();
 
@@ -438,7 +436,7 @@ namespace Midi {
 
 			Sleep(2000); // The menu is called when the animation starts. We need to wait for the tuning name to appear in the bottom-right corner so we can read it and get the tuning we need.
 
-			int* highestLowestTuning = SongTuning::GetHighestLowestString(SongTuning::GetTuningAtTuner());
+			std::array<int, 2> highestLowestTuning = SongTuning::GetHighestLowestString(SongTuning::GetTuningAtTuner());
 
 			int highestTuning = highestLowestTuning[0];
 			int lowestTuning = highestLowestTuning[1];
@@ -448,8 +446,6 @@ namespace Midi {
 				_LOG("(MIDI) Cannot read tuning in tuner. Will attempt to automate tuning once the user is in the song." << std::endl);
 				return;
 			}
-
-			delete[] highestLowestTuning;
 
 			int TrueTuning_Hertz = SongTuning::GetTrueTuning();
 
