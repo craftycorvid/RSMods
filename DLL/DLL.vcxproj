@@ -265,6 +265,7 @@
     <ClInclude Include="D3DInfo.h" />
     <ClInclude Include="D3DOverlay.hpp" />
     <ClInclude Include="GameState.hpp" />
+    <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Lib\Ini\SimpleIni.h" />
     <ClInclude Include="Lib\Json\json.hpp" />
     <ClInclude Include="Lib\Midi\RtMidi.h" />

@@ -1004,45 +1004,6 @@ void GUI() {
 	oDrawPrimitive = (tDrawPrimitive)MemUtil::TrampHook((PBYTE)vTable[D3DInfo::DrawPrimitive_Index], (PBYTE)D3DHooks::Hook_DP, 7); // https://docs.microsoft.com/en-us/windows/win32/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-drawprimitive
 }
 
-void SendEscapeKey() {
-	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYDOWN, VK_ESCAPE, 0);
-	Sleep(30);
-	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYUP, VK_ESCAPE, 0);
-}
-
-void PressDownArrowKey() 
-{
-	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYDOWN, VK_DOWN, 0);
-	Sleep(30);
-	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYUP, VK_DOWN, 0);
-}
-
-/// <summary>
-/// Presses Enter. Normally used in a loop to skip most of the login dialog. "Fork in the toaster" method
-/// </summary>
-void AutoEnterGame() {
-	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYDOWN, VK_RETURN, 0);
-	Sleep(30);
-	PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYUP, VK_RETURN, 0);
-}
-
-/// <summary>
-/// Force a Steam screenshot. Requires the default "F12" screenshot key for Steam.
-/// </summary>
-void TakeScreenshot() {
-	_LOG_INIT;
-	if (!takenScreenshotOfThisScreen) {
-		takenScreenshotOfThisScreen = true;
-		Sleep(8000); // The menu title changes while the animation is running so we are giving it so time to show the actual results. (8 seconds)
-
-		// Press F12
-		PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYDOWN, VK_F12, 0);
-		_LOG("Took screenshot" << std::endl);
-		Sleep(30);
-		PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYUP, VK_F12, 0);
-	}
-}
-
 /// <summary>
 /// Update settings so users don't need to restart the game for every mod they want to toggle on / off.
 /// </summary>
@@ -1226,13 +1187,13 @@ unsigned WINAPI MainThread() {
 
 			// Show Selected Volume
 			if (Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				
+
 				// Stop displaying volume if 3 seconds have passed since last adjustment
 				const auto currentTime = std::chrono::steady_clock::now();
 				if (currentTime - displayVolumeStartTime > std::chrono::seconds(3))
 					displayCurrentVolume = false;
 			}
-			
+
 			// Toggle Loft off (Always Off)
 			if (!LoftOff && !GameState::LessonMode && Settings::ReturnSettingValue("ToggleLoftEnabled") == "on" && Settings::ReturnSettingValue("ToggleLoftWhen") == "startup") {
 				Loft::ToggleLoft();
@@ -1290,7 +1251,7 @@ unsigned WINAPI MainThread() {
 				// MIDI Auto Tuning / Auto True-Tuning (In Song)
 				if (Settings::ReturnSettingValue("AutoTuneForSong") == "on" && !Midi::alreadyAutomatedTuningInThisSong && (Settings::ReturnSettingValue("AutoTuneForSongWhen") == "tuner" || (Settings::ReturnSettingValue("AutoTuneForSongWhen") == "manual" && Midi::userWantsToUseAutoTuning)))
 					Midi::AutomateTuning();
-					
+
 				// Show Song Timer (In Song)
 				if (!AutomatedSongTimer && Settings::ReturnSettingValue("ShowSongTimerEnabled") == "on" && Settings::ReturnSettingValue("ShowSongTimerWhen") == "automatic") {
 					AutomatedSongTimer = true;
@@ -1345,7 +1306,7 @@ unsigned WINAPI MainThread() {
 					UseEROrColorsInThisSong = false;
 					AttemptedERInThisSong = false;
 				}
-				
+
 				// Turn off Show Song Timer (In Song)
 				if (AutomatedSongTimer && Settings::ReturnSettingValue("ShowSongTimerEnabled") == "on" && Settings::ReturnSettingValue("ShowSongTimerWhen") == "automatic") {
 					AutomatedSongTimer = false;
@@ -1405,9 +1366,9 @@ unsigned WINAPI MainThread() {
 
 			// Screenshot Scores
 			if (Settings::ReturnSettingValue("ScreenShotScores") == "on" && GameState::Menus::IsInScoreMenus())
-				TakeScreenshot();
+				Keyboard::TakeScreenshot();
 			else
-				takenScreenshotOfThisScreen = false;
+				Keyboard::takenScreenshotOfThisScreen = false;
 
 			// If the current menu is not the same as the previous menu and if it's one of menus where you tune your guitar (i.e. headstock is shown), reset the cache because user may want to change the headstock style
 			if (GameState::previousMenu != GameState::currentMenu && GameState::Menus::IsInTuningMenus()) {
@@ -1433,8 +1394,6 @@ unsigned WINAPI MainThread() {
 			// It is only used while the game boots, else the game may crash.
 			GameState::currentMenu = GameState::GetCurrentMenu(true);
 
-			//_LOG("Menu Loop: " << GameState::currentMenu << ", enabled: " << Settings::ReturnSettingValue("ForceProfileEnabled") << std::endl);
-
 			// Have We Loaded? Or has the user opened a new user profile?
 			// This prevents the user from being locked in a loop.
 			if (GameState::currentMenu.compare("MainMenu") == 0 || GameState::currentMenu.compare("PlayedRS1Select") == 0 || GameState::currentMenu.compare("SimpleDialog") == 0)
@@ -1445,19 +1404,19 @@ unsigned WINAPI MainThread() {
 				*(int*)Offsets::ptr_sampleRateSize.Get() = 2;
 				*(int*)Offsets::ptr_sampleRateBuffer.Get() = 128;
 			}
-				
+
 			// Auto Load Profile. AKA "Fork in the toaster".
 			if (Settings::ReturnSettingValue("ForceProfileEnabled") == "on" && !GameState::Menus::IsInMenusWithDisallowedAutoEnter() && !forkInToasterNewProfile) {
 				// Skip UPlay login dialog - depending on the menu it might be necessary to press either ESC or Enter, so just spam both
 				if (GameState::currentMenu == (std::string)"SelectionListDialog" || GameState::currentMenu == (std::string)"UplayLoginDialog") {
-					SendEscapeKey();
-					AutoEnterGame();
+					Keyboard::SendEscapeKey();
+					Keyboard::AutoEnterGame();
 				}
 				// If the user user says "I want to always load this profile"
 				else if (Settings::ReturnSettingValue("ProfileToLoad") != "" && GameState::currentMenu == (std::string)"ProfileSelect") {
 					selectedUser = GameState::CurrentSelectedUser();
 					if (selectedUser == Settings::ReturnSettingValue("ProfileToLoad")) // The profile we're looking for
-						AutoEnterGame();
+						Keyboard::AutoEnterGame();
 					else if (selectedUser == (std::string)"New profile") { // Yeah, the profile they're looking for doesn't exist :(
 						_LOG_SETLEVEL(LogLevel::Error);
 						_LOG("(Auto Load) Invalid Profile Name" << std::endl);
@@ -1465,12 +1424,12 @@ unsigned WINAPI MainThread() {
 						forkInToasterNewProfile = true;
 					}
 					else { // Not the profile we're looking for. Move down 1.
-						PressDownArrowKey();
-					} 
+						Keyboard::PressDownArrowKey();
+					}
 				}
 				// User doesn't care what profile we select, just select the first / top one.
 				else
-					AutoEnterGame();
+					Keyboard::AutoEnterGame();
 			}
 		}
 	}

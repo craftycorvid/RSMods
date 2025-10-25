@@ -19,7 +19,7 @@
 #include "Mods/TrueTuning.hpp"
 #include "Mods/Loft.hpp"
 #include "Menu.hpp"
-#include "Keyboard.h"
+#include "Keyboard.hpp"
 
 std::vector<std::string> effectQueue;
 std::vector<std::string> enabledEffects;
