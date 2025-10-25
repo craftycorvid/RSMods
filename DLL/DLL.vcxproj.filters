@@ -282,6 +282,12 @@
     <ClCompile Include="Mods\Loft.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
+    <ClCompile Include="QualityOfLife.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Twitch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MemUtil.hpp">
@@ -576,6 +582,12 @@
       <Filter>Main Headers\Structs</Filter>
     </ClInclude>
     <ClInclude Include="Keyboard.hpp">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="QualityOfLife.hpp">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Twitch.hpp">
       <Filter>Main Headers</Filter>
     </ClInclude>
   </ItemGroup>

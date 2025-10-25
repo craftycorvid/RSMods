@@ -170,9 +170,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug with Wwise Logging|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="QualityOfLife.cpp" />
     <ClCompile Include="SongTimer.cpp" />
     <ClCompile Include="SongTuning.cpp" />
     <ClCompile Include="Tests.cpp" />
+    <ClCompile Include="Twitch.cpp" />
     <ClCompile Include="VersioningStruct.cpp" />
     <ClCompile Include="Wwise\Exports.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../stdafx.h</PrecompiledHeaderFile>
@@ -284,6 +286,7 @@
     <ClInclude Include="ObjectUtil.hpp" />
     <ClInclude Include="CC\Effects\ShuffleTonesEffect.hpp" />
     <ClInclude Include="CC\Effects\SmallNoteheadEffect.hpp" />
+    <ClInclude Include="QualityOfLife.hpp" />
     <ClInclude Include="Resolution.h" />
     <ClInclude Include="RSColor.h" />
     <ClInclude Include="SongTimer.hpp" />
@@ -291,6 +294,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Tests.hpp" />
     <ClInclude Include="Tuning.h" />
+    <ClInclude Include="Twitch.hpp" />
     <ClInclude Include="VersioningStruct.h" />
     <ClInclude Include="VoiceOver.h" />
     <ClInclude Include="Wwise\Logging.hpp" />

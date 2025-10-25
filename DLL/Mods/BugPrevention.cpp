@@ -123,4 +123,13 @@ namespace BugPrevention {
 
 		_LOG("(BUG PREVENTION) Prevented Additional Audio Devices Crash" << std::endl);
 	}
+
+	/// <summary>
+	/// Fixes crash when modifying functions in Rocksmith. 
+	/// </summary>
+	void FixModifyingFunctions() {
+		uintptr_t forceSuccessLSBOffset = Offsets::ptr_ModdedPtrCrashFix.Get() + 0x3; // LSB of the MOV is what we are replacing
+		byte forceFailedLSB = MemUtil::ReadValue<byte>(forceSuccessLSBOffset + 0x14, true); // We are replacing it with ForceFailed LSB, which is 0x14 away
+		MemUtil::PatchAdr(forceSuccessLSBOffset, (LPVOID)&forceFailedLSB, 1, true);
+	}
 }

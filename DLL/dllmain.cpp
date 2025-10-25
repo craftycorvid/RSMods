@@ -871,61 +871,8 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 }
 
 /// <summary>
-/// Patches Two RTC cables error message.
+/// Manage Queue of Twitch Effects.
 /// </summary>
-void PatchTwoRTC()
-{
-	char patch[25];
-	std::fill_n(patch, 25, 0x90);
-	MemUtil::PatchAdr(Offsets::ptr_twoRTCBypass, patch, sizeof(patch));;
-}
-
-/// <summary>
-/// RS spawns two processes, one of which complains about Steam not being active. 
-/// We find that one and close it.
-/// </summary>
-HANDLE GetMessageBoxProcess()
-{
-	HWND    hWnd;
-	DWORD   dwProcessId = 0;
-	HANDLE  hRET;
-	LPCTSTR g_cszClass = TEXT("#32770"); // Dialog box class
-
-	hWnd = FindWindow(g_cszClass, L"Error.");
-	if (hWnd != NULL)
-	{
-		GetWindowThreadProcessId(hWnd, &dwProcessId);
-		if (dwProcessId != 0)
-			hRET = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_TERMINATE, FALSE, dwProcessId);
-	}
-	return hRET;
-}
-
-/// <summary>
-/// Stops the game from starting two instances
-/// </summary>
-void StopTwoRSInstances() {
-	_LOG_INIT;
-
-	HANDLE hndl = GetMessageBoxProcess();
-
-	if (hndl) {
-		HMODULE hMod;
-		DWORD cNeeded;
-
-		if (EnumProcessModulesEx(hndl, &hMod, sizeof(hMod), &cNeeded, LIST_MODULES_ALL))
-		{
-			TCHAR szProcessName[MAX_PATH] = TEXT("<unknown>");
-			GetModuleBaseName(hndl, hMod, szProcessName, sizeof(szProcessName) / sizeof(TCHAR));
-
-			_LOG("Title:" << szProcessName); //TODO: Returns a number? Fix & compare with 'Rocksmtih 2014'
-		}
-		
-		_LOG("Terminating parasitic RS process" << std::endl);
-		TerminateProcess(hndl, 0);
-	}
-}
-
 /// <returns>NULL. Loops while game is open.</returns>
 unsigned WINAPI HandleEffectQueueThread() {
 	while (!GameState::GameClosing) {
@@ -944,7 +891,9 @@ unsigned WINAPI HandleEffectQueueThread() {
 void GUI() {
 	_LOG_INIT;
 
-	uint32_t d3d9Base, adr, * vTable = NULL;
+	uint32_t d3d9Base;
+	uint32_t adr;
+	uint32_t* vTable = NULL;
 
 	// Find D3D Device
 	while ((d3d9Base = (uint32_t)GetModuleHandleA("d3d9.dll")) == NULL)
@@ -966,13 +915,11 @@ void GUI() {
 
 	_LOG_SETLEVEL(LogLevel::Error);
 
-	// Null-check
 	if (!adr) {
 		_LOG("Could not find D3D9 device pointer." << std::endl);
 		return;
 	}
 
-	// Null-Check x2
 	if (!*(uint32_t*)adr) { // Wing it
 		_LOG("Could not find DX9 device." << std::endl);
 		MessageBoxA(NULL, "Could not find DX9 device, please restart the game!", "Error", NULL);
@@ -981,7 +928,7 @@ void GUI() {
 
 	vTable = *(uint32_t**)adr;
 
-	// Third times the charm?
+	// Third time's the charm?
 	if (!vTable || vTable < (uint32_t*)Offsets::baseHandle) {
 		_LOG("Could not find D3D device's vTable address." << std::endl);
 		MessageBoxA(NULL, "Could not find D3D device's vTable address \n Restart the game and if you still get this error after a few tries, please report the error!", "Error", NULL);
@@ -989,7 +936,6 @@ void GUI() {
 	}
 
 	// Hook D3D functions to use for our own D3D work. Reference D3DHooks
-
 	if (!runningThroughWine) {
 		oSetVertexDeclaration = (tSetVertexDeclaration)MemUtil::TrampHook((PBYTE)vTable[D3DInfo::SetVertexDeclaration_Index], (PBYTE)D3DHooks::Hook_SetVertexDeclaration, 7); // https://docs.microsoft.com/en-us/windows/win32/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-setvertexdeclaration
 		oSetVertexShaderConstantF = (tSetVertexShaderConstantF)MemUtil::TrampHook((PBYTE)vTable[D3DInfo::SetVertexShaderConstantF_Index], (PBYTE)D3DHooks::Hook_SetVertexShaderConstantF, 7); // https://docs.microsoft.com/en-us/windows/win32/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-setvertexshaderconstantf
@@ -1023,8 +969,7 @@ void UpdateSettings() {
 unsigned WINAPI MainThread() {
 	_LOG_INIT;
 
-	std::ifstream RSModsFileInput("RSMods.ini"); // Check if this file exists
-	if (!RSModsFileInput) {
+	if (!(std::ifstream("RSMods.ini"))) {
 		std::ofstream RSModsFileOutput("RSMods.ini"); // If we don't call this, the game will crash.
 		RSModsFileOutput.close();
 	}
@@ -1039,16 +984,11 @@ unsigned WINAPI MainThread() {
 	D3DHooks::debug = debug;
 	Offsets::Initialize();
 
-	// Fixes crash when modifying functions in Rocksmith. 
-	uintptr_t forceSuccessLSBOffset = Offsets::ptr_ModdedPtrCrashFix.Get() + 0x3; // LSB of the MOV is what we are replacing
-	byte forceFailedLSB = MemUtil::ReadValue<byte>(forceSuccessLSBOffset + 0x14, true); // We are replacing it with ForceFailed LSB, which is 0x14 away
-	MemUtil::PatchAdr(forceSuccessLSBOffset, (LPVOID)&forceFailedLSB, 1, true);
-
+	BugPrevention::FixModifyingFunctions();
 	Settings::Initialize();
-	
+
 	UpdateSettings();
 	ERMode::Initialize();
-
 
 	GUI();
 	Midi::InitMidi();
@@ -1058,7 +998,7 @@ unsigned WINAPI MainThread() {
 	Midi::tuningOffset = Settings::GetModSetting("TuningOffset");
 	AudioDevices::SetupMicrophones();
 	BugPrevention::PreventPnPCrash();
-	StopTwoRSInstances();
+	QualityOfLife::StopTwoRSInstances();
 
 	BugPrevention::AllowComplexPasswords();
 	BugPrevention::PreventAdvancedDisplayCrash();
@@ -1078,14 +1018,14 @@ unsigned WINAPI MainThread() {
 		AudioDevices::output_SampleRate = Settings::GetModSetting("AlternativeOutputSampleRate");
 		AudioDevices::ChangeOutputSampleRate();
 	}
-	
+
 	// Look to see if RS_ASIO applied the 2 RTC input bypass.
 	// If they did, then we disregard the results from our version of the mod.
-	
+
 	bool rs_asio_BypassTwoRTC = false;
 	_LOG("RS_ASIO Bypass2RTC: " << std::boolalpha << rs_asio_BypassTwoRTC << std::endl);
 	if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on")
-		PatchTwoRTC();
+		QualityOfLife::PatchTwoRTC();
 
 	// Patch x86 assembly for Riff Repeater speed logic to make it linear.
 	if (Settings::ReturnSettingValue("LinearRiffRepeater") == "on")
@@ -1097,7 +1037,7 @@ unsigned WINAPI MainThread() {
 
 	// Allow the user to have a small amount of time to Alt+Tab while the game continues playing the audio.
 	if (Settings::ReturnSettingValue("AllowAudioInBackground") == "on")
-		VolumeControl::AllowAltTabbingWithAudio();	
+		VolumeControl::AllowAltTabbingWithAudio();
 
 	using namespace D3DHooks;
 	while (!GameState::GameClosing) {
@@ -1127,7 +1067,7 @@ unsigned WINAPI MainThread() {
 			}
 
 			// If the bypass for the 2 RTC dialog was set by RS_ASIO, don't change it!
-			if (!rs_asio_BypassTwoRTC) { 
+			if (!rs_asio_BypassTwoRTC) {
 
 				// User originally had BypassTwoRTCMessageBox on, but now they want it turned off.
 				if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "off" && *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_patch_call[0])
@@ -1135,7 +1075,7 @@ unsigned WINAPI MainThread() {
 
 				// User originally had BypassTwoRTCMessageBox off, but now they want it turned on
 				else if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on" && *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_original[0])
-					PatchTwoRTC();
+					QualityOfLife::PatchTwoRTC();
 			}
 
 			// User wants NSP timer changed, and the time limit is not what the user set.
@@ -1147,11 +1087,11 @@ unsigned WINAPI MainThread() {
 				SongTimer::SetNonStopPlayTimer(DefaultNSPTimeLimit);
 
 			// User had Linear RR off, but now they want it turned on.
-			if (Settings::ReturnSettingValue("LinearRiffRepeater") == "on" && !RiffRepeater::currentlyEnabled_LinearRR) 
+			if (Settings::ReturnSettingValue("LinearRiffRepeater") == "on" && !RiffRepeater::currentlyEnabled_LinearRR)
 				RiffRepeater::EnableLinearSpeeds();
 
 			// User had Linear RR on, but now they want it turned off.
-			else if (Settings::ReturnSettingValue("LinearRiffRepeater") == "off" && RiffRepeater::currentlyEnabled_LinearRR) 
+			else if (Settings::ReturnSettingValue("LinearRiffRepeater") == "off" && RiffRepeater::currentlyEnabled_LinearRR)
 				RiffRepeater::DisableLinearSpeeds();
 
 			// Scan for MIDI devices for Automated Tuning / True-Tuning
@@ -1445,13 +1385,14 @@ void Initialize() {
 	Wwise::Exports::Initialize();
 
 	std::thread(MainThread).detach(); // Mod Toggle based on menus
-	std::thread(EnumerationThread).detach(); // Force Enumeration
+	/*std::thread(EnumerationThread).detach(); // Force Enumeration
 	std::thread(HandleEffectQueueThread).detach(); // Twitch Effects
 	std::thread(MidiThread).detach(); // MIDI Auto Tuning / True Tuning
 	std::thread(RiffRepeaterThread).detach(); // RR Speed Above 100% Log
 
 	// Probably check ini setting before starting this thing
 	CrowdControl::StartServer(); // Twitch Effects Server
+	*/
 }
 
 /// <summary>
@@ -1464,14 +1405,14 @@ void Initialize() {
 BOOL APIENTRY DllMain(HMODULE hModule, uint32_t dwReason, LPVOID lpReserved) {
 	// Init boos
 	bool debugLogPresent = std::ifstream("RSMods_debug.txt").good();
-	std::ofstream clearDebugLog = std::ofstream("RSMods_debug.txt");
+	auto clearDebugLog = std::ofstream("RSMods_debug.txt");
 
 	switch (dwReason) {
 	case DLL_PROCESS_ATTACH:
 		// Setup logging system
-		FILE* streamRead, *streamConsole;
+		FILE* streamRead;
+		FILE* streamConsole;
 
-		// If running a debug build, give us a console.
 		if (debug) {
 			AllocConsole();
 
@@ -1482,13 +1423,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, uint32_t dwReason, LPVOID lpReserved) {
 
 		// Create log file to both help with debugging release builds,
 		// and allow the user to examine their debug logs after a crash.
-		if (debugLogPresent) { 
-
+		if (debugLogPresent) {
 			// Clear log so it isn't full of junk from the last launch
 			clearDebugLog.open("RSMods_debug.txt", std::ofstream::out | std::ofstream::trunc);
 			clearDebugLog.close();
 
-			// Attach log to stderr.
 			FILE* debugLog;
 			freopen_s(&debugLog, "RSMods_debug.txt", "w", stderr);
 		}

@@ -8,4 +8,5 @@ namespace BugPrevention {
 	void PreventAdvancedDisplayCrash();
 	void PreventPortAudioInDeviceCrash();
 	void PreventExtraAudioDevicesCrash();
+	void FixModifyingFunctions();
 }
