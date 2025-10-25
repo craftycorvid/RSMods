@@ -282,6 +282,9 @@
     <ClCompile Include="Mods\Loft.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="QualityOfLife.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -582,6 +585,9 @@
       <Filter>Main Headers\Structs</Filter>
     </ClInclude>
     <ClInclude Include="Keyboard.hpp">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.hpp">
       <Filter>Main Headers</Filter>
     </ClInclude>
     <ClInclude Include="QualityOfLife.hpp">

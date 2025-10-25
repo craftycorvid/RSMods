@@ -109,6 +109,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug with Wwise Logging|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Mods\AudioDevices.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug with Wwise Logging|Win32'">../stdafx.h</PrecompiledHeaderFile>
@@ -272,6 +273,7 @@
     <ClInclude Include="Lib\Json\json.hpp" />
     <ClInclude Include="Lib\Midi\RtMidi.h" />
     <ClInclude Include="Log.hpp" />
+    <ClInclude Include="Menu.hpp" />
     <ClInclude Include="MidiPedal.h" />
     <ClInclude Include="Mods\AudioDevices.hpp" />
     <ClInclude Include="Mods\BugPrevention.hpp" />
