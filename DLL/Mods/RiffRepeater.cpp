@@ -144,3 +144,28 @@ void RiffRepeater::DisableLinearSpeeds() {
 	currentlyEnabled_LinearRR = false;
 	MemUtil::PatchAdr(Offsets::ptr_timeStretchCalculations, "\xDD\x05\xA0\x18\x22\x01", 6);
 }
+
+void RiffRepeater::HandleSongChange(const std::string& previousSongKey) {
+	// If we have cached this event, then use the cached version, and tell the other threads to enable the Riff Repeater speed mod.
+	if (SongObjectIDs.find("Play_" + previousSongKey) != SongObjectIDs.end()) {
+		currentSongID = SongObjectIDs.find("Play_" + previousSongKey)->second;
+		readyToLogSongID = false;
+		loggedCurrentSongID = true;
+	}
+	else { // We have not seen this event yet, so we need to log the internal ID for the song and cache it.
+		loggedCurrentSongID = false;
+		readyToLogSongID = true; // Wait until the user gets into the song so we can grab this ID.
+	}
+}
+
+/// <summary>
+/// If we have recently changed the Riff Repeater speed through the mod, then save the new value to a text file.
+/// This is primarily for streamers who want to make a custom overlay with the song speed.
+/// </summary>
+void RiffRepeater::SaveSpeedToFileOnChange() {
+	if (GameState::Menus::IsInModesWithAllowedFastRiffRepeater() && RiffRepeater::saveNewRRSpeedToFile) {
+		auto rrText = std::ofstream("riff_repeater_speed.txt", std::ofstream::out);
+		rrText << std::to_string((int)realSongSpeed) << std::endl;
+		RiffRepeater::saveNewRRSpeedToFile = false;
+	}
+}

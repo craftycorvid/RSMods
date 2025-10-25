@@ -719,3 +719,18 @@ std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds)
 
 	return std::string(buffer);
 }
+
+void D3DHooks::RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice) {
+	if (regenerateUserDefinedTexture) {
+		RSColor userDefColor = Settings::ConvertHexToColor(Settings::ReturnSettingValue("SolidNoteColor"));
+
+		ColorList customColorList(16, userDefColor);
+		D3D::GenerateTexture(pDevice, &twitchUserDefinedTexture, customColorList);
+
+		ERMode::customSolidColor.clear();
+		for (int str = 0; str < 6;str++)
+			ERMode::customSolidColor.push_back(userDefColor);
+
+		regenerateUserDefinedTexture = false;
+	}
+}

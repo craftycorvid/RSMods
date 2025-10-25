@@ -20,11 +20,10 @@
 #include "Mods/Loft.hpp"
 #include "Menu.hpp"
 #include "Keyboard.hpp"
+#include "QualityOfLife.hpp"
+#include "Keybindings.hpp"
+#include "Twitch.hpp"
 
-std::vector<std::string> effectQueue;
-std::vector<std::string> enabledEffects;
-
-bool saveNewRRSpeedToFile = false;
 inline bool ImGuiInit = false; // Has ImGui already been init? If we close the game with this being false, then we get an assert.
 inline const double DefaultNSPTimeLimit = 10.9899997711182; // The default time for NSP.
 
@@ -35,5 +34,3 @@ inline float roughLoopStart = NULL; // Just like loopStart, except we account fo
 inline float loopEnd = NULL; // The end of the loop, as specified by the user.
 
 inline std::string selectedUser = "";
-
-bool Contains(std::string str, const char* key){ return str.find(key) != std::string::npos; }

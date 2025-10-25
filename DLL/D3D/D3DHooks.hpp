@@ -93,6 +93,7 @@ namespace D3DHooks {
 	/// <param name="timeInSeconds"> - Float containing number of seconds elapsed.</param>
 	/// <returns>std::string of time in "h:m:s" format.</returns>
 	std::string ConvertFloatTimeToStringTime(float timeInSeconds);
+	void RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice);
 }
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

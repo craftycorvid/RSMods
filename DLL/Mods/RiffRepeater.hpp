@@ -9,6 +9,8 @@ namespace RiffRepeater {
 	void EnableLinearSpeeds();
 	void DisableLinearSpeeds();
 	bool LogSongID(std::string songKey);
+	void HandleSongChange(const std::string& previousSongKey);
+	void SaveSpeedToFileOnChange();
 
 	inline std::map<std::string, AkUInt32> SongObjectIDs;
 	inline AkUInt32 currentSongID;
@@ -17,4 +19,6 @@ namespace RiffRepeater {
 
 	inline bool currentlyEnabled_Above100 = false;
 	inline bool currentlyEnabled_LinearRR = false;
+
+	inline bool saveNewRRSpeedToFile = false;
 }
