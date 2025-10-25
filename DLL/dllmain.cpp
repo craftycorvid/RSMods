@@ -2,19 +2,19 @@
 #include "Main.hpp"
 
 #if defined(_DEBUG) || defined(_WWISE_LOGS)
-bool debug = true; // You ARE on a debug build.
+bool debug = true;
 #else
-bool debug = false; // You are NOT on a debug build.
+bool debug = false;
 #endif
 
 #ifdef _WWISE_LOGS
-bool wwiseLogging = true; // You ARE on a Wwise logging build.
+bool wwiseLogging = true;
 #else
-bool wwiseLogging = false; // You are NOT on a Wwise logging build.
+bool wwiseLogging = false;
 #endif
 
 #ifndef _RSMODS_VERSION
-#define _RSMODS_VERSION "RSMODS Version: 1.2.8.0 SRC. DEBUG: " << std::boolalpha << debug << ". Wwise Logs: " << std::boolalpha << wwiseLogging << "."
+#define _RSMODS_VERSION "RSMODS Version: 1.2.8.2 SRC. DEBUG: " << std::boolalpha << debug << ". Wwise Logs: " << std::boolalpha << wwiseLogging << "."
 #endif
 
 /// <summary>
@@ -22,32 +22,24 @@ bool wwiseLogging = false; // You are NOT on a Wwise logging build.
 /// </summary>
 /// <returns>NULL. Loops while game is open.</returns>
 unsigned WINAPI EnumerationThread() {
-
-	// User has not seen the main menu yet.
-	// Please wait until the user has seen the main menu before doing anything.
 	while (!GameState::GameLoaded)
 		Sleep(5000);
 
-
-	// Read the users Keybinds and Mod Settings, so verify we have the latest data from the INI.
 	Settings::ReadKeyBinds();
 	Settings::ReadModSettings();
 
-	// Set an inital count for number of DLC songs.
-	int oldDLCCount = Enumeration::GetCurrentDLCCount(), newDLCCount = oldDLCCount;
+	int oldDLCCount = Enumeration::GetCurrentDLCCount();
+	int newDLCCount = oldDLCCount;
 
-	// Look for new dlc files. Break when game is closing.
 	while (!GameState::GameClosing) {
 		if (Settings::ReturnSettingValue("ForceReEnumerationEnabled") == "automatic") {
 			oldDLCCount = newDLCCount;
 			newDLCCount = Enumeration::GetCurrentDLCCount();
 
-			// If there is any new dlc files, trigger Enumeration.
 			if (oldDLCCount != newDLCCount)
 				Enumeration::ForceEnumeration();
 		}
 
-		// Sleep for a user provided interval (milliseconds).
 		Sleep(Settings::GetModSetting("CheckForNewSongsInterval"));
 	}
 
@@ -61,7 +53,6 @@ unsigned WINAPI EnumerationThread() {
 /// <returns>NULL. Loops while game is open.</returns>
 unsigned WINAPI MidiThread() {
 	// Initial some values.
-	int everyXcyclesCheckD3DTextures = 31;
 	int currentCount = 0;
 
 	while (!GameState::GameClosing) {
@@ -80,11 +71,10 @@ unsigned WINAPI MidiThread() {
 		if (Midi::sendCC)
 			Midi::SendControlChange(Midi::dataToSendCC);
 
-		// Sleep for ~ 1/33rd of a second so we don't waste that many cycles.
-		Sleep(Midi::sleepFor); 
+		Sleep(Midi::sleepFor);
 		currentCount++;
 	}
-	
+
 	return 0;
 }
 
@@ -104,33 +94,14 @@ unsigned WINAPI RiffRepeaterThread() {
 			continue;
 		}
 
-		// Get SongKey for the song. We need this to reference the audio event by name.
 		const auto songKey = GameState::GetSongKey();
-
-		// If this isn't the song we saw on the last loop.
 		if (songKey != previousSongKey) {
 			previousSongKey = songKey;
 
-			// If we have cached this event, then use the cached version, and tell the other threads to enable the Riff Repeater speed mod.
-			if (RiffRepeater::SongObjectIDs.find("Play_" + previousSongKey) != RiffRepeater::SongObjectIDs.end()) {
-				RiffRepeater::currentSongID = RiffRepeater::SongObjectIDs.find("Play_" + previousSongKey)->second;
-				RiffRepeater::readyToLogSongID = false;
-				RiffRepeater::loggedCurrentSongID = true;
-			}
-			// We have not seen this event yet, so we need to log the internal ID for the song and cache it.
-			else {
-				RiffRepeater::loggedCurrentSongID = false;
-				RiffRepeater::readyToLogSongID = true; // Wait until the user gets into the song so we can grab this ID.
-			}
+			RiffRepeater::HandleSongChange(previousSongKey);
 		}
 
-		// If we have recently changed the Riff Repeater speed through the mod, then save the new value to a text file.
-		// This is primarily for streamers who want to make a custom overlay with the song speed.
-		if (GameState::Menus::IsInModesWithAllowedFastRiffRepeater() && saveNewRRSpeedToFile) {
-			auto rrText = std::ofstream("riff_repeater_speed.txt", std::ofstream::out);
-			rrText << std::to_string((int)realSongSpeed) << std::endl;
-			saveNewRRSpeedToFile = false;
-		}
+		RiffRepeater::SaveSpeedToFileOnChange();
 	}
 
 	return 0;
@@ -147,395 +118,44 @@ unsigned WINAPI RiffRepeaterThread() {
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 	_LOG_INIT;
 
-	// Makes ALT + ENTER cause F11 to be pressed.
-	// This is mainly so a user can use a common shortcut, that works in most games now-a-days.
-	if (msg == WM_SYSCOMMAND && keyPressed == SC_KEYMENU) {
-		if (lParam == VK_RETURN) 
-			WndProc(hWnd, WM_KEYUP, VK_F11, 0);
-
-		return true;
-	}
-	
-	// Prevent a weird bug when trying to play Guitarcade or Score Attack with a key combination.
-	if (msg == WM_SYSCOMMAND && keyPressed == SC_MOVE + 0x2 && GameState::Menus::IsInOnlineModes())
+	if (D3DHooks::menuEnabled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, keyPressed, lParam))
 		return true;
 
-	// Trigger Mod on Keypress
-	if (msg == WM_KEYUP) {
-		if (GameState::GameLoaded) { // Game must not be on the startup videos or it will crash
-
-			// Toggle Loft mod
-			if (keyPressed == Settings::GetKeyBind("ToggleLoftKey") && Settings::ReturnSettingValue("ToggleLoftEnabled") == "on") {
-				Loft::ToggleLoft();
-				_LOG("Triggered Mod: Toggle Loft" << std::endl);
+	switch (msg) {
+		case WM_SYSCOMMAND:
+			// Makes ALT + ENTER cause F11 to be pressed.
+			// This is mainly so a user can use a common shortcut, that works in most games now-a-days.
+			if (keyPressed == SC_KEYMENU && lParam == VK_RETURN) {
+				WndProc(hWnd, WM_KEYUP, VK_F11, 0);
+				return true;
 			}
 
-			// Show Song Timer mod
-			else if (keyPressed == Settings::GetKeyBind("ShowSongTimerKey") && Settings::ReturnSettingValue("ShowSongTimerEnabled") == "on") {
-				D3DHooks::showSongTimerOnScreen = !D3DHooks::showSongTimerOnScreen;
-				_LOG("Triggered Mod: Show Song Timer" << std::endl);
+			// Prevent a weird bug when trying to play Guitarcade or Score Attack with a key combination.
+			if (keyPressed == SC_MOVE + 0x2 && GameState::Menus::IsInOnlineModes()) {
+				return true;
 			}
 
-			// Force Enumeration mod
-			else if (keyPressed == Settings::GetKeyBind("ForceReEnumerationKey") && Settings::ReturnSettingValue("ForceReEnumerationEnabled") == "manual") {
-				Enumeration::ForceEnumeration();
-				_LOG("Triggered Mod: Force Enumeration" << std::endl);
-			}
+			break;
+		case WM_KEYUP:
+			Keybindings::HandleKeyUp(keyPressed);
+			break;
+		case WM_KEYDOWN:
+			Keybindings::HandleKeyDown(keyPressed);
+			break;
+		case WM_CLOSE:
+			GameState::GameClosing = true;
+			break;
+		case WM_COPYDATA:
+			Keybindings::UpdateSettingsOnGUIChange(lParam);
+			break;
 
-			// Rainbow Strings mod
-			else if (keyPressed == Settings::GetKeyBind("RainbowStringsKey") && Settings::ReturnSettingValue("RainbowStringsEnabled") == "on") {
-				ERMode::ToggleRainbowMode();
-
-				if (!ERMode::RainbowEnabled)
-					ERMode::ResetAllStrings();
-
-				_LOG("Triggered Mod: Rainbow Strings" << std::endl);
-			}
-
-			// Rainbow Notes mod
-			else if (keyPressed == Settings::GetKeyBind("RainbowNotesKey") && Settings::ReturnSettingValue("RainbowNotesEnabled") == "on") {
-				ERMode::ToggleRainbowNotes();
-				_LOG("Triggered Mod: Rainbow Notes" << std::endl);
-			}
-
-			// Remove Lyrics mod
-			else if (keyPressed == Settings::GetKeyBind("RemoveLyricsKey") && Settings::ReturnSettingValue("RemoveLyricsWhen") == "manual") {
-				D3DHooks::RemoveLyrics = !D3DHooks::RemoveLyrics;
-				_LOG("Triggered Mod: Remove Lyrics" << std::endl);
-			}
-
-			// Control + A. Force us to read the Settings from the INI again, to renew our cached values.
-			else if (keyPressed == 0x41 && (GetKeyState(VK_CONTROL) & 0x8000)) {
-				Settings::UpdateSettings();
-				_LOG("Triggered Setting Update" << std::endl);
-			}
-
-			// Changed Displayed Volume mod
-			else if (keyPressed == Settings::GetKeyBind("ChangedSelectedVolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				GameOverlay::currentVolumeIndex++;
-
-				if (GameOverlay::currentVolumeIndex > (GameOverlay::mixerInternalNames.size() - 1)) // There are only so many values we know we can edit, so loop back.
-					GameOverlay::currentVolumeIndex = 0;
-			}
-
-			// Change Tuning Offset mod
-			else if (keyPressed == Settings::GetKeyBind("TuningOffsetKey") && Settings::ReturnSettingValue("AutoTuneForSong") == "on") {
-				if (GetKeyState(VK_CONTROL) & 0x8000) // Is Control Pressed
-					Midi::tuningOffset--;
-				else
-					Midi::tuningOffset++;
-
-				// Cap what values can be set (as we don't want to have to specify every value, and some pedals don't support more than an octave).
-				if (Midi::tuningOffset < -3)
-					Midi::tuningOffset = -3;
-				else if (Midi::tuningOffset > 12)
-					Midi::tuningOffset = 12;
-
-				_LOG("Triggered Mod Setting: Tuning Offset is now set to " << Midi::tuningOffset << std::endl);
-			}
-
-			// Toggle Extended Range mod
-			else if (keyPressed == Settings::GetKeyBind("ToggleExtendedRangeKey"))
-			{
-				D3DHooks::UseERExclusivelyInThisSong = !D3DHooks::UseERExclusivelyInThisSong;
-				GameState::ToggleCB(D3DHooks::UseERExclusivelyInThisSong);
-
-				_LOG("Triggered Mod: Toggle Extended Range" << std::endl);
-			}
-
-			// Looping mod. Set loop starting point.
-			else if (keyPressed == Settings::GetKeyBind("LoopStartKey") && Settings::ReturnSettingValue("AllowLooping") == "on" && GameState::Menus::IsInModesWithAllowedFastRiffRepeater()) {
-				if (GetKeyState(VK_CONTROL) & 0x8000) { // Is Control Pressed.
-					loopStart = NULL;
-					loopEnd = NULL;
-				}
-				else {
-					// Set the start of the loop to the current time in the song.
-					loopStart = SongTimer::SongTimer();
-
-					// If end point of the loop comes at the same time as, or before, the start of the loop, reset it to 0.
-					if (loopEnd <= loopStart) {
-						loopEnd = NULL;
-					}
-				}
-			}
-
-			// Looping mod. Set loop ending point.
-			else if (keyPressed == Settings::GetKeyBind("LoopEndKey") && Settings::ReturnSettingValue("AllowLooping") == "on" && GameState::Menus::IsInModesWithAllowedFastRiffRepeater()) {
-				if (GetKeyState(VK_CONTROL) & 0x8000) { // Is Control Pressed.
-					loopEnd = NULL;
-				}
-				else {
-					// Set the end of the loop to the current time in the song.
-					loopEnd = SongTimer::SongTimer();
-
-					// If end point of the loop comes at the same time as, or before, the start of the loop, reset it to 0.
-					if (loopEnd <= loopStart) {
-						loopEnd = NULL;
-					}
-				}
-			}
-
-			// Rewind song by X seconds mod.
-			else if (keyPressed == Settings::GetKeyBind("RewindKey") && Settings::ReturnSettingValue("AllowRewind") == "on" && GameState::Menus::IsInLASPlayingModes()) {
-				// SongTimer is stored in seconds, while RewindBy is stored in milliseconds.
-				// We need milliseconds to send to Wwise, so change SongTimer to milliseconds, then subtract the Rewind value.
-				AkTimeMs seekTo = (AkTimeMs)((SongTimer::SongTimer() * 1000) - Settings::GetModSetting("RewindBy"));
-
-				// RewindBy is greater than the amount of time we've been in the song.
-				// Reset seekTo to 0 to prevent seeking to a negative time.
-				if (seekTo < 0) {
-					_LOG("(REWIND) Tried to seek to " << seekTo << "ms into the song. Resetting to 0." << std::endl);
-					seekTo = 0;
-				}
-
-				// Send event to Wwise to rewind the song.
-				// Or more accurately, move to the seek time since Wwise doesn't have a rewind function.
-				Wwise::SoundEngine::SeekOnEvent(std::string("Play_" + GameState::GetSongKey()).c_str(), 0x1234, seekTo, false);
-
-				// Tell Rocksmith to make all notes before the section we want the user to play to be greyed out.
-				// While this isn't absolutely necessary, it is best to have this run just in case.
-				// Our seek time needs to be stored as milliseconds when sending to Wwise, but we need to have it in seconds when setting the GreyNoteTimer.
-				SongTimer::SetGreyNoteTimer(seekTo / 1000.f);
-
-				_LOG("(REWIND) Seeked to " << seekTo << "ms." << std::endl);
-			}
-
-			else if (keyPressed == Settings::GetKeyBind("MutePlayer1Key"))
-			{
-				if (VolumeControl::player1Muted)
-				{
-					VolumeControl::UnmutePlayer();
-				}
-				else
-				{
-					VolumeControl::MutePlayer();
-				}
-
-				GameOverlay::displayCurrentVolume = true;
-				GameOverlay::displayVolumeStartTime = std::chrono::steady_clock::now();
-				GameOverlay::currentVolumeIndex = 2;
-			}
-
-			else if (keyPressed == Settings::GetKeyBind("MutePlayer2Key"))
-			{
-				if (VolumeControl::player2Muted)
-				{
-					VolumeControl::UnmutePlayer(true);
-				}
-				else
-				{
-					VolumeControl::MutePlayer(true);
-				}
-
-				GameOverlay::displayCurrentVolume = true;
-				GameOverlay::displayVolumeStartTime = std::chrono::steady_clock::now();
-				GameOverlay::currentVolumeIndex = 3;
-			}
-
-			// Hide the mixer if it is not actively being pressed
-			else if (keyPressed == Settings::GetKeyBind("DisplayMixerKey")) {
-				GameOverlay::displayMixer = false;
-			}
-
-			// Auto Tuning via MIDI mod. 
-			// Checks if we are in a tuning menu, and the user tried to skip tuning.
-			if (Settings::ReturnSettingValue("AutoTuneForSongWhen") == "manual" && GameState::Menus::IsInTuningMenus() && keyPressed == VK_DELETE) {
-				Midi::userWantsToUseAutoTuning = true;
-			}
-		}
-
-		// If we are using a debug version of the mods.
-		if (debug) {
-			if (keyPressed == VK_INSERT) { // Debug menu. ImGUI
-				D3DHooks::menuEnabled = !D3DHooks::menuEnabled;
-			}
-		}
-	}
-
-	// Repeatedly trigger mod on key hold
-	else if (msg == WM_KEYDOWN) {
-		// Game must not be on the startup videos or it might crash
-		if (GameState::GameLoaded) {
-			// Riff Repeater > 100% mod.
-			if (keyPressed == Settings::GetKeyBind("RRSpeedKey") && Settings::ReturnSettingValue("RRSpeedAboveOneHundred") == "on" && GameState::Menus::IsInModesWithAllowedFastRiffRepeater() && RiffRepeater::loggedCurrentSongID) {
-
-				// Get the current speed of Riff Repeater.
-				realSongSpeed = RiffRepeater::GetSpeed(true);
-
-				// Add / Subtract User specified Interval
-				if (GetKeyState(VK_CONTROL) & 0x8000)
-					realSongSpeed -= (float)Settings::GetModSetting("RRSpeedInterval");
-				else
-					realSongSpeed += (float)Settings::GetModSetting("RRSpeedInterval");
-
-				// Set limits to the speed
-				// Cap at 400. Plugin only goes down to 25. 10000 / 25 = 400.
-				// Cap at 25. Plugin only goes up to 400. 10000 / 400 = 25.
-
-				if (realSongSpeed > 400.f)
-					realSongSpeed = 400.f;
-
-				if (realSongSpeed < 25.f)
-					realSongSpeed = 25.f;
-
-				// Save new speed, and save it to a file (for streamers to use as a custom on-screen overlay)
-				RiffRepeater::SetSpeed(realSongSpeed, true);
-				RiffRepeater::EnableTimeStretch();
-				saveNewRRSpeedToFile = true;
-
-				_LOG("Triggered Mod: Song Speed set to " << realSongSpeed << "% which is equivalent to " << RiffRepeater::ConvertSpeed(realSongSpeed) << " Wwise RTPC." << std::endl);
-			}
-
-			// Display Mixer  mod
-			else if (keyPressed == Settings::GetKeyBind("DisplayMixerKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				GameOverlay::displayMixer = true;
-			}
-
-			// Change Master Volume mod
-			else if (keyPressed == Settings::GetKeyBind("MasterVolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				if ((GetKeyState(VK_CONTROL) & 0x8000)) // Is Control Pressed
-					VolumeControl::DecreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Master_Volume");
-				else
-					VolumeControl::IncreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Master_Volume");
-
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 0;
-			}
-
-			// Change Song Volume mod
-			else if (keyPressed == Settings::GetKeyBind("SongVolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				if ((GetKeyState(VK_CONTROL) & 0x8000)) // Is Control Pressed
-					VolumeControl::DecreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_Music");
-				else
-					VolumeControl::IncreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_Music");
-
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 1;
-			}
-
-			// Change P1 Guitar & P1 Bass Volume mod
-			else if (keyPressed == Settings::GetKeyBind("Player1VolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				if ((GetKeyState(VK_CONTROL) & 0x8000)) // Is Control Pressed
-					VolumeControl::DecreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_Player1");
-				else
-					VolumeControl::IncreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_Player1");
-
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 2;
-			}
-
-			// Change P2 Guitar & P2 Bass Volume mod
-			else if (keyPressed == Settings::GetKeyBind("Player2VolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				if ((GetKeyState(VK_CONTROL) & 0x8000)) // Is Control Pressed
-					VolumeControl::DecreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_Player2");
-				else
-					VolumeControl::IncreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_Player2");
-
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 3;
-			}
-
-			// Change Microphone Volume mod
-			else if (keyPressed == Settings::GetKeyBind("MicrophoneVolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				if ((GetKeyState(VK_CONTROL) & 0x8000)) // Is Control Pressed
-					VolumeControl::DecreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_Mic");
-				else
-					VolumeControl::IncreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_Mic");
-
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 4;
-			}
-
-			// Change Voice-Over Volume mod
-			else if (keyPressed == Settings::GetKeyBind("VoiceOverVolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				if ((GetKeyState(VK_CONTROL) & 0x8000)) // Is Control Pressed
-					VolumeControl::DecreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_VO");
-				else
-					VolumeControl::IncreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_VO");
-
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 5;
-			}
-
-			// Change SFX Volume mod
-			else if (keyPressed == Settings::GetKeyBind("SFXVolumeKey") && Settings::ReturnSettingValue("VolumeControlEnabled") == "on") {
-				if ((GetKeyState(VK_CONTROL) & 0x8000)) // Is Control Pressed
-					VolumeControl::DecreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_SFX");
-				else
-					VolumeControl::IncreaseVolume(Settings::GetModSetting("VolumeControlInterval"), "Mixer_SFX");
-
-				displayCurrentVolume = true;
-				displayVolumeStartTime = std::chrono::steady_clock::now();
-				currentVolumeIndex = 6;
-			}
-		}
-	}
-
-	// Update settings from GUI.
-	// Done on GUI setting save.
-	else if (msg == WM_COPYDATA) {
-		auto pcds = (COPYDATASTRUCT*)lParam;
-		if (pcds->dwData == 1)
-		{
-			std::string currMsg = (char*)pcds->lpData;
-			_LOG(currMsg << std::endl);
-
-			// GUI sent a "update" message. We need to re-read the INI.
-			if (Contains(currMsg, "update")) {
-				if (Contains(currMsg, "all"))
-					Settings::UpdateSettings();
-				else
-					Settings::ParseSettingUpdate(currMsg);
-			}
-
-			// GUI sent a "WwiseEvent" message. We need to trigger a Voice-Over so the user can test their Sound Pack.
-			else if (Contains(currMsg, "WwiseEvent")) {
-				auto msgParts = Settings::SplitByWhitespace(currMsg);
-
-				if (msgParts.size() == 2)
-					VoiceOverControl::PlayVoiceOver(msgParts[1]);
-			}
-
-			// **Deprecated** Twitch Integration. Use CrowdControl.
-			else if (Contains(currMsg, "TurboSpeed"))
-			{
-				if (Contains(currMsg, "enable"))
-					RiffRepeater::EnableTimeStretch();
-				else
-					RiffRepeater::DisableTimeStretch();
-			}
-			else if (Contains(currMsg, "enable"))
-				effectQueue.push_back(currMsg);
-			else if (Contains(currMsg, "Reconnect"))
-				CrowdControl::StartServerLoop();
-		}
-	}
-
-	// Failsafe for mouse input falling through the menu
-	//if (D3DHooks::menuEnabled && (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONDOWN || msg == WM_RBUTTONUP || msg == WM_MBUTTONDOWN || msg == WM_MBUTTONUP || msg == WM_MOUSEWHEEL || msg == WM_MOUSEMOVE))
-	//	return false;
-
-	// If Game is closing, else get ImGUI setup.
-	if (msg == WM_CLOSE)
-		GameState::GameClosing = true;
-	else {
-		ImGuiIO& io = ImGui::GetIO();
-
-		POINT mPos;
-		GetCursorPos(&mPos);
-		ScreenToClient(hWnd, &mPos);
-		ImGui::GetIO().MousePos.x = mPos.x;
-		ImGui::GetIO().MousePos.y = mPos.y;
-
-		if (D3DHooks::menuEnabled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, keyPressed, lParam))
-			return true;
+		default:
+			POINT mPos;
+			GetCursorPos(&mPos);
+			ScreenToClient(hWnd, &mPos);
+			ImGui::GetIO().MousePos.x = mPos.x;
+			ImGui::GetIO().MousePos.y = mPos.y;
+			break;
 	}
 
 	return CallWindowProc(D3DHooks::oWndProc, hWnd, msg, keyPressed, lParam);
@@ -823,8 +443,8 @@ unsigned WINAPI MainThread() {
 
 				// Stop displaying volume if 3 seconds have passed since last adjustment
 				const auto currentTime = std::chrono::steady_clock::now();
-				if (currentTime - displayVolumeStartTime > std::chrono::seconds(3))
-					displayCurrentVolume = false;
+				if (currentTime - GameOverlay::displayVolumeStartTime > std::chrono::seconds(3))
+					GameOverlay::displayCurrentVolume = false;
 			}
 
 			// Toggle Loft off (Always Off)
@@ -921,11 +541,11 @@ unsigned WINAPI MainThread() {
 
 				// Turn off Looping mod
 				if (Settings::ReturnSettingValue("AllowLooping") == "on") {
-					if (loopStart != NULL)
-						loopStart = NULL;
+					if (Keybindings::loopStart != NULL)
+						Keybindings::loopStart = NULL;
 
-					if (loopEnd != NULL)
-						loopEnd = NULL;
+					if (Keybindings::loopEnd != NULL)
+						Keybindings::loopEnd = NULL;
 				}
 
 				// Turn off Riff Repeater Speed above 100%

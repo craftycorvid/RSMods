@@ -99,6 +99,7 @@
     </ClCompile>
     <ClCompile Include="D3DOverlay.cpp" />
     <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="Keybindings.cpp" />
     <ClCompile Include="Lib\ImGUI\imgui_tables.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug with Wwise Logging|Win32'">NotUsing</PrecompiledHeader>
@@ -268,6 +269,7 @@
     <ClInclude Include="D3DInfo.h" />
     <ClInclude Include="D3DOverlay.hpp" />
     <ClInclude Include="GameState.hpp" />
+    <ClInclude Include="Keybindings.hpp" />
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Lib\Ini\SimpleIni.h" />
     <ClInclude Include="Lib\Json\json.hpp" />

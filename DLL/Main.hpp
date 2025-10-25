@@ -24,13 +24,6 @@
 #include "Keybindings.hpp"
 #include "Twitch.hpp"
 
-inline bool ImGuiInit = false; // Has ImGui already been init? If we close the game with this being false, then we get an assert.
 inline const double DefaultNSPTimeLimit = 10.9899997711182; // The default time for NSP.
-
-
-// Looping functionality.
-inline float loopStart = NULL; // The start of the loop, as specified by the user.
-inline float roughLoopStart = NULL; // Just like loopStart, except we account for the lead-in time.
-inline float loopEnd = NULL; // The end of the loop, as specified by the user.
 
 inline std::string selectedUser = "";

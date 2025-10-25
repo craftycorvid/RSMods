@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "D3DOverlay.hpp"
+#include "Keybindings.hpp"
 
 /// <returns>Size of Rocksmith Window</returns>
 Resolution GameOverlay::GetWindowSize() {
@@ -215,4 +216,60 @@ void GameOverlay::DisplayLoopStartEndTimes(float loopStart, float loopEnd)
 		pDevice,
 		{ NULL, NULL },
 		DT_CENTER | DT_NOCLIP);
+}
+
+void HandleLooping() {
+	if (Settings::ReturnSettingValue("AllowLooping") == "on" && (Keybindings::loopStart != NULL || Keybindings::loopEnd != NULL)) {
+		// Only enable looping in learn a song modes (learn a song & non-stop play)
+		if (GameState::Menus::IsInLearnASongModes()) {
+			GameOverlay::DisplayLoopStartEndTimes(Keybindings::loopStart, Keybindings::loopEnd);
+
+			// Prevent the user from creating a loop that starts at a negative timestamp.
+			if ((Settings::GetModSetting("LoopingLeadUp") / 1000.f) >= Keybindings::loopStart) {
+				Keybindings::roughLoopStart = 0.f;
+			}
+			else {
+				Keybindings::roughLoopStart = Keybindings::loopStart - (Settings::GetModSetting("LoopingLeadUp") / 1000.f);
+			}
+
+			// If we are paused, reset the grey note timer.
+			if (GameState::Menus::IsInLearnASongPauseModes()) {
+				// Resets grey note timer to loopStart. This makes it so notes in the loop are not deactivated.
+				// Deactivated notes are greyed out, and do not register with note detection.
+				// As an added bonus the game also automatically adds a bit of lead time so the player has some time to prepare.
+				if (SongTimer::GetGreyNoteTimer() != Keybindings::loopStart) {
+					SongTimer::SetGreyNoteTimer(Keybindings::loopStart);
+				}
+			}
+
+			// If not paused AND we are at the end of the loop, seek to the start of the loop.
+			else if (Keybindings::loopStart != NULL && Keybindings::loopEnd != NULL && (SongTimer::SongTimer() >= Keybindings::loopEnd)) {
+				Wwise::SoundEngine::SeekOnEvent(std::string("Play_" + GameState::GetSongKey()).c_str(), 0x1234, (AkTimeMs)(Keybindings::roughLoopStart * 1000), false);
+			}
+		}
+		// Difference between learnASongModes & fastRRModes is the inclusion of RR. This means that this check is only gets the RR menus.
+		else if (GameState::Menus::IsInModesWithAllowedFastRiffRepeater()) {
+			// Reset loopStart and loopEnd to NULL as the user wants to do a loop with RR, or is changing some settings.
+			Keybindings::loopStart = NULL;
+			Keybindings::loopEnd = NULL;
+		}
+	}
+
+}
+
+void GameOverlay::RenderOverlay(IDirect3DDevice9* pDevice) {
+	// Draw text on screen
+	// NOTE: NEVER USE SET VALUES. Always do division of WindowSize width AND heigh so every resolution should have the text in around the same spot.
+	if (GameState::GameLoaded) {
+		Resolution WindowSize = GameOverlay::GetWindowSize();
+
+		GameOverlay::SetPDevice(pDevice, WindowSize);
+		GameOverlay::DisplayMixer();
+		GameOverlay::DisplaySongTimer();
+		GameOverlay::DisplayRiffRepeaterOverHundredPercentSpeed();
+		GameOverlay::DisplayCurrentNote();
+		GameOverlay::DisplayCurrentTuningForAutoTune();
+
+		HandleLooping();
+	}
 }

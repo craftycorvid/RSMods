@@ -24,6 +24,7 @@ namespace GameOverlay {
 	void DisplayRiffRepeaterOverHundredPercentSpeed();
 	void DisplayCurrentTuningForAutoTune();
 	void DisplayLoopStartEndTimes(float loopStart, float loopEnd);
+	void RenderOverlay(IDirect3DDevice9* pDevice);
 
 	inline std::vector<std::string> mixerInternalNames = { // Needs to be char* as that's what SetRTPCValue needs.
 		{"Master_Volume"}, // Master Volume
