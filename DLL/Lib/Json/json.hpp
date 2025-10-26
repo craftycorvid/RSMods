@@ -1,3 +1,5 @@
+#pragma warning(push, 0)
+
 /*
     __ _____ _____ _____
  __|  |   __|     |   | |  JSON for Modern C++

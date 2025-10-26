@@ -10,9 +10,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus KillMusicVolumeEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("KillMusicVolumeEffect::Test()" << std::endl);
+		LOG_INFO("KillMusicVolumeEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -28,9 +26,7 @@ namespace CrowdControl::Effects {
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or the same effect is running already, or EffectStatus::Sucess if we are in a song</returns>
 	EffectStatus KillMusicVolumeEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("KillMusicVolumeEffect::Start()" << std::endl);
+		LOG_INFO("KillMusicVolumeEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -75,9 +71,7 @@ namespace CrowdControl::Effects {
 	/// <returns> EffectStatus::Success</returns>
 	EffectStatus KillMusicVolumeEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("KillMusicVolumeEffect::Stop()" << std::endl);
+		LOG_INFO("KillMusicVolumeEffect::Stop()" << std::endl);
 
 		// Make sure volume was set to original value by setting it immediately effective
 		Wwise::SoundEngine::SetRTPCValue("Mixer_Music", oldVolume, AK_INVALID_GAME_OBJECT, 2000, AkCurveInterpolation_Linear);

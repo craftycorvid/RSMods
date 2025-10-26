@@ -7,9 +7,6 @@
 /// <param name="verbose"> - Should we show the tuning in the console **DEBUG BUILD ONLY**</param>
 /// <returns>Current Tuning in a Byte[6] array.</returns>
 std::array<byte, 6> SongTuning::GetCurrentTuning(bool verbose) {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
 	uintptr_t addrTuning = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_tuning, Offsets::ptr_tuningOffsets, true);
 
 	if (!addrTuning) {
@@ -32,7 +29,7 @@ std::array<byte, 6> SongTuning::GetCurrentTuning(bool verbose) {
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			_LOG("String" << i << " - " << static_cast<int>(allTunings[i]) << std::endl);
+			LOG_INFO("String" << i << " - " << static_cast<int>(allTunings[i]) << std::endl);
 		}
 	}
 
@@ -44,22 +41,18 @@ std::array<byte, 6> SongTuning::GetCurrentTuning(bool verbose) {
 /// </summary>
 /// <returns>Guess of Current Tuning</returns>
 Tuning SongTuning::GetTuningAtTuner() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
 	std::string pathToTuningList = "RSMods/CustomMods/tuning.database.json";
 
 	// If we can't find the list of tunings, just return a default value
 	if (!std::filesystem::exists(pathToTuningList)) {
-		_LOG("Invalid File: GetTuningAtTuner - Path To Tuning File Doesn't Exist." << std::endl);
+		LOG_ERROR("Invalid File: GetTuningAtTuner - Path To Tuning File Doesn't Exist." << std::endl);
 		return Tuning();
 	}
 
 	uintptr_t addrTuningText = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_tuningText, Offsets::ptr_tuningTextOffsets);
 
-	// Null Pointer Check
 	if (!addrTuningText) {
-		_LOG("Invalid Pointer: GetTuningAtTuner" << std::endl);
+		LOG_ERROR("Invalid Pointer: GetTuningAtTuner" << std::endl);
 		return Tuning();
 	}
 
@@ -86,11 +79,9 @@ Tuning SongTuning::GetTuningAtTuner() {
 
 	std::string tuningText = unsanitizedTuningText;
 
-	_LOG_SETLEVEL(LogLevel::Warning);
-
 	// If it's a custom tuning we don't know the tuning, so we might as well stop here.
 	if (tuningText == (std::string)"CUSTOM TUNING") {
-		_LOG("Invalid Tuning: CUSTOM TUNING" << std::endl);
+		LOG_WARNING("Invalid Tuning: CUSTOM TUNING" << std::endl);
 		return Tuning();
 	}
 
@@ -116,18 +107,15 @@ Tuning SongTuning::GetTuningAtTuner() {
 		}
 	}
 
-	_LOG("Invalid Tuning: Tuning doesn't exist in RSMods tuning list" << std::endl);
+	LOG_WARNING("Invalid Tuning: Tuning doesn't exist in RSMods tuning list" << std::endl);
 	return Tuning();
 }
 
 /// <returns>Should we Display The Extended Range Colors?</returns>
 bool SongTuning::IsExtendedRangeSong() {
-	_LOG_INIT;
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	uintptr_t addrTimerEnabled = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_timer, Offsets::ptr_timerBaseOffsets);
 	if (!addrTimerEnabled) {
-		_LOG("Invalid Pointer: IsExtendedRangeSong" << std::endl);
+		LOG_ERROR("Invalid Pointer: IsExtendedRangeSong" << std::endl);
 		return false;
 	}
 
@@ -155,7 +143,7 @@ bool SongTuning::IsExtendedRangeSong() {
 
 	// HighestLowest Tuning Pointer is invalid
 	if (lowestTuning == 666) {
-		_LOG("Invalid Tuning: GetHighestLowestString -> IsExtendedRangeSong" << std::endl);
+		LOG_ERROR("Invalid Tuning: GetHighestLowestString -> IsExtendedRangeSong" << std::endl);
 		return false;
 	}
 
@@ -163,35 +151,29 @@ bool SongTuning::IsExtendedRangeSong() {
 	if (GetTrueTuning() <= 260)
 		lowestTuning -= 12;
 
-	_LOG_SETLEVEL(LogLevel::Info);
-
 	// Does the user's settings allow us to toggle on drop tunings (ER on B, trigger on C# Drop B)
 	if (Settings::ReturnSettingValue("ExtendedRangeDropTuning") == "on" && lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") && dropTuning) {
-		_LOG("Successful: IsExtendedRangeSong in DROP where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << std::endl);
+		LOG_INFO("Successful: IsExtendedRangeSong in DROP where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << std::endl);
 		return true;
 	}
 
 	// Does the user's settings allow us to toggle Extended Range Mode for this tuning
 	if (lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") && (!dropTuning || lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") - 2)) {
-		_LOG("Successful: IsExtendedRangeSong in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << " minus 2. Drop Tuned: " << std::boolalpha << dropTuning << std::endl);
+		LOG_INFO("Successful: IsExtendedRangeSong in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << " minus 2. Drop Tuned: " << std::boolalpha << dropTuning << std::endl);
 		return true;
 	}
 
-	_LOG("Failed: IsExtendedRangeSong. Drop at " << Settings::GetModSetting("ExtendedRangeMode") << " but received " << lowestTuning << " with drop tuning " << Settings::ReturnSettingValue("ExtendedRangeDropTuning") << std::endl);
+	LOG_INFO("Failed: IsExtendedRangeSong. Drop at " << Settings::GetModSetting("ExtendedRangeMode") << " but received " << lowestTuning << " with drop tuning " << Settings::ReturnSettingValue("ExtendedRangeDropTuning") << std::endl);
 	return false;
 }
 
 /// <returns>Should we Display The Extended Range Colors In The Tuner?</returns>
 bool SongTuning::IsExtendedRangeTuner() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	uintptr_t addrTuningText = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_tuningText, Offsets::ptr_tuningTextOffsets);
 
 	// Either null or is not in a pre-song tuner
 	if (!addrTuningText) {
-		_LOG("Invalid Pointer: IsExtendedRangeTuner" << std::endl);
+		LOG_ERROR("Invalid Pointer: IsExtendedRangeTuner" << std::endl);
 		return false;
 	}
 
@@ -203,7 +185,7 @@ bool SongTuning::IsExtendedRangeTuner() {
 
 	// Tuning Not Found
 	if (tunerSongTuning.lowE == 69) {
-		_LOG("Invalid Tuning: IsExtendedRangeTuner" << std::endl);
+		LOG_ERROR("Invalid Tuning: IsExtendedRangeTuner" << std::endl);
 		return false;
 	}
 
@@ -213,8 +195,6 @@ bool SongTuning::IsExtendedRangeTuner() {
 	if (GetTrueTuning() <= 260)
 		lowestTuning -= 12;
 
-	_LOG_SETLEVEL(LogLevel::Info);
-
 	bool inDrop = IsSongInDrop(tunerSongTuning);
 
 	// The games stores tunings in unsigned chars (bytes) so we need to convert it to our int Extended Range toggle.
@@ -223,17 +203,17 @@ bool SongTuning::IsExtendedRangeTuner() {
 
 	// Does the user's settings allow us to toggle on drop tunings (ER on B, trigger on C# Drop B)
 	if (Settings::ReturnSettingValue("ExtendedRangeDropTuning") == "on" && inDrop && lowestTuning <= Settings::GetModSetting("ExtendedRangeMode")) {
-		_LOG("Successful: IsExtendedRangeTuner in DROP where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << std::endl);
+		LOG_INFO("Successful: IsExtendedRangeTuner in DROP where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << std::endl);
 		return true;
 	}
 
 	// Does the user's settings allow us to toggle Extended Range Mode for this tuning
 	if (lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") && (!inDrop || lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") - 2)) {
-		_LOG("Successful: IsExtendedRangeTuner in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << " minus 2. Drop Tuned: " << std::boolalpha << inDrop << std::endl);
+		LOG_INFO("Successful: IsExtendedRangeTuner in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << " minus 2. Drop Tuned: " << std::boolalpha << inDrop << std::endl);
 		return true;
 	}
 
-	_LOG("Failed: IsExtendedRangeTuner. Drop at " << Settings::GetModSetting("ExtendedRangeMode") << " but received " << lowestTuning << " with drop tuning " << Settings::ReturnSettingValue("ExtendedRangeDropTuning") << std::endl);
+	LOG_INFO("Failed: IsExtendedRangeTuner. Drop at " << Settings::GetModSetting("ExtendedRangeMode") << " but received " << lowestTuning << " with drop tuning " << Settings::ReturnSettingValue("ExtendedRangeDropTuning") << std::endl);
 	return false;
 }
 
@@ -242,10 +222,6 @@ bool SongTuning::IsExtendedRangeTuner() {
 /// </summary>
 /// <returns>[0] - Highest, [1] - Lowest</returns>
 std::array<int, 2> SongTuning::GetHighestLowestString() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	int highestTuning = 0;
 	int lowestTuning = 256;
 	int currentStringTuning = 0;
@@ -303,7 +279,6 @@ std::array<int, 2> SongTuning::GetHighestLowestString(Tuning tuningOverride) {
 	int highestTuning = 0;
 	int lowestTuning = 256;
 
-	// Null Pointer Check
 	if (tuningOverride.lowE == 69) {
 		return { 666, 666 };
 	}
@@ -383,10 +358,6 @@ bool SongTuning::IsSongInStandard(Tuning tuning) {
 
 /// <returns>True Tuning. ex: A440, A432</returns>
 int SongTuning::GetTrueTuning() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	uintptr_t trueTunePointer = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_trueTuning, Offsets::ptr_trueTuningOffsets);
 
 	if (!trueTunePointer) {

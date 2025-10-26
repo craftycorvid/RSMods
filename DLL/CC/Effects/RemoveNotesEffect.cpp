@@ -10,9 +10,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus RemoveNotesEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("RemoveNotesEffect::Test()" << std::endl);
+		LOG_INFO("RemoveNotesEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -26,9 +24,7 @@ namespace CrowdControl::Effects {
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or the same effect is running already, or EffectStatus::Success if we are in a song</returns>
 	EffectStatus RemoveNotesEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("RemoveNotesEffect::Start()" << std::endl);
+		LOG_INFO("RemoveNotesEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -47,9 +43,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success</returns>
 	EffectStatus RemoveNotesEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("RemoveNotesEffect::Stop()" << std::endl);
+		LOG_INFO("RemoveNotesEffect::Stop()" << std::endl);
 
 		ScaleNotes(1);
 		running = false;
@@ -61,10 +55,8 @@ namespace CrowdControl::Effects {
 	/// Change the scale of the notes
 	/// </summary>
 	/// <param name="scale"> - Scale to set the notes.</param>
-	void RemoveNotesEffect::ScaleNotes(float scale) {
-		_LOG_INIT;
-		
-		_LOG("RemoveNotesEffect::ScaleNotes(" << scale << ")" << std::endl);
+	void RemoveNotesEffect::ScaleNotes(float scale) {		
+		LOG_INFO("RemoveNotesEffect::ScaleNotes(" << scale << ")" << std::endl);
 
 		std::map<std::string, float> scaleMap;
 

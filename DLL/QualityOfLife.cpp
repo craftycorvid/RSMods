@@ -9,7 +9,7 @@ namespace QualityOfLife {
 	{
 		char patch[25];
 		std::fill_n(patch, 25, 0x90);
-		MemUtil::PatchAdr(Offsets::ptr_twoRTCBypass, patch, sizeof(patch));;
+		MemUtil::PatchAdr(Offsets::ptr_twoRTCBypass, patch, sizeof(patch));
 	}
 
 	/// <summary>
@@ -36,8 +36,6 @@ namespace QualityOfLife {
 	/// Stops the game from starting two instances
 	/// </summary>
 	void StopTwoRSInstances() {
-		_LOG_INIT;
-
 		HANDLE handle = GetMessageBoxProcess();
 
 		if (!handle) {
@@ -54,14 +52,14 @@ namespace QualityOfLife {
 				std::wstring processName(processNameBuffer.data());
 
 				if (processName == L"Rocksmith2014.exe") {
-					_LOG("Found parasitic process '" << processName.c_str() << "'. Terminating." << std::endl);
+					LOG_INFO("Found parasitic process '" << processName.c_str() << "'. Terminating." << std::endl);
 
 					if (!TerminateProcess(handle, 0)) {
-						_LOG("Failed to terminate process. Error: " << GetLastError() << std::endl);
+						LOG_ERROR("Failed to terminate process. Error: " << GetLastError() << std::endl);
 					}
 				}
 				else {
-					_LOG("Found dialog box, but process '" << processName.c_str() << "' is not the target. Not terminating." << std::endl);
+					LOG_INFO("Found dialog box, but process '" << processName.c_str() << "' is not the target. Not terminating." << std::endl);
 				}
 			}
 		}

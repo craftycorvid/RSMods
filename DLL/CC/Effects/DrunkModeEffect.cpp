@@ -12,14 +12,12 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus DrunkModeEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("DrunkModeEffect::Test()" << std::endl);
+		LOG_INFO("DrunkModeEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
-			return EffectStatus::Success;
+		return EffectStatus::Success;
 	}
 
 	/// <summary>
@@ -29,9 +27,7 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or incompatible effects are running, or EffectStatus::Success if we are</returns>
 	EffectStatus DrunkModeEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("DrunkModeEffect::Start()" << std::endl);
+		LOG_INFO("DrunkModeEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -51,9 +47,7 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 	/// <returns>EffectStatus::Success</returns>
 	EffectStatus DrunkModeEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("DrunkModeEffect::Stop()" << std::endl);
+		LOG_INFO("DrunkModeEffect::Stop()" << std::endl);
 
 		running = false;
 		Loft::ToggleDrunkMode(false);

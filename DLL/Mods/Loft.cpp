@@ -6,13 +6,10 @@ namespace Loft {
 	/// Turn the background / "map" on or off.
 	/// </summary>
 	void ToggleLoft() {
-		_LOG_INIT;
-		_LOG_SETLEVEL(LogLevel::Error);
-
 		uintptr_t farAddr = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_loft, Offsets::ptr_loft_farOffsets);
 
 		if (!farAddr) {
-			_LOG("Invalid Pointer: ToggleLoft()" << std::endl);
+			LOG_ERROR("Invalid Pointer: ToggleLoft()" << std::endl);
 			return;
 		}
 

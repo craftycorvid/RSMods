@@ -11,11 +11,11 @@ namespace ERMode {
 	bool IsRainbowNotesEnabled();
 	void ResetString(int strIndex);
 	bool ResetAllStrings();
-	void SetCustomColors(int strIdx, ColorMap customColorMap);
+	void SetCustomColors(int strIdx, const ColorMap& customColorMap);
 	void Initialize();
 	void InitStrings(std::vector<uintptr_t>& strings, int state);
 	void SetColors(std::vector<uintptr_t> strings, std::vector<RSColor> colors);
-	void SetColors(std::vector<uintptr_t> strings, std::string colorType);
+	void SetColors(std::vector<uintptr_t> strings, const std::string& colorType);
 
 	inline bool Is7StringSong = false;
 	inline bool RainbowEnabled = false;

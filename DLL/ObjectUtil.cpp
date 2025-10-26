@@ -3,14 +3,11 @@
 
 namespace ObjectUtil {
 	Object* GetRootObject() {
-		_LOG_INIT;
-		_LOG_SETLEVEL(LogLevel::Error);
-
 		auto root = (Object*)MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_rootObject, Offsets::ptr_rootObjectOffsets, true);
 
 		// Disabled due to spam of the log.
 		/*if (root == NULL)
-			_LOG("(ObjUtil) Root object is NULL. Some Twitch mods may not work" << std::endl);*/
+			LOG_ERROR("(ObjUtil) Root object is NULL. Some Twitch mods may not work" << std::endl);*/
 
 		return root;
 	}

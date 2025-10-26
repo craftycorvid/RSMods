@@ -69,8 +69,7 @@ void TrueTuning::DisableTrueTuning()
 	MemUtil::PatchAdr(Offsets::ptr_disableTrueTuningGate, "\xEB", 1); // Force a jump into our code, JMP.
 	MemUtil::PlaceHook(Offsets::ptr_disableTrueTuning, disableTrueTuning, 6);
 
-	_LOG_INIT;
-	_LOG("Disabled true tuning" << std::endl);
+	LOG_INFO("Disabled true tuning" << std::endl);
 }
 
 /// <summary>
@@ -81,6 +80,5 @@ void TrueTuning::EnableTrueTuning()
 	MemUtil::PatchAdr(Offsets::ptr_disableTrueTuningGate, "\x74", 1); // Change the jump back to a conditional jump, JE.
 	MemUtil::PatchAdr(Offsets::ptr_disableTrueTuning, "\xD9\x05\x68\x44\x22\x01", 6);
 
-	_LOG_INIT;
-	_LOG("Enabled true tuning" << std::endl);
+	LOG_INFO("Enabled true tuning" << std::endl);
 }

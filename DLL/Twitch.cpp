@@ -54,18 +54,17 @@ namespace Twitch {
 	/// </summary>
 	/// <param name="currEffectMsg"> - Mod to Trigger.</param>
 	void HandleEffect(std::string const& currEffectMsg) {
-		_LOG_INIT;
-
 		auto msgParts = Settings::SplitByWhitespace(currEffectMsg);
 		std::string effectName = msgParts[1];
-		_LOG("Entering the thread for: " << currEffectMsg << std::endl);
+
+		LOG_INFO("Entering the thread for: " << currEffectMsg << std::endl);
 
 		// Don't allow the current effect to apply twice. Also blocks mods from triggering when not in a song.
 		while (IsCurrentEffectAlreadyAppliedOrNotInSong(effectName))
 			Sleep(150);
 
-		_LOG("Enabled effects count: " << enabledEffects.size() << std::endl);
-		_LOG("Enabling " << effectName << std::endl);
+		LOG_INFO("Enabled effects count: " << enabledEffects.size() << std::endl);
+		LOG_INFO("Enabling " << effectName << std::endl);
 
 		if (HandleMessage(currEffectMsg, "enable")) {
 			// Sleep for the duration of the effect.
@@ -77,10 +76,9 @@ namespace Twitch {
 		}
 	}
 
-	void DisableEffect(const std::string& effectName) {
-		_LOG_INIT;
-
-		_LOG("Disabling " << effectName << std::endl);
+	void DisableEffect(const std::string& effectName) 
+	{
+		LOG_INFO("Disabling " << effectName << std::endl);
 
 		if (Contains(effectName, enabledEffects)) // JIC
 			enabledEffects.erase(std::find(enabledEffects.begin(), enabledEffects.end(), effectName));

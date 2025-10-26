@@ -10,9 +10,7 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus FYourFCEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("FYourFC::Test()" << std::endl);
+		LOG_INFO("FYourFC::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -26,19 +24,19 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or incompatible effects are running, or EffectStatus::Sucess if we are</returns>
 	EffectStatus FYourFCEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("FYourFC::Start()" << std::endl);
+		LOG_INFO("FYourFC::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		uintptr_t currentNoteStreak = 0;
 
-		if (GameState::Menus::IsInLearnASongModes())
+		if (GameState::Menus::IsInLearnASongModes()) {
 			currentNoteStreak = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_currentNoteStreak, Offsets::ptr_currentNoteStreakLASOffsets);
-		else if (GameState::Menus::IsInScoreAttackModes())
+		}
+		else if (GameState::Menus::IsInScoreAttackModes()) {
 			currentNoteStreak = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_currentNoteStreak, Offsets::ptr_currentNoteStreakSAOffsets);
+		}
 
 		if (currentNoteStreak != 0)
 			*(int32_t*)currentNoteStreak = 0;
@@ -52,9 +50,7 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 	/// <returns>EffectStatus::Success</returns>
 	EffectStatus FYourFCEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("FYourFC::Stop()" << std::endl);
+		LOG_INFO("FYourFC::Stop()" << std::endl);
 
 		return EffectStatus::Success;
 	}

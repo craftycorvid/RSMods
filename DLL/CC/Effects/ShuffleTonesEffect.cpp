@@ -10,9 +10,7 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus ShuffleTonesEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("ShuffleTonesEffect::Test()" << std::endl);
+		LOG_INFO("ShuffleTonesEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -27,9 +25,7 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus ShuffleTonesEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("ShuffleTonesEffect::Start()" << std::endl);
+		LOG_INFO("ShuffleTonesEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -81,9 +77,7 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// <returns>EffectStatus::Success</returns>
 	EffectStatus ShuffleTonesEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("ShuffleTonesEffect::Stop()" << std::endl);
+		LOG_INFO("ShuffleTonesEffect::Stop()" << std::endl);
 
 		running = false;
 

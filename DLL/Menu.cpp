@@ -65,8 +65,6 @@ namespace Menu {
 	}
 
 	void Init(IDirect3DDevice9* pDevice, LONG_PTR WndProc) {
-		_LOG_INIT;
-
 		if (ImGuiInit) {
 			return;
 		}
@@ -90,7 +88,7 @@ namespace Menu {
 		ImGui::GetIO().ImeWindowHandle = D3DHooks::hThisWnd;
 		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-		_LOG("ImGUI Init" << std::endl);
+		LOG_INFO("ImGUI Init" << std::endl);
 
 		Settings::UpdateSettings();
 

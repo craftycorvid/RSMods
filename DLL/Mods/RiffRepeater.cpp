@@ -1,8 +1,8 @@
 #include "../stdafx.h"
 #include "RiffRepeater.hpp"
 
-float Divisor = 10000.f;
-float Max = 400.f;
+const float Divisor = 10000.f;
+const float Max = 400.f;
 
 /// <summary>
 /// Gets the Time_Stretch RTPC.
@@ -71,31 +71,27 @@ void RiffRepeater::DisableTimeStretch() {
 /// </summary>
 /// <param name="songKey"> - SongKey for the current playing song.</param>
 /// <returns>QueryAudioObjectIDs == AK_SUCCESS</returns>
-bool RiffRepeater::LogSongID(std::string songKey) {
+bool RiffRepeater::LogSongID(const std::string& songKey) {
 	std::string playEvent = "Play_" + songKey;
 	AkUInt32 totalObjects = 0;
 
 	// Gets total number of objects so we know how much memory we need to allocate.
 	Wwise::SoundEngine::Query::QueryAudioObjectIDs(playEvent.c_str(), &totalObjects, NULL); 
 
-	// Allocate a memory block, 12 wide per object. Should only ever be 1 object, but just to be sure.
-	void* memoryBlock = malloc(totalObjects * 0xC); 
+	std::vector<AkObjectInfo> memoryBlock(totalObjects);
 
 	// Get the Actor-Mixer ID that we need to manipulate the Time_Stretch parameter.
-	AKRESULT soundObjects = Wwise::SoundEngine::Query::QueryAudioObjectIDs(playEvent.c_str(), &totalObjects, (AkObjectInfo*)memoryBlock); 
+	AKRESULT soundObjects = Wwise::SoundEngine::Query::QueryAudioObjectIDs(playEvent.c_str(), &totalObjects, memoryBlock.data()); 
 
-	if (totalObjects > 0 && memoryBlock != NULL) {
+	if (totalObjects > 0 && !memoryBlock.empty()) {
 		// Save the Play_{SongKey} event and the Actor-Mixer ID to a map so we don't need to get it multiple times if the user leaves and comes back to the song.
 		// These values are static, PER SONG, so we could even make a database file (and/or csv) with these IDs in it to have an even bigger cache of them.
-		SongObjectIDs.insert({ playEvent, *(AkUInt32*)memoryBlock }); 
+		SongObjectIDs.try_emplace({ playEvent, memoryBlock[0].objID });
 												
 		// The Actor-Mixer ID we need is at the very beginning of the memory block.
-		currentSongID = *(AkUInt32*)memoryBlock; 
+		currentSongID = memoryBlock[0].objID;
 		loggedCurrentSongID = true;
 	}
-
-	// Free the memory we allocated earlier in this function.
-	free(memoryBlock); 
 
 	return soundObjects == AK_Success;
 }
@@ -104,7 +100,7 @@ bool RiffRepeater::LogSongID(std::string songKey) {
 /// <summary>
 /// x86 ASM hook for making Riff Repeater speeds linear. 68% on the slider -> 68% song speed.
 /// </summary>
-void __declspec(naked) hook_timeStretchCalulations() {
+void __declspec(naked) hook_timeStretchCalculations() {
 	__asm {
 		push EBP // Save EBP to stack
 
@@ -134,7 +130,7 @@ void __declspec(naked) hook_timeStretchCalulations() {
 /// </summary>
 void RiffRepeater::EnableLinearSpeeds() {
 	currentlyEnabled_LinearRR = true;
-	MemUtil::PlaceHook(Offsets::ptr_timeStretchCalculations, hook_timeStretchCalulations, 6);
+	MemUtil::PlaceHook(Offsets::ptr_timeStretchCalculations, hook_timeStretchCalculations, 6);
 }
 
 /// <summary>

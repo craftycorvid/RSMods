@@ -42,12 +42,10 @@ void DirectInput() {
 /// Public function to turn off XInput and DirectInput Controllers.
 /// </summary>
 void DisableControllers::DisableControllers() {
-	_LOG_INIT;
-
-	_LOG("Disabling Controllers..." << std::endl);
+	LOG_INFO("Disabling Controllers..." << std::endl);
 
 	XInput();
 	DirectInput();
 
-	_LOG("DI8-Pointer: " << DirectInputPointer << std::endl);
+	LOG_INFO("DI8-Pointer: " << DirectInputPointer << std::endl);
 }

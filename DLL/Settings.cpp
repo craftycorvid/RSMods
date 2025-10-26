@@ -160,13 +160,9 @@ std::vector<std::string> Settings::GetCustomSongTitles() {
 /// Parse Mod / Volume Keybind Toggles
 /// </summary>
 void Settings::ReadKeyBinds() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	CSimpleIniA reader;
 	if (reader.LoadFile("RSMods.ini") < 0) {
-		_LOG("Error reading saved settings" << std::endl);
+		LOG_ERROR("Error reading saved settings" << std::endl);
 		return;
 	}
 
@@ -203,13 +199,9 @@ void Settings::ReadKeyBinds() {
 /// Parse Settings For Mods
 /// </summary>
 void Settings::ReadModSettings() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	CSimpleIniA reader;
 	if (reader.LoadFile("RSMods.ini") < 0) {
-		_LOG("Error reading saved settings" << std::endl);
+		LOG_ERROR("Error reading saved settings" << std::endl);
 		return;
 	}
 
@@ -356,13 +348,9 @@ void Settings::ReadStringColors() {
 /// Parse Noteway Colors From INI
 /// </summary>
 void Settings::ReadNotewayColors() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	CSimpleIniA reader;
 	if (reader.LoadFile("RSMods.ini") < 0) {
-		_LOG("Error reading saved settings" << std::endl);
+		LOG_ERROR("Error reading saved settings" << std::endl);
 		return;
 	}
 

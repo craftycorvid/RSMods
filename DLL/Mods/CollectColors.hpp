@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../RSColor.h"
+
 namespace CollectColors {
 	RSColor GetAmbientStringColor(int stringHue, bool colorBlind);
 	RSColor GetDisabledStringColor(int stringHue, float stringSaturation, float stringLightness, bool colorBlind);

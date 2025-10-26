@@ -2,8 +2,6 @@
 #include "BigNoteheadEffect.hpp"
 
 namespace CrowdControl::Effects {
-	
-	
 	/// <summary>
 	/// Test the twitch mod's requirements.
 	/// </summary>
@@ -11,9 +9,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus BigNoteheadEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("BigNoteheadEffect::Test()" << std::endl);
+		LOG_INFO("BigNoteheadEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -27,9 +23,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus BigNoteheadEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("BigNoteheadEffect::Start()" << std::endl);
+		LOG_INFO("BigNoteheadEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -48,9 +42,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success</returns>
 	EffectStatus BigNoteheadEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("BigNoteheadEffect::Stop()" << std::endl);
+		LOG_INFO("BigNoteheadEffect::Stop()" << std::endl);
 
 		SetNoteHeadScale(1);
 		running = false;
@@ -62,13 +54,11 @@ namespace CrowdControl::Effects {
 	/// Sets the scale only for objects which are of note mesh type
 	/// </summary>
 	void BigNoteheadEffect::SetNoteHeadScale(float scale) {
-		_LOG_INIT;
-
-		_LOG("BigNoteheadEffect::SetNoteHeadScale(" << scale << ")" << std::endl);
+		LOG_INFO("BigNoteheadEffect::SetNoteHeadScale(" << scale << ")" << std::endl);
 
 		ObjectUtil::SetObjectScales({
 			{"MeshNoteSingleLH", scale},
 			{"MeshNoteSingleRH", scale}
-			});
+		});
 	}
 }

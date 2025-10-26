@@ -1,3 +1,5 @@
+#pragma warning(push, 0)
+
 /*==========================================================================;
  *
  *  Copyright (C) Microsoft Corporation.  All Rights Reserved.

@@ -2,148 +2,125 @@
 
 /// If changing this file, be sure to do a clean build, else some changes might not go into effect.
 
-#if defined(_DEBUG) || defined(_WWISE_LOGS)
-#ifndef _LOG_INIT
-#define _LOG_INIT Log LOG; Log LOG_DEV; LOG_DEV.isConsole = true // Use log in place of cout or cerr, to help consolidate logging.
-#endif
-
-#ifndef _LOG_NOHEAD
-#define _LOG_NOHEAD(X) LOG << X; LOG_DEV << X // Used to append to an existing log message. Will not add timestamp nor level of log.
-#endif
-
-#ifndef _LOG
-#define _LOG(X) LOG << LOG.GetHeader() << X; LOG_DEV << LOG_DEV.GetHeader() << X // Log a specific message to the console (on debug builds) and the log file.
-#endif
-
-#ifndef _LOG_SETLEVEL
-#define _LOG_SETLEVEL(X) LOG.level = X; LOG_DEV.level = X // Sets the logging level of both the file LOG and console LOG.
-#endif
-#else
-
-#ifndef _LOG_INIT
-#define _LOG_INIT Log LOG // Use log in place of cout or cerr, to help consolidate logging.
-#endif
-
-#ifndef _LOG_NOHEAD
-#define _LOG_NOHEAD(X) try { LOG << X; } catch (const std::exception&) { std::cerr << X; }// Used to append to an existing log message. Will not add timestamp nor level of log.
-#endif
-
-#ifndef _LOG
-#define _LOG(X) try { LOG << LOG.GetHeader() << X; } catch ( const std::exception&) { std::cerr << X; }  // Log a specific message to the log file.
-#endif
-
-#ifndef _LOG_SETLEVEL
-#define _LOG_SETLEVEL(X) LOG.level = X // Sets the logging level of the file LOG.
-#endif
-
-#endif
+#pragma once
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <sstream>
+#include <mutex>
 
 /// <summary>
-/// Classification of the logs level, whether the log is just a debug message or an error.
+/// Classification of the logs level.
 /// </summary>
-enum class LogLevel : unsigned char
-{
-	Debug,
-	Info,
-	Warning,
-	Error
+enum class LogLevel : unsigned char {
+    Debug,
+    Info,
+    Warning,
+    Error
 };
 
-namespace LogSettings
-{
-	/// <summary>
-	/// The time that we have that we consider "boot time" of Rocksmith.
-	/// All timestamps in the log are based off of this value.
-	/// </summary>
-	inline clock_t startupTime;
+namespace LogSettings {
+    /// <summary>
+    /// The time that we have that we consider "boot time" of Rocksmith.
+    /// All timestamps in the log are based off of this value.
+    /// </summary>
+    inline clock_t startupTime;
 
-	/// <summary>
-	/// Log level to default to, in-case we need to add more values in the future.
-	/// </summary>
-	inline LogLevel defaultLogLevel = LogLevel::Info;
+    /// <summary>
+    /// Log level to default to, in-case we need to add more values in the future.
+    /// </summary>
+    inline LogLevel defaultLogLevel = LogLevel::Info;
+
+    inline constexpr bool isDebugBuild = 
+    #if defined(_DEBUG) || defined(_WWISE_LOGS)
+        true;
+    #else
+        false;
+    #endif
 }
 
-struct Log
-{
-	enum LogLevel level = LogSettings::defaultLogLevel;
+/// <summary>
+/// Singleton logger that manages both file and console output.
+/// </summary>
+class Logger {
+public:
+    static Logger& GetInstance() {
+        static Logger instance;
+        return instance;
+    }
 
-	bool isConsole = false;
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
 
-	/// <summary>
-	/// Log a message to both cout (debug console) and cerr (log file).
-	/// </summary>
-	/// <returns>Pointer to ostream to support chaining.</returns>
-	template <typename T>
-	std::ostream& operator<<(const T message)
-	{
-		if (isConsole)
-		{
-			std::cout << message;
-			return std::cout;
-		}
-		else {
-			std::cerr << message;
-			return std::cerr;
-		}
-	}
+    /// <summary>
+    /// Log a message with automatic header generation.
+    /// </summary>
+    template <typename T>
+    void Log(const T& message, LogLevel level = LogSettings::defaultLogLevel) {
+        std::lock_guard<std::mutex> lock(mutex);
 
-	/// <summary>
-	/// Get timestamp since boot, and log level label.
-	/// </summary>
-	std::string GetHeader()
-	{
-		std::string header;
+        std::string header = GenerateHeader(level);
 
-		// Debug console doesn't need header information, as it will just cause a bunch of wasted space.
-		if (isConsole)
-		{
-			return header;
-		}
+        std::cerr << header << message;
 
-		// Get the timestamp from starting the game to now.
-		double timeSinceStart = (double)(clock() - LogSettings::startupTime) / CLOCKS_PER_SEC;
-		header += std::to_string(timeSinceStart);
-		
-		// Remove trailing zeros.
-		header.erase(header.size() - 4, std::string::npos);
+        if constexpr (LogSettings::isDebugBuild) {
+            std::cout << message;
+        }
+    }
 
-		header += " ";
+    /// <summary>
+    /// Log without header (for continuation of previous message).
+    /// </summary>
+    template <typename T>
+    void LogNoHeader(const T& message) {
+        std::lock_guard<std::mutex> lock(mutex);
 
-		// Append the log level
-		switch (level)
-		{
-			case (LogLevel::Debug):
-			{
-				header += "[DEBUG]";
-				break;
-			}
-			
-			case (LogLevel::Info):
-			{
-				header += "[INFO]";
-				break;
-			}
+        std::cerr << message;
 
-			case (LogLevel::Warning):
-			{
-				header += "[WARNING]";
-				break;
-			}
+        if constexpr (LogSettings::isDebugBuild) {
+            std::cout << message;
+        }
+    }
 
-			case (LogLevel::Error):
-			{
-				header += "[ERROR]";
-				break;
-			}
+    /// <summary>
+    /// Set the current log level for subsequent logs.
+    /// </summary>
+    void SetLevel(LogLevel level) {
+        currentLevel = level;
+    }
 
-			default:
-			{
-				header += "[UNKNOWN]";
-				break;
-			}
-		}
+    LogLevel GetLevel() const {
+        return currentLevel;
+    }
 
-		header += " ";
-		return header;
-	};
+private:
+    Logger() = default;
+
+    std::string GenerateHeader(LogLevel level) {
+        std::ostringstream header;
+
+        double timeSinceStart = static_cast<double>(clock() - LogSettings::startupTime) / CLOCKS_PER_SEC;
+        header << std::fixed << std::setprecision(2) << timeSinceStart << " ";
+
+        switch (level) {
+            case LogLevel::Debug:   header << "[DEBUG] ";   break;
+            case LogLevel::Info:    header << "[INFO] ";    break;
+            case LogLevel::Warning: header << "[WARNING] "; break;
+            case LogLevel::Error:   header << "[ERROR] ";   break;
+            default:                header << "[UNKNOWN] "; break;
+        }
+
+        return header.str();
+    }
+
+    LogLevel currentLevel = LogSettings::defaultLogLevel;
+    std::mutex mutex; 
 };
+
+#define LOG_DEBUG(msg)   do { std::ostringstream _log_ss; _log_ss << msg; Logger::GetInstance().Log(_log_ss.str(), LogLevel::Debug); } while(0)
+#define LOG_INFO(msg)    do { std::ostringstream _log_ss; _log_ss << msg; Logger::GetInstance().Log(_log_ss.str(), LogLevel::Info); } while(0)
+#define LOG_WARNING(msg) do { std::ostringstream _log_ss; _log_ss << msg; Logger::GetInstance().Log(_log_ss.str(), LogLevel::Warning); } while(0)
+#define LOG_ERROR(msg)   do { std::ostringstream _log_ss; _log_ss << msg; Logger::GetInstance().Log(_log_ss.str(), LogLevel::Error); } while(0)
+#define LOG_NOHEAD(msg)  do { std::ostringstream _log_ss; _log_ss << msg; Logger::GetInstance().LogNoHeader(_log_ss.str()); } while(0)
+
+#define LOG_SETLEVEL(lvl) Logger::GetInstance().SetLevel(lvl)

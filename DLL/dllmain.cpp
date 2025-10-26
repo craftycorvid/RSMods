@@ -116,8 +116,6 @@ unsigned WINAPI RiffRepeaterThread() {
 /// <param name="lParam"> - Data Sent</param>
 /// <returns>Verification that message was sent.</returns>
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
-	_LOG_INIT;
-
 	if (Menu::menuEnabled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, keyPressed, lParam))
 		return true;
 
@@ -167,8 +165,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 /// <param name="pDevice"> - Device Pointer</param>
 /// <returns>HRESULT of the official EndScene</returns>
 HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
-	_LOG_INIT;
-
 	HRESULT originalReturn = oEndScene(pDevice);
 	if (Menu::IsOverlayCall()) {
 		return originalReturn;
@@ -203,9 +199,7 @@ unsigned WINAPI HandleEffectQueueThread() {
 /// </summary>
 /// <returns>NULL. Loops while game is open.</returns>
 unsigned WINAPI MainThread() {
-	_LOG_INIT;
-
-	_LOG_NOHEAD(_RSMODS_VERSION << std::endl);
+	LOG_NOHEAD(_RSMODS_VERSION << std::endl);
 
 	GameLoopState loopState = {};
 

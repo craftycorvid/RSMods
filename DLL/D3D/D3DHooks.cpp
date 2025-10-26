@@ -177,8 +177,6 @@ HRESULT APIENTRY D3DHooks::Hook_Reset(IDirect3DDevice9* pDevice, D3DPRESENT_PARA
 /// <param name="PrimCount"> - Number of primitives to render.</param>
 /// <returns>If the method succeeds, the return value is D3D_OK. If the method fails, the return value can be the following: D3DERR_INVALIDCALL.</returns>
 HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE PrimType, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT StartIndex, UINT PrimCount) { // Draw things on screen
-	_LOG_INIT;
-
 	static bool calculatedCRC = false, calculatedHeadstocks = false, calculatedSkyline = false;
 
 	if (pDevice->GetStreamSource(0, &Stream_Data, &Offset, &Stride) == D3D_OK)
@@ -190,7 +188,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 		D3D::GenerateTextures(pDevice, D3D::Strings);
 		D3D::GenerateTextures(pDevice, D3D::Notes);
 		D3D::GenerateTextures(pDevice, D3D::Rainbow);
-		_LOG("Reloaded settings" << std::endl);
+		LOG_INFO("Reloaded settings" << std::endl);
 	}
 
 	if (setAllToNoteGradientTexture) {
@@ -209,11 +207,11 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 			currIdx--;
 
 		if (GetAsyncKeyState(VK_END) & 1) { // Toggle logging
-			_LOG("Logging is ");
+			LOG_INFO("Logging is ");
 			startLogging = !startLogging;
 			if (!startLogging)
-				_LOG_NOHEAD("no longer ");
-			_LOG_NOHEAD("armed!" << std::endl);
+				LOG_NOHEAD("no longer ");
+			LOG_NOHEAD("armed!" << std::endl);
 		}
 
 		if (GetAsyncKeyState(VK_F8) & 1) { // Save logged meshes to file
@@ -235,7 +233,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 				if (std::find(allMeshes.begin(), allMeshes.end(), currentThicc) == allMeshes.end()) // Make sure we don't log what we'd already logged
 					allMeshes.push_back(currentThicc);
 				if (NOTE_STEMS) // Criteria for search
-					_LOG("{ " << Stride << ", "
+					LOG_INFO("{ " << Stride << ", "
 									  << PrimCount << ", "
 									  << NumVertices << ", "
 									  << StartIndex << ", "

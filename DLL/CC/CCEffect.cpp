@@ -12,8 +12,6 @@ namespace CrowdControl::Effects {
 	}
 
 	void CCEffect::SetDuration(Request req) {
-		_LOG_INIT;
-
 		if (req.duration)
 			duration_ms = req.duration;
 
@@ -27,7 +25,7 @@ namespace CrowdControl::Effects {
 			}
 		}
 
-		_LOG("Set duration to " << duration_ms << "ms" << std::endl);
+		LOG_INFO("Set duration to " << duration_ms << "ms" << std::endl);
 
 		endTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(duration_ms);
 	}

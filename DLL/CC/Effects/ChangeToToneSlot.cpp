@@ -4,7 +4,6 @@
 using namespace CrowdControl::Enums;
 
 namespace CrowdControl::Effects {
-	
 	/// <summary>
 	/// Test the twitch mod's requirements.
 	/// </summary>
@@ -12,9 +11,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus ChangeToToneSlot::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("ChangeToToneSlot::Test()" << std::endl);
+		LOG_INFO("ChangeToToneSlot::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -29,16 +26,14 @@ namespace CrowdControl::Effects {
 	/// <returns> EffectStatus::Retry if we aren't currently in a song, or EffectStatus::Success if we are</returns>
 	EffectStatus ChangeToToneSlot::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("ChangeToToneSlot::Start()" << std::endl);
+		LOG_INFO("ChangeToToneSlot::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
 
 		Util::SendKey(Settings::GetVKCodeForString(std::to_string(slot)));
 	
-		_LOG("Changing tone to slot " << slot << std::endl);
+		LOG_INFO("Changing tone to slot " << slot << std::endl);
 
 		return EffectStatus::Success;
 	}

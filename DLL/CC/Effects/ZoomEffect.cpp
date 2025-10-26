@@ -6,9 +6,7 @@ using namespace CrowdControl::Enums;
 namespace CrowdControl::Effects {
 	EffectStatus ZoomEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("ZoomEffect::Test()" << std::endl);
+		LOG_INFO("ZoomEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -19,9 +17,7 @@ namespace CrowdControl::Effects {
 
 	EffectStatus ZoomEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("ZoomEffect::Start()" << std::endl);
+		LOG_INFO("ZoomEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -42,9 +38,7 @@ namespace CrowdControl::Effects {
 
 	EffectStatus ZoomEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("ZoomEffect::Stop()" << std::endl);
+		LOG_INFO("ZoomEffect::Stop()" << std::endl);
 
 		auto rootObject = ObjectUtil::GetRootObject();
 

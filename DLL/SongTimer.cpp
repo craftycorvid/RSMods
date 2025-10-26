@@ -2,10 +2,6 @@
 #include "SongTimer.hpp"
 
 float SongTimer::SongTimer() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	if (GameState::Menus::IsInPreSongTuner()) {
 		return 0.f;
 	}
@@ -14,13 +10,13 @@ float SongTimer::SongTimer() {
 	uintptr_t addrTimerRare = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_timerRare, Offsets::ptr_timerRareOffsets, true);
 
 	if (!addrTimerBase) {
-		_LOG("Invalid Pointer: (BASE) ShowSongTimer" << std::endl);
+		LOG_ERROR("Invalid Pointer: (BASE) ShowSongTimer" << std::endl);
 		return 0.f;
 	}
 
 	// At this point, we can verify that the timer is a valid time.
 	if (!addrTimerRare) {
-		_LOG("Invalid Pointer: (RARE) ShowSongTimer" << std::endl);
+		LOG_ERROR("Invalid Pointer: (RARE) ShowSongTimer" << std::endl);
 		return *(float*)addrTimerBase;
 	}
 
@@ -40,13 +36,10 @@ float SongTimer::SongTimer() {
 /// </summary>
 /// <returns>Time where all notes before it are grey / deactivated.</returns>
 float SongTimer::GetGreyNoteTimer() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
 	uintptr_t greyNoteTimer = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_greyOutNoteTimer, Offsets::ptr_greyOutNoteTimerOffsets);
 
 	if (!greyNoteTimer) {
-		_LOG("Invalid Pointer: GetGreyNoteTimer = NULL" << std::endl);
+		LOG_ERROR("Invalid Pointer: GetGreyNoteTimer = NULL" << std::endl);
 		return NULL;
 	}
 
@@ -58,13 +51,10 @@ float SongTimer::GetGreyNoteTimer() {
 /// </summary>
 /// <param name="timeInSeconds"> - Time to set the "deactivate before" at.</param>
 void SongTimer::SetGreyNoteTimer(float timeInSeconds) {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
 	uintptr_t greyNoteTimer = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_greyOutNoteTimer, Offsets::ptr_greyOutNoteTimerOffsets);
 
 	if (!greyNoteTimer) {
-		_LOG("Invalid Pointer: SetGreyNoteTimer = NULL" << std::endl);
+		LOG_ERROR("Invalid Pointer: SetGreyNoteTimer = NULL" << std::endl);
 		return;
 	}
 

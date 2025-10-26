@@ -10,9 +10,7 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus SmallNoteheadEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("SmallNoteheadEffect::Test()" << std::endl);
+		LOG_INFO("SmallNoteheadEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -27,9 +25,7 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus SmallNoteheadEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("SmallNoteheadEffect::Start()" << std::endl);
+		LOG_INFO("SmallNoteheadEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -48,9 +44,7 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// <returns>EffectStatus::Success</returns>
 	EffectStatus SmallNoteheadEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("SmallNoteheadEffect::Stop()" << std::endl);
+		LOG_INFO("SmallNoteheadEffect::Stop()" << std::endl);
 
 		running = false;
 		SetNoteHeadScale(1);
@@ -63,13 +57,11 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// </summary>
 	/// <param name="scale"></param>
 	void SmallNoteheadEffect::SetNoteHeadScale(float scale) {
-		_LOG_INIT;
-
-		_LOG("SmallNoteheadEffect::SetNoteHeadScale(" << scale << ")" << std::endl);
+		LOG_INFO("SmallNoteheadEffect::SetNoteHeadScale(" << scale << ")" << std::endl);
 
 		ObjectUtil::SetObjectScales({
 			{"MeshNoteSingleLH", scale},
 			{"MeshNoteSingleRH", scale}
-			});
+		});
 	}
 }

@@ -8,7 +8,7 @@ namespace RiffRepeater {
 	void DisableTimeStretch();
 	void EnableLinearSpeeds();
 	void DisableLinearSpeeds();
-	bool LogSongID(std::string songKey);
+	bool LogSongID(const std::string& songKey);
 	void HandleSongChange(const std::string& previousSongKey);
 	void SaveSpeedToFileOnChange();
 

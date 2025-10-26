@@ -6,9 +6,7 @@ using namespace CrowdControl::Enums;
 namespace CrowdControl::Effects {
 	EffectStatus WavyNotesEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("WavyNotesEffect::Test()" << std::endl);
+		LOG_INFO("WavyNotesEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -19,9 +17,7 @@ namespace CrowdControl::Effects {
 
 	EffectStatus WavyNotesEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("WavyNotesEffect::Start()" << std::endl);
+		LOG_INFO("WavyNotesEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -35,9 +31,7 @@ namespace CrowdControl::Effects {
 
 	EffectStatus WavyNotesEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("WavyNotesEffect::Stop()" << std::endl);
+		LOG_INFO("WavyNotesEffect::Stop()" << std::endl);
 
 		wavy_notes_enabled = false;
 		running = false;

@@ -5,24 +5,24 @@
 namespace Midi {
 	std::vector<MIDIOUTCAPSA> midiOutDevices;
 	std::vector<MIDIINCAPSA> midiInDevices;
-	int SelectedMidiOutDevice = 0, SelectedMidiInDevice = 0, MidiCC = 0, MidiPC = 666;
-	unsigned int NumberOfOutPorts, NumberOfInPorts;
+	int SelectedMidiOutDevice = 0;
+	int SelectedMidiInDevice = 0;
+	int MidiCC = 0;
+	int MidiPC = 666;
+	unsigned int NumberOfOutPorts;
+	unsigned int NumberOfInPorts;
 
 	/// <summary>
 	/// Startup MIDI processing
 	/// </summary>
 	void InitMidi() {
-		_LOG_INIT;
-
 		try {
 			// Try to init a Midi in device.
 			RtMidiIn midiin;
-			_LOG("Starting MIDI" << std::endl);
+			LOG_INFO("Starting MIDI" << std::endl);
 		}
 		catch (RtMidiError& error) {
-			_LOG_SETLEVEL(LogLevel::Error);
-
-			_LOG("(MIDI) " << error.getMessage() << std::endl);
+			LOG_ERROR("(MIDI) " << error.getMessage() << std::endl);
 		}
 	}
 
@@ -56,13 +56,11 @@ namespace Midi {
 	/// <param name="PedalToUse"> - What pedal is the user using?</param>
 	/// <param name="MidiOutDevice"> - Name of MIDI device to send MIDI to.</param>
 	/// <param name="MidiInDevice"> - Name of MIDI device to listen to.</param>
-	void ReadMidiSettingsFromINI(std::string ChordsMode, int PedalToUse, std::string MidiOutDevice, std::string MidiInDevice) {
-		_LOG_INIT;
-
+	void ReadMidiSettingsFromINI(const std::string& ChordsMode, int PedalToUse, const std::string& MidiOutDevice, const std::string& MidiInDevice) {
 		// Is Chords mode on (only some Digitech pedals support it.)
 		if (ChordsMode == "on") { 
 			Digitech::DIGITECH_CHORDS_MODE = true;
-			_LOG("(MIDI) Chords Mode: Enabled" << std::endl);
+			LOG_INFO("(MIDI) Chords Mode: Enabled" << std::endl);
 		}
 		
 		// Verify that we have an actual pedal specified.
@@ -71,7 +69,7 @@ namespace Midi {
 		else
 			return;
 
-		_LOG("(MIDI) Pedal To Use: " << selectedPedal.pedalName << std::endl);
+		LOG_INFO("(MIDI) Pedal To Use: " << selectedPedal.pedalName << std::endl);
 
 		// Fill the list of Midi In, and Midi Out devices.
 		GetMidiDeviceNames();
@@ -81,9 +79,7 @@ namespace Midi {
 		FindMidiInDevices(MidiInDevice);
 	}
 
-	void FindMidiOutDevices(std::string deviceToLookFor) {
-		_LOG_INIT;
-
+	void FindMidiOutDevices(const std::string& deviceToLookFor) {
 		for (int device = 0; device < NumberOfOutPorts; device++) {
 
 			std::string deviceName = "";
@@ -97,43 +93,32 @@ namespace Midi {
 
 			// We found the device that is specified in the INI.
 			if (deviceName.find(deviceToLookFor) != std::string::npos) {
-				_LOG("(MIDI) Connecting To Midi OUT Device: " << midiOutDevices.at(device).szPname << std::endl);
+				LOG_INFO("(MIDI) Connecting To Midi OUT Device: " << midiOutDevices.at(device).szPname << std::endl);
 				SelectedMidiOutDevice = device;
 				break;
 			}
 			// This is not the device specified in the INI.
 			else
-				_LOG("(MIDI) Available MIDI OUT device: " << midiOutDevices.at(device).szPname << std::endl);
+				LOG_INFO("(MIDI) Available MIDI OUT device: " << midiOutDevices.at(device).szPname << std::endl);
 		}
 	}
-	void FindMidiInDevices(std::string deviceToLookFor) {
-		_LOG_INIT;
 
+	void FindMidiInDevices(const std::string& deviceToLookFor) {
 		for (int device = 0; device < NumberOfInPorts; device++) {
+			std::string_view deviceName(midiInDevices[device].szPname);
 
-			std::string deviceName = "";
-
-			// Parse Char Buffer, since the name is a null-terminated string, we need to terminate it ourselves in a string.
-			for (int i = 0; i < 32; i++) {
-				if (midiInDevices.at(device).szPname[i] == (char)0)
-					break;
-				deviceName.push_back(midiInDevices.at(device).szPname[i]);
-			}
 			// We found the device that is specified in the INI.
 			if (deviceName.find(deviceToLookFor) != std::string::npos) {
-				_LOG("(MIDI) Connecting To Midi IN Device: " << midiInDevices.at(device).szPname << std::endl);
+				LOG_INFO("(MIDI) Connecting To Midi IN Device: " << midiInDevices.at(device).szPname << std::endl);
 				SelectedMidiInDevice = device;
 				break;
 			}
-			// This is not the device specified in the INI.
 			else
-				_LOG("(MIDI) Available MIDI IN device: " << midiInDevices.at(device).szPname << std::endl);
+				LOG_INFO("(MIDI) Available MIDI IN device: " << midiInDevices.at(device).szPname << std::endl);
 		}
 	}
 
 	bool IsValidMidiMessage(std::vector<unsigned char>* message) {
-		_LOG_INIT;
-
 		size_t messageSize = message->size();
 
 		if (messageSize < 1) // Empty Message
@@ -142,36 +127,32 @@ namespace Midi {
 		switch (message->at(0)) {
 			case MidiCommands::NoteOff:
 				if (messageSize != 3) {
-					_LOG_SETLEVEL(LogLevel::Error);
-					_LOG("(MIDI IN) Invalid NoteOff" << std::endl);
+					LOG_ERROR("(MIDI IN) Invalid NoteOff" << std::endl);
 					return false;
 				}
-				_LOG("(MIDI IN) NoteOff. Key = " << (int)message->at(1) << ". Velocity = " << (int)message->at(2) << std::endl);
+				LOG_INFO("(MIDI IN) NoteOff. Key = " << (int)message->at(1) << ". Velocity = " << (int)message->at(2) << std::endl);
 				break;
 			case MidiCommands::NoteOn:
 				if (messageSize != 3) {
-					_LOG_SETLEVEL(LogLevel::Error);
-					_LOG("(MIDI IN) Invalid NoteOn" << std::endl);
+					LOG_ERROR("(MIDI IN) Invalid NoteOn" << std::endl);
 					return false;
 				}
-				_LOG("(MIDI IN) NoteOn. Key = " << (int)message->at(1) << ". Velocity = " << (int)message->at(2) << std::endl);
+				LOG_INFO("(MIDI IN) NoteOn. Key = " << (int)message->at(1) << ". Velocity = " << (int)message->at(2) << std::endl);
 				break;
 			case MidiCommands::AfterTouch:
 				if (messageSize != 3) {
-					_LOG_SETLEVEL(LogLevel::Error);
-					_LOG("(MIDI IN) Invalid AfterTouch" << std::endl);
+					LOG_ERROR("(MIDI IN) Invalid AfterTouch" << std::endl);
 					return false;
 				}
-				_LOG("(MIDI IN) AfterTouch. Key = " << (int)message->at(1) << ". Touch = " << (int)message->at(2) << std::endl);
+				LOG_INFO("(MIDI IN) AfterTouch. Key = " << (int)message->at(1) << ". Touch = " << (int)message->at(2) << std::endl);
 				break;
 			case MidiCommands::CC:
 				if (messageSize != 3) {
-					_LOG_SETLEVEL(LogLevel::Error);
-					_LOG("(MIDI IN) Invalid CC" << std::endl);
+					LOG_ERROR("(MIDI IN) Invalid CC" << std::endl);
 					return false;
 				}
 
-				_LOG("(MIDI IN) CC. Controller# = " << (int)message->at(1) << ". Value = " << std::dec << (int)message->at(2) << std::endl);
+				LOG_INFO("(MIDI IN) CC. Controller# = " << (int)message->at(1) << ". Value = " << std::dec << (int)message->at(2) << std::endl);
 
 				// Current Midi In mod to test | Midi RR Speed > 100%
 				RiffRepeater::SetSpeed((message->at(2) * 2), true);
@@ -200,43 +181,38 @@ namespace Midi {
 				break;
 			case MidiCommands::PC:
 				if (messageSize != 2) {
-					_LOG_SETLEVEL(LogLevel::Error);
-					_LOG("(MIDI IN) Invalid PC" << std::endl);
+					LOG_ERROR("(MIDI IN) Invalid PC" << std::endl);
 					return false;
 				}
-				_LOG("(MIDI IN) PC. Instrument# = " << (int)message->at(1) << std::endl);
+				LOG_INFO("(MIDI IN) PC. Instrument# = " << (int)message->at(1) << std::endl);
 				break;
 			case MidiCommands::Pressure:
 				if (messageSize != 2) {
-					_LOG_SETLEVEL(LogLevel::Error);
-					_LOG("(MIDI IN) Invalid Pressure" << std::endl);
+					LOG_ERROR("(MIDI IN) Invalid Pressure" << std::endl);
 					return false;
 				}
-				_LOG("(MIDI IN) Pressure. Pressure = " << (int)message->at(1) << std::endl);
 				break;
 			case MidiCommands::PitchBend: // Pitch Bend
 				if (messageSize != 3) {
-					_LOG_SETLEVEL(LogLevel::Error);
-					_LOG("(MIDI IN) Invalid PitchBend" << std::endl);
+					LOG_ERROR("(MIDI IN) Invalid PitchBend" << std::endl);
 					return false;
 				}
-				_LOG("(MIDI IN) PitchBend. LSB = " << (int)message->at(1) << ". MSB = " << (int)message->at(2) << std::endl);
+				LOG_INFO("(MIDI IN) PitchBend. LSB = " << (int)message->at(1) << ". MSB = " << (int)message->at(2) << std::endl);
 				break;
 			default:
 				if (message->at(0) >= 0xF0) { // System Command
-					_LOG("(MIDI IN) System: ");
+					LOG_INFO("(MIDI IN) System: ");
 					for (int i = 0; i < messageSize; i++) {
-						_LOG_NOHEAD ((int)message->at(i) << " ");
+						LOG_NOHEAD ((int)message->at(i) << " ");
 					}
-					_LOG_NOHEAD("" << std::endl);
+					LOG_NOHEAD("" << std::endl);
 				}
 				else { // Unknown Midi Command
-					_LOG_SETLEVEL(LogLevel::Warning);
-					_LOG("(MIDI IN) Unknown: ");
+					LOG_WARNING("(MIDI IN) Unknown: ");
 					for (int i = 0; i < messageSize; i++) {
-						_LOG_NOHEAD((int)message->at(i) << " ");
+						LOG_NOHEAD((int)message->at(i) << " ");
 					}
-					_LOG_NOHEAD("" << std::endl);
+					LOG_NOHEAD("" << std::endl);
 					return false; 
 				}
 				break;
@@ -249,16 +225,11 @@ namespace Midi {
 	}
 
 	unsigned WINAPI ListenToMidiInThread() {
-		_LOG_INIT;
-
-		_LOG_SETLEVEL(LogLevel::Error);
-
-		RtMidiIn* midiin = new RtMidiIn();
+		auto midiin = std::make_unique<RtMidiIn>();
 
 		NumberOfInPorts = midiInGetNumDevs();
 		if (NumberOfInPorts == 0) {
-			_LOG("No MIDI IN ports available!" << std::endl);
-			delete midiin;
+			LOG_ERROR("No MIDI IN ports available!" << std::endl);
 			return -1;
 		}
 
@@ -279,26 +250,21 @@ namespace Midi {
 	/// <param name="alternativeChannel"> - Channel to use over the default. Mainly used for software pedals.</param>
 	/// <returns>Message was sent or not.</returns>
 	bool SendProgramChange(char programChange, char alternativeChannel) {
-		_LOG_INIT;
-
-		_LOG_SETLEVEL(LogLevel::Error);
-
-		RtMidiOut* midiout = new RtMidiOut();
+		auto midiout = std::make_unique<RtMidiOut>();
 		std::vector<unsigned char> message;
 
 		char channel = alternativeChannel == (char)255 ? selectedPedal.PC_Channel : alternativeChannel; // If we want to bypass the PC channel (mainly for software pedals) then alternative channel won't be default.
 
 		// Are we using a dummy pedal?
 		if (selectedPedal.pedalName == MidiPedal().pedalName) {
-			_LOG("(MIDI) SendPC: DUMMY PEDAL" << std::endl);
+			LOG_ERROR("(MIDI) SendPC: DUMMY PEDAL" << std::endl);
 			return false;
 		}
 
 		// Check available ports.
 		NumberOfOutPorts = midiOutGetNumDevs();
 		if (NumberOfOutPorts == 0) {
-			_LOG("No MIDI OUT ports available!" << std::endl);
-			delete midiout;
+			LOG_ERROR("No MIDI OUT ports available!" << std::endl);
 			sendPC = false;
 			return false;
 		}
@@ -311,16 +277,12 @@ namespace Midi {
 			message.push_back(programChange); // What program we changing to?
 			midiout->sendMessage(&message);
 
-			_LOG_SETLEVEL(LogLevel::Info);
-
-			_LOG("Sent Midi Message: PC" << (int)channel << ": " << (int)programChange << std::endl);
+			LOG_INFO("Sent Midi Message: PC" << (int)channel << ": " << (int)programChange << std::endl);
 		}
 		catch (RtMidiError& error) {
-			_LOG("(MIDI) Error: " << error.getMessage() << std::endl);
+			LOG_ERROR("(MIDI) Error: " << error.getMessage() << std::endl);
 		}
 
-		// Clean up
-		delete midiout;
 		sendPC = false;
 		lastPC = programChange;
 		return true;
@@ -334,25 +296,21 @@ namespace Midi {
 	/// <param name="alternativeChannel"> - Channel to use over the default. Mainly used for software pedals.</param>
 	/// <returns>Message wwas sent or not.</returns>
 	bool SendControlChange(char toePosition, char alternativeBank, char alternativeChannel) {
-		_LOG_INIT;
-		_LOG_SETLEVEL(LogLevel::Error);
-
 		char bank = alternativeBank == (char)255 ? selectedPedal.CC_Bank : alternativeBank; // If we want to bypass the CC bank (mainly for software pedals) then alternative bank won't be default.
 		char channel = alternativeChannel == (char)255 ? selectedPedal.CC_Channel : alternativeChannel; // If we want to bypass the CC channel (mainly for software pedals) then alternative channel won't be default.
 
 		if (selectedPedal.pedalName == MidiPedal().pedalName) {
-			_LOG("(MIDI) SendCC: DUMMY PEDAL" << std::endl);
+			LOG_ERROR("(MIDI) SendCC: DUMMY PEDAL" << std::endl);
 			return false;
 		}
 
-		RtMidiOut* midiout = new RtMidiOut();
+		auto midiout = std::make_unique<RtMidiOut>();
 		std::vector<unsigned char> message;
 
 		// Check available ports.
 		NumberOfOutPorts = midiOutGetNumDevs();
 		if (NumberOfOutPorts == 0) {
-			_LOG("No MIDI ports available!" << std::endl);
-			delete midiout;
+			LOG_ERROR("No MIDI ports available!" << std::endl);
 			sendCC = false;
 			return false;
 		}
@@ -367,16 +325,12 @@ namespace Midi {
 			message.push_back(toePosition); // New Control Value || 0 = off, 127 = on
 			midiout->sendMessage(&message);
 
-			_LOG_SETLEVEL(LogLevel::Info);
-
-			_LOG("Sending Midi Message: CC" << (int)channel << ": " << (int)bank << " " << (int)toePosition << std::endl);
+			LOG_INFO("Sending Midi Message: CC" << (int)channel << ": " << (int)bank << " " << (int)toePosition << std::endl);
 		}
 		catch (RtMidiError& error) {
-			_LOG("(MIDI) Error: " << error.getMessage() << std::endl);
+			LOG_ERROR("(MIDI) Error: " << error.getMessage() << std::endl);
 		}
 
-		// Clean up
-		delete midiout;
 		sendCC = false;
 		lastCC = toePosition;
 		return true;
@@ -387,13 +341,10 @@ namespace Midi {
 	/// </summary>
 	void AutomateTuning() {
 		if (!alreadyAutomatedTuningInThisSong) {
-			_LOG_INIT;
-			_LOG_SETLEVEL(LogLevel::Error);
-
 			alreadyAutomatedTuningInThisSong = true;
 
 			if (!selectedPedal.supportsDropTuning) {
-				_LOG("Your pedal doesn't support drop tuning." << std::endl);
+				LOG_ERROR("Your pedal doesn't support drop tuning." << std::endl);
 				return;
 			}
 
@@ -406,7 +357,7 @@ namespace Midi {
 
 			// Invalid pointer check
 			if (highestTuning == 666 && lowestTuning == 666) {
-				_LOG("(MIDI) Unable to read tuning in song." << std::endl);
+				LOG_ERROR("(MIDI) Unable to read tuning in song." << std::endl);
 				return;
 			}
 
@@ -417,20 +368,16 @@ namespace Midi {
 
 			selectedPedal.autoTuneFunction(highestTuning + tuningOffset, TrueTuning_Hertz);
 
-			_LOG_SETLEVEL(LogLevel::Info);
-			_LOG("(MIDI) Triggered Mod: Automated Tuning (Song)" << std::endl);
+			LOG_INFO("(MIDI) Triggered Mod: Automated Tuning (Song)" << std::endl);
 		}
 	}
 
 	void AttemptTuningInTuner() {
 		if (!alreadyAttemptedTuningInTuner) {
-			_LOG_INIT;
-			_LOG_SETLEVEL(LogLevel::Error);
-
 			alreadyAttemptedTuningInTuner = true;
 
 			if (!selectedPedal.supportsDropTuning) {
-				_LOG("(MIDI) Your pedal doesn't support drop tuning." << std::endl);
+				LOG_ERROR("(MIDI) Your pedal doesn't support drop tuning." << std::endl);
 				return;
 			}
 
@@ -443,7 +390,7 @@ namespace Midi {
 
 			// Invalid pointer check
 			if (highestTuning == 666 && lowestTuning == 666) {
-				_LOG("(MIDI) Cannot read tuning in tuner. Will attempt to automate tuning once the user is in the song." << std::endl);
+				LOG_ERROR("(MIDI) Cannot read tuning in tuner. Will attempt to automate tuning once the user is in the song." << std::endl);
 				return;
 			}
 
@@ -453,9 +400,7 @@ namespace Midi {
 
 			selectedPedal.autoTuneFunction(highestTuning + tuningOffset, TrueTuning_Hertz);
 
-			_LOG_SETLEVEL(LogLevel::Info);
-
-			_LOG("(MIDI) Triggered Mod: Automated Tuning (Tuner)" << std::endl);
+			LOG_INFO("(MIDI) Triggered Mod: Automated Tuning (Tuner)" << std::endl);
 			alreadyAutomatedTuningInThisSong = true;
 		}
 	}
@@ -464,15 +409,11 @@ namespace Midi {
 	/// Send a command to the pedal to turn off the modifications we did for the current song's tuning, and true-tuning.
 	/// </summary>
 	void RevertAutomatedTuning() { // Turn off the pedal after we are done with a song.
-
 		if (selectedPedal.pedalName == MidiPedal().pedalName)
 			return;
 
 		if (lastPC != 666 || selectedPedal.softwarePedal) { // If the song is in E Standard, and we leave, it tries to use "Bypass +2 OCT Whammy"
-
-			_LOG_INIT;
-
-			_LOG("(MIDI) Attmepting to turn off automatic tuning" << std::endl);
+			LOG_INFO("(MIDI) Attmepting to turn off automatic tuning" << std::endl);
 
 			// User is using a software pedal (or a custom defined pedal).
 			if (selectedPedal.softwarePedal) {
@@ -909,8 +850,11 @@ namespace Midi {
 			/// <param name="highestTuning"> - Highest tuned string in the current song.</param>
 			/// <param name="TrueTuning_Hertz"> - True Tuning (non-concert pitch)</param>
 			void AutoTuningAndTrueTuning(int highestTuning, float TrueTuning_Hertz) {
-				int temp_PC, temp_CC, offset = 0;
-				float Target_Hertz, Target_Semitones;
+				int temp_PC;
+				int temp_CC;
+				int offset = 0;
+				float Target_Hertz;
+				float Target_Semitones;
 
 				// Chords Mode Offset
 				if (Digitech::DIGITECH_CHORDS_MODE)
@@ -965,9 +909,6 @@ namespace Midi {
 		/// <param name="highestTuning"> - Highest tuned string in the current song.</param>
 		/// <param name="TrueTuning_Hertz"> - True Tuning (non-concert pitch)</param>
 		void AutoTuning(int highestTuning, float TrueTuning_Hertz) {
-			_LOG_INIT;
-			_LOG_SETLEVEL(LogLevel::Error);
-
 			// User wants us to reload our settings.
 			if (Settings::async_UpdateMidiSettings) {
 				ReloadSettings();
@@ -984,7 +925,7 @@ namespace Midi {
 				sentSemitoneInThisSong = true;
 			}
 			else
-				_LOG("(MIDI) Software Pedal Error: Attempted to tune to " << highestTuning << " but the user doesn't have a value set for it." << std::endl);
+				LOG_ERROR("(MIDI) Software Pedal Error: Attempted to tune to " << highestTuning << " but the user doesn't have a value set for it." << std::endl);
 
 			// Bass fix was applied, so we need to adjust the true tuning.
 			if (TrueTuning_Hertz < 260.f)
@@ -995,9 +936,6 @@ namespace Midi {
 		}
 
 		void AutoTrueTuning(float TrueTuning_Hertz) {
-			_LOG_INIT;
-			_LOG_SETLEVEL(LogLevel::Error);
-
 			if (TrueTuning_Hertz < 260.f)
 				TrueTuning_Hertz *= 2;
 
@@ -1011,7 +949,7 @@ namespace Midi {
 				Midi::Software::sentTrueTuningInThisSong = true;
 			}
 			else
-				_LOG("(MIDI) Software Pedal Error: Attempted to truetune to A" << TrueTuning_Hertz << " but the user doesn't have a value set for it." << std::endl);
+				LOG_ERROR("(MIDI) Software Pedal Error: Attempted to truetune to A" << TrueTuning_Hertz << " but the user doesn't have a value set for it." << std::endl);
 		}
 
 		void ReloadSettings() {
@@ -1025,9 +963,6 @@ namespace Midi {
 		}
 
 		void FillSemitoneMap() {
-			_LOG_INIT;
-			_LOG_SETLEVEL(LogLevel::Error);
-
 			std::string triggers = Settings::ReturnSettingValue("AutoTuneForSoftwareSemitoneTriggers");
 			std::string delim = ", ";
 			std::vector<std::string> separated;
@@ -1053,7 +988,7 @@ namespace Midi {
 				if (semiToneMap.count(semiTone) == 0)
 					semiToneMap[semiTone] = command;
 				else
-					_LOG("(MIDI) Software Pedal Error: Semitone Triggers for "
+					LOG_ERROR("(MIDI) Software Pedal Error: Semitone Triggers for "
 							  << semiTone
 							  << " is already set to "
 							  << semiToneMap[semiTone]
@@ -1063,22 +998,17 @@ namespace Midi {
 							  << std::endl);
 			}
 
-			_LOG_SETLEVEL(LogLevel::Info);
-
-			_LOG("(MIDI) Software Pedal: Semitone Triggers" << std::endl);
+			LOG_INFO("(MIDI) Software Pedal: Semitone Triggers" << std::endl);
 
 			for (std::map<char, char>::iterator it = semiToneMap.begin(); it != semiToneMap.end(); it++)
 			{
-				_LOG_NOHEAD("Semitone = " << (int)it->first << ", Value To Send = " << (int)it->second << std::endl);
+				LOG_NOHEAD("Semitone = " << (int)it->first << ", Value To Send = " << (int)it->second << std::endl);
 			}
 
-			_LOG("(MIDI) Software Pedal: Semitone Triggers --END" << std::endl);
+			LOG_INFO("(MIDI) Software Pedal: Semitone Triggers --END" << std::endl);
 		}
 
 		void LoadSemitoneSettings() {
-			_LOG_INIT;
-			_LOG_SETLEVEL(LogLevel::Error);
-
 			std::string settings = Settings::ReturnSettingValue("AutoTuneForSoftwareSemitoneSettings");
 			std::string delim = ", ";
 			std::vector<std::string> separated;
@@ -1107,7 +1037,7 @@ namespace Midi {
 						if (separated.size() > 2)
 							selectedPedal.PC_Channel = std::atoi(separated.at(2).c_str()) % 16; // Only 16 channels are supported.
 						else
-							_LOG("SOFTWARE LOADSETTINGS ERROR (semitones): PC set as the send method but no channel is specified" << std::endl);
+							LOG_ERROR("SOFTWARE LOADSETTINGS ERROR (semitones): PC set as the send method but no channel is specified" << std::endl);
 					}
 						
 					if (separated.at(1) == "CC") {
@@ -1117,22 +1047,19 @@ namespace Midi {
 							if (separated.size() > 3)
 								selectedPedal.CC_Bank = std::atoi(separated.at(3).c_str());
 							else
-								_LOG("SOFTWARE LOAD SETTINGS ERROR (semitones): CC set as the send method but no bank is specified. Defaulting to Bank 0." << std::endl);
+								LOG_ERROR("SOFTWARE LOAD SETTINGS ERROR (semitones): CC set as the send method but no bank is specified. Defaulting to Bank 0." << std::endl);
 						}
 						else
-							_LOG("SOFTWARE LOADSETTINGS ERROR (semitones): CC set as the send method but no channel is specified. Defaulting to Channel 0." << std::endl);
+							LOG_ERROR("SOFTWARE LOADSETTINGS ERROR (semitones): CC set as the send method but no channel is specified. Defaulting to Channel 0." << std::endl);
 					}
 				}
 			}
 			else {
-				_LOG("SOFTWARE LOADSETTINGS ERROR (semitones): No settings to load!" << std::endl);
+				LOG_ERROR("SOFTWARE LOADSETTINGS ERROR (semitones): No settings to load!" << std::endl);
 			}
 		}
 
 		void FillTrueTuningMap() {
-			_LOG_INIT;
-			_LOG_SETLEVEL(LogLevel::Error);
-
 			std::string triggers = Settings::ReturnSettingValue("AutoTuneForSoftwareTrueTuningTriggers");
 			std::string delim = ", ";
 			std::vector<std::string> separated;
@@ -1158,7 +1085,7 @@ namespace Midi {
 				if (trueTuningMap.count(trueTuning) == 0)
 					trueTuningMap[trueTuning] = command;
 				else
-					_LOG("(MIDI) Software Pedal Error: TrueTuning Triggers for "
+					LOG_ERROR("(MIDI) Software Pedal Error: TrueTuning Triggers for "
 							  << trueTuning
 							  << " is already set to "
 							  << trueTuningMap[trueTuning]
@@ -1168,23 +1095,17 @@ namespace Midi {
 						      << std::endl);
 			}
 
-			_LOG_SETLEVEL(LogLevel::Info);
+			LOG_INFO("(MIDI) Software Pedal: TrueTuning Triggers" << std::endl);
 
-			_LOG("(MIDI) Software Pedal: TrueTuning Triggers" << std::endl);
-
-			for (std::map<int, char>::iterator it = trueTuningMap.begin(); it != trueTuningMap.end(); it++)
+			for (auto it = trueTuningMap.begin(); it != trueTuningMap.end(); it++)
 			{
-				_LOG_NOHEAD("True Tuning = A" << it->first << ", Value To Send = " << (int)it->second << std::endl);
+				LOG_NOHEAD("True Tuning = A" << it->first << ", Value To Send = " << (int)it->second << std::endl);
 			}
 				
-
-			_LOG("(MIDI) Software Pedal: TrueTuning Triggers --END" << std::endl);
+			LOG_INFO("(MIDI) Software Pedal: TrueTuning Triggers --END" << std::endl);
 		}
 
 		void LoadTrueTuningSettings() {
-			_LOG_INIT;
-			_LOG_SETLEVEL(LogLevel::Error);
-
 			std::string settings = Settings::ReturnSettingValue("AutoTuneForSoftwareTrueTuningSettings");
 			std::string delim = ", ";
 			std::vector<std::string> separated;
@@ -1212,7 +1133,7 @@ namespace Midi {
 						if (separated.size() > 2)
 							sendTrueTuningChannel = std::atoi(separated.at(2).c_str()) % 16; // Only 16 channels are supported.
 						else
-							_LOG("SOFTWARE LOADSETTINGS ERROR (truetuning): PC set as the send method but no channel is specified" << std::endl);
+							LOG_ERROR("SOFTWARE LOADSETTINGS ERROR (truetuning): PC set as the send method but no channel is specified" << std::endl);
 					}
 					if (separated.at(1) == "CC") {
 						sendTrueTuningCommand = controlChangeStatus;
@@ -1222,16 +1143,16 @@ namespace Midi {
 							if (separated.size() > 3)
 								trueTuningBank = std::atoi(separated.at(3).c_str());
 							else
-								_LOG("SOFTWARE LOAD SETTINGS ERROR (truetuning): CC set as the send method but no bank is specified. Defaulting to Bank 0." << std::endl);
+								LOG_ERROR("SOFTWARE LOAD SETTINGS ERROR (truetuning): CC set as the send method but no bank is specified. Defaulting to Bank 0." << std::endl);
 						}
 						else
-							_LOG("SOFTWARE LOADSETTINGS ERROR (truetuning): CC set as the send method but no channel is specified. Defaulting to Channel 0." << std::endl);
+							LOG_ERROR("SOFTWARE LOADSETTINGS ERROR (truetuning): CC set as the send method but no channel is specified. Defaulting to Channel 0." << std::endl);
 
 					}
 				}
 			}
 			else {
-				_LOG("SOFTWARE LOADSETTINGS ERROR (truetuning): No settings to load!" << std::endl);
+				LOG_ERROR("SOFTWARE LOADSETTINGS ERROR (truetuning): No settings to load!" << std::endl);
 			}
 		}
 	}

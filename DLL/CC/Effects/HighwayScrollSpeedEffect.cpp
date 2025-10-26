@@ -12,9 +12,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus HighwayScrollSpeedEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("HighwayScrollSpeedEffect::Test()" << std::endl);
+		LOG_INFO("HighwayScrollSpeedEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -28,9 +26,7 @@ namespace CrowdControl::Effects {
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or incompatible effects are running, or EffectStatus::Sucess if we are</returns>
 	EffectStatus HighwayScrollSpeedEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("HighwayScrollSpeedEffect::Start()" << std::endl);
+		LOG_INFO("HighwayScrollSpeedEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -49,9 +45,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success</returns>
 	EffectStatus HighwayScrollSpeedEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("HighwayScrollSpeedEffect::Stop()" << std::endl);
+		LOG_INFO("HighwayScrollSpeedEffect::Stop()" << std::endl);
 
 		WriteScrollSpeedMultiplier(5.0);
 
@@ -65,9 +59,7 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="val"> - New Scroll Speed Modifier</param>
 	void HighwayScrollSpeedEffect::WriteScrollSpeedMultiplier(double val) {
-		_LOG_INIT;
-
-		_LOG("HighwayScrollSpeedEffect::WriteScrollSpeedMultiplier(" << val << ")" << std::endl);
+		LOG_INFO("HighwayScrollSpeedEffect::WriteScrollSpeedMultiplier(" << val << ")" << std::endl);
 
 		MemUtil::SetStaticValue(Offsets::ptr_scrollSpeedMultiplier.Get(), val, sizeof(double));
 	}

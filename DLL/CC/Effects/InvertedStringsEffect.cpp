@@ -24,9 +24,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
 	EffectStatus InvertedStringsEffect::Test(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("InvertedStringsEffect::Test()" << std::endl);
+		LOG_INFO("InvertedStringsEffect::Test()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -38,13 +36,11 @@ namespace CrowdControl::Effects {
 	/// Save the original positioning from the guitar strings
 	/// </summary>
 	void SaveInitialStringPos() {
-		_LOG_INIT;
-
 		// Get the root object, and it's children.
 		ObjectUtil::Object* rootObject = ObjectUtil::GetRootObject();
 		std::vector<ObjectUtil::Object*> children = ObjectUtil::GetChildrenOfObject(rootObject);
 
-		_LOG(children.size() << "/" << rootObject->childCount << std::endl);
+		LOG_INFO(children.size() << "/" << rootObject->childCount << std::endl);
 
 		for (auto child : children)
 		{
@@ -54,7 +50,7 @@ namespace CrowdControl::Effects {
 			if (className.find("String") != std::string::npos || className.find("string") != std::string::npos){
 				stringObjs.push_back(child);
 				stringPositions.push_back(StrPos(child->x, child->y, child->z));
-				_LOG(className << std::endl);
+				LOG_INFO(className << std::endl);
 			}
 		}
 	}
@@ -91,9 +87,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success if completed successfully, or EffectStatus::Retry if we can't run it.</returns>
 	EffectStatus InvertedStringsEffect::Start(Request request)
 	{
-		_LOG_INIT;
-
-		_LOG("InvertedStringsEffect::Start()" << std::endl);
+		LOG_INFO("InvertedStringsEffect::Start()" << std::endl);
 
 		if (!CanStart(&EffectList::GetAllEffects()))
 			return EffectStatus::Retry;
@@ -113,9 +107,7 @@ namespace CrowdControl::Effects {
 	/// <returns>EffectStatus::Success</returns>
 	EffectStatus InvertedStringsEffect::Stop()
 	{
-		_LOG_INIT;
-
-		_LOG("InvertedStringsEffect::Stop()" << std::endl);
+		LOG_INFO("InvertedStringsEffect::Stop()" << std::endl);
 
 		running = false;
 		RevertStringPositions();

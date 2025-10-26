@@ -5,63 +5,55 @@
 /// Setup active microphones map with all the available microphones and their respective IDs.
 /// </summary>
 void AudioDevices::SetupMicrophones() {
-	_LOG_INIT;
-	_LOG_SETLEVEL(LogLevel::Error);
-
-	// Initialization
 	activeMicrophones.clear();
 
-	// CoInitialize
 	HRESULT coInit = CoInitialize(NULL);
 
-	// Check response of CoInitialize
 	if (coInit != S_OK) {
-		_LOG("Unable to get microphone volume. CoInitialize is not S_OK. Returned ");
+		LOG_ERROR("Unable to get microphone volume. CoInitialize is not S_OK. Returned ");
 		switch (coInit) {
 		case (S_FALSE):
-			_LOG_NOHEAD("S_FALSE" << std::endl);
+			LOG_NOHEAD("S_FALSE" << std::endl);
 			break;
 		case (RPC_E_CHANGED_MODE):
-			_LOG_NOHEAD("RPC_E_CHANGED_MODE" << std::endl);
+			LOG_NOHEAD("RPC_E_CHANGED_MODE" << std::endl);
 			break;
 		default: // Non-documented error.
-			_LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
+			LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
 			break;
 		}
 		return;
 	}
 
-	// CoCreateInstance
 	IMMDeviceEnumerator* deviceEnumerator = NULL;
 	HRESULT coCI = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID*)&deviceEnumerator);
 
 	// Check response of CoCreateInstance
 	if (coCI != S_OK) {
-		_LOG("Unable to get microphone volume. CoCreateInstance is not S_OK. Returned ");
+		LOG_ERROR("Unable to get microphone volume. CoCreateInstance is not S_OK. Returned ");
 		switch (coCI) {
 		case (REGDB_E_CLASSNOTREG):
-			_LOG_NOHEAD("REGDB_E_CLASSNOTREG" << std::endl);
+			LOG_NOHEAD("REGDB_E_CLASSNOTREG" << std::endl);
 			break;
 		case (CLASS_E_NOAGGREGATION):
-			_LOG_NOHEAD("CLASS_E_NOAGGREGATION" << std::endl);
+			LOG_NOHEAD("CLASS_E_NOAGGREGATION" << std::endl);
 			break;
 		case (E_NOINTERFACE):
-			_LOG_NOHEAD("E_NOINTERFACE" << std::endl);
+			LOG_NOHEAD("E_NOINTERFACE" << std::endl);
 			break;
 		case (E_POINTER):
-			_LOG_NOHEAD("E_POINTER" << std::endl);
+			LOG_NOHEAD("E_POINTER" << std::endl);
 			break;
 		default: // Non-documented error.
-			_LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
+			LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
 			break;
 		}
 
 		return;
 	}
 
-	// Null-Check
 	if (!deviceEnumerator) {
-		_LOG("CoCreateInstance failed while setting up microphones. DeviceEnumerator is null" << std::endl);
+		LOG_ERROR("CoCreateInstance failed while setting up microphones. DeviceEnumerator is null" << std::endl);
 		return;
 	}
 
@@ -100,7 +92,6 @@ void AudioDevices::SetupMicrophones() {
 		// Add the UTF8 name and the Device ID to the list of microphones that are ready to use.
 		activeMicrophones.insert(std::pair<std::string, LPWSTR>(utf8MicrophoneName, microphoneId));
 
-		// Clean-up
 		PropVariantClear(&microphoneName);
 		microphoneProperties->Release();
 		selectedMicrophone->Release();
@@ -109,7 +100,6 @@ void AudioDevices::SetupMicrophones() {
 		selectedMicrophone = NULL;
 	}
 
-	// Clean-up
 	microphones->Release();
 	deviceEnumerator->Release();
 	microphones = NULL;
@@ -123,12 +113,7 @@ void AudioDevices::SetupMicrophones() {
 /// <param name="microphone"> - Name of the microphone</param>
 /// <param name="volume"> - New Volume</param>
 void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
-	_LOG_INIT;
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	if (activeMicrophones.find(microphoneName) != activeMicrophones.end()) {
-
-		// Initialization
 		LPWSTR microphoneId = activeMicrophones[microphoneName];
 		IMMDevice* microphone = NULL;
 
@@ -136,22 +121,22 @@ void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
 		HRESULT coCI = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID*)&deviceEnumerator);
 
 		if (coCI != S_OK) {
-			_LOG("Unable to get microphone volume. CoCreateInstance is not S_OK. Returned ");
+			LOG_ERROR("Unable to get microphone volume. CoCreateInstance is not S_OK. Returned ");
 			switch (coCI) {
 			case (REGDB_E_CLASSNOTREG):
-				_LOG_NOHEAD("REGDB_E_CLASSNOTREG" << std::endl);
+				LOG_NOHEAD("REGDB_E_CLASSNOTREG" << std::endl);
 				break;
 			case (CLASS_E_NOAGGREGATION):
-				_LOG_NOHEAD("CLASS_E_NOAGGREGATION" << std::endl);
+				LOG_NOHEAD("CLASS_E_NOAGGREGATION" << std::endl);
 				break;
 			case (E_NOINTERFACE):
-				_LOG_NOHEAD("E_NOINTERFACE" << std::endl);
+				LOG_NOHEAD("E_NOINTERFACE" << std::endl);
 				break;
 			case (E_POINTER):
-				_LOG_NOHEAD("E_POINTER" << std::endl);
+				LOG_NOHEAD("E_POINTER" << std::endl);
 				break;
 			default: // Non-documented error.
-				_LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
+				LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
 				break;
 			}
 
@@ -159,7 +144,7 @@ void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
 		}
 
 		if (!deviceEnumerator) {
-			_LOG("CoCreateInstance failed while setting microphone volume. DeviceEnumerator is null" << std::endl);
+			LOG_ERROR("CoCreateInstance failed while setting microphone volume. DeviceEnumerator is null" << std::endl);
 			return;
 		}
 
@@ -169,7 +154,7 @@ void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
 		deviceEnumerator = NULL;
 
 		if (!microphone) {
-			_LOG("GetDevice failed to get a microphone in SetVolume." << std::endl);
+			LOG_ERROR("GetDevice failed to get a microphone in SetVolume." << std::endl);
 			return;
 		}
 
@@ -177,15 +162,12 @@ void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
 		IAudioEndpointVolume* microphoneVolume = NULL;
 		microphone->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID*)&microphoneVolume);
 
-		_LOG_SETLEVEL(LogLevel::Info);
-
-		// Set the volume
 		if (volume > 100)
 			volume %= 100;
 
 		microphoneVolume->SetMasterVolumeLevelScalar((float)volume / 100, NULL);
 
-		_LOG("Set volume of microphone: \"" << microphoneName << "\" to " << volume << std::endl);
+		LOG_INFO("Set volume of microphone: \"" << microphoneName << "\" to " << volume << std::endl);
 
 		// Clean-up
 		microphone->Release();
@@ -193,7 +175,7 @@ void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
 	}
 	else
 	{
-		_LOG("Unable to find microphone (Set volume): \"" << microphoneName << "\"" << std::endl);
+		LOG_ERROR("Unable to find microphone (Set volume): \"" << microphoneName << "\"" << std::endl);
 	}
 }
 
@@ -203,45 +185,38 @@ void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
 /// <param name="microphone"> - Name of the microphone</param>
 /// <returns>Int 0-100 of the current volume of the microphone</returns>
 int AudioDevices::GetMicrophoneVolume(std::string microphoneName) {
-	_LOG_INIT;
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	if (activeMicrophones.find(microphoneName) != activeMicrophones.end()) {
-		// Initialization
 		LPWSTR microphoneId = activeMicrophones[microphoneName];
 		IMMDevice* microphone = NULL;
 
-		// CoCreateInstance
 		IMMDeviceEnumerator* deviceEnumerator = NULL;
 		HRESULT coCI = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID*)&deviceEnumerator);
 
-		// Check response of CoCreateInstance
 		if (coCI != S_OK) {
-			_LOG("Unable to get microphone volume. CoCreateInstance is not S_OK. Returned ");
+			LOG_ERROR("Unable to get microphone volume. CoCreateInstance is not S_OK. Returned ");
 			switch (coCI) {
 			case (REGDB_E_CLASSNOTREG):
-				_LOG_NOHEAD("REGDB_E_CLASSNOTREG" << std::endl);
+				LOG_NOHEAD("REGDB_E_CLASSNOTREG" << std::endl);
 				break;
 			case (CLASS_E_NOAGGREGATION):
-				_LOG_NOHEAD("CLASS_E_NOAGGREGATION" << std::endl);
+				LOG_NOHEAD("CLASS_E_NOAGGREGATION" << std::endl);
 				break;
 			case (E_NOINTERFACE):
-				_LOG_NOHEAD("E_NOINTERFACE" << std::endl);
+				LOG_NOHEAD("E_NOINTERFACE" << std::endl);
 				break;
 			case (E_POINTER):
-				_LOG_NOHEAD("E_POINTER" << std::endl);
+				LOG_NOHEAD("E_POINTER" << std::endl);
 				break;
 			default: // Non-documented error.
-				_LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
+				LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
 				break;
 			}
 
 			return 17.f;
 		}
 
-		// Null-Check
 		if (!deviceEnumerator) {
-			_LOG("CoCreateInstance failed while getting microphone volume. DeviceEnumerator is null" << std::endl);
+			LOG_ERROR("CoCreateInstance failed while getting microphone volume. DeviceEnumerator is null" << std::endl);
 			return 17.f;
 		}
 
@@ -251,7 +226,7 @@ int AudioDevices::GetMicrophoneVolume(std::string microphoneName) {
 		deviceEnumerator = NULL;
 
 		if (!microphone) {
-			_LOG("GetDevice failed to get a microphone in GetVolume." << std::endl);
+			LOG_ERROR("GetDevice failed to get a microphone in GetVolume." << std::endl);
 			return 17.f;
 		}
 
@@ -263,7 +238,6 @@ int AudioDevices::GetMicrophoneVolume(std::string microphoneName) {
 		float currentVolume = 0.f;
 		microphoneVolume->GetMasterVolumeLevelScalar(&currentVolume);
 
-		// Clean-up
 		microphone->Release();
 		microphoneVolume->Release();
 
@@ -271,7 +245,7 @@ int AudioDevices::GetMicrophoneVolume(std::string microphoneName) {
 	}
 	else
 	{
-		_LOG("Unable to find microphone (Get volume): \"" << microphoneName << "\"" << std::endl);
+		LOG_ERROR("Unable to find microphone (Get volume): \"" << microphoneName << "\"" << std::endl);
 		return 17.f;
 	}
 }

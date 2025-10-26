@@ -35,14 +35,13 @@ namespace Keyboard {
 	/// Force a Steam screenshot. Requires the default "F12" screenshot key for Steam.
 	/// </summary>
 	void TakeScreenshot() {
-		_LOG_INIT;
 		if (!takenScreenshotOfThisScreen) {
 			takenScreenshotOfThisScreen = true;
 			Sleep(8000); // The menu title changes while the animation is running so we are giving it so time to show the actual results. (8 seconds)
 
 			// Press F12
 			PostMessage(FindWindow(nullptr, L"Rocksmith 2014"), WM_KEYDOWN, VK_F12, 0);
-			_LOG("Took screenshot" << std::endl);
+			LOG_INFO("Took screenshot" << std::endl);
 			Sleep(30);
 			PostMessage(FindWindow(nullptr, L"Rocksmith 2014"), WM_KEYUP, VK_F12, 0);
 		}

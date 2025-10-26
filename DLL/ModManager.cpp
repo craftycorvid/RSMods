@@ -44,8 +44,6 @@ namespace ModManager {
 	/// Hook Game Functions For Our Own Uses (On Alt-Tab, Draw UI, etc).
 	/// </summary>
 	void GUI() {
-		_LOG_INIT;
-
 		uint32_t d3d9Base;
 		uint32_t adr;
 		uint32_t* vTable = NULL;
@@ -57,26 +55,24 @@ namespace ModManager {
 
 		bool runningThroughWine = adr == (uint32_t)2;
 
-		_LOG("Running in Wine: " << std::boolalpha << runningThroughWine << std::endl);
+		LOG_INFO("Running in Wine: " << std::boolalpha << runningThroughWine << std::endl);
 
 		// Proton / Wine Check.
 		// We do NOT support linux. There is some issues with the D3D pointers.
 		// This check is meant so if someone does load our mods on Linux, we won't just crash. Most mods will just not work.
 		if (runningThroughWine) {
-			_LOG("Performing Wine check" << std::endl);
+			LOG_INFO("Performing Wine check" << std::endl);
 			adr = MemUtil::FindPattern<uint32_t>(0x2000000, 0x2B778CC, (byte*)Offsets::d3dDevice_Pattern, Offsets::d3dDevice_Mask) + 2;
-			_LOG(adr << std::endl);
+			LOG_INFO(adr << std::endl);
 		}
 
-		_LOG_SETLEVEL(LogLevel::Error);
-
 		if (!adr) {
-			_LOG("Could not find D3D9 device pointer." << std::endl);
+			LOG_ERROR("Could not find D3D9 device pointer." << std::endl);
 			return;
 		}
 
 		if (!*(uint32_t*)adr) { // Wing it
-			_LOG("Could not find DX9 device." << std::endl);
+			LOG_ERROR("Could not find DX9 device." << std::endl);
 			MessageBoxA(NULL, "Could not find DX9 device, please restart the game!", "Error", NULL);
 			return;
 		}
@@ -85,7 +81,7 @@ namespace ModManager {
 
 		// Third time's the charm?
 		if (!vTable || vTable < (uint32_t*)Offsets::baseHandle) {
-			_LOG("Could not find D3D device's vTable address." << std::endl);
+			LOG_ERROR("Could not find D3D device's vTable address." << std::endl);
 			MessageBoxA(NULL, "Could not find D3D device's vTable address \n Restart the game and if you still get this error after a few tries, please report the error!", "Error", NULL);
 			return;
 		}
@@ -139,8 +135,6 @@ namespace ModManager {
 	/// </summary>
 	void ApplyStartupMods() 
 	{
-		_LOG_INIT;
-
 		AudioDevices::SetupMicrophones();
 		ApplyBugPrevention();
 		ApplyAudioDeviceConfiguration();
@@ -152,7 +146,7 @@ namespace ModManager {
 		// Look to see if RS_ASIO applied the 2 RTC input bypass.
 		// If they did, then we disregard the results from our version of the mod.
 		bool rsAsioBypassTwoRTC = false;
-		_LOG("RS_ASIO Bypass2RTC: " << std::boolalpha << rsAsioBypassTwoRTC << std::endl);
+		LOG_INFO("RS_ASIO Bypass2RTC: " << std::boolalpha << rsAsioBypassTwoRTC << std::endl);
 
 		if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on") {
 			QualityOfLife::PatchTwoRTC();
@@ -175,13 +169,11 @@ namespace ModManager {
 	/// </summary>
 	void ApplyAudioDeviceConfiguration() 
 	{
-		_LOG_INIT;
-
 		Midi::tuningOffset = Settings::GetModSetting("TuningOffset");
 
 		if (Settings::ReturnSettingValue("AltOutputSampleRate") == "on" &&
 			Settings::GetModSetting("AlternativeOutputSampleRate") != 48000) {
-			_LOG("[!] Overriding Output Sample Rate to " << Settings::GetModSetting("AlternativeOutputSampleRate") << std::endl);
+			LOG_WARNING("[!] Overriding Output Sample Rate to " << Settings::GetModSetting("AlternativeOutputSampleRate") << std::endl);
 			AudioDevices::output_SampleRate = Settings::GetModSetting("AlternativeOutputSampleRate");
 			AudioDevices::ChangeOutputSampleRate();
 		}
@@ -575,8 +567,6 @@ namespace ModManager {
 	/// This prevents the user from being locked in a loop.
 	/// </summary>
 	void CheckIfGameHasLoaded() {
-		_LOG_INIT;
-
 		if (!GameState::GameLoaded && (GameState::currentMenu == "MainMenu" ||
 			GameState::currentMenu == "PlayedRS1Select" ||
 			GameState::currentMenu == "SimpleDialog")) {
@@ -629,16 +619,13 @@ namespace ModManager {
 	/// Loads a specific user profile by name.
 	/// </summary>
 	void HandleSpecificProfileLoad(GameLoopState& state) {
-		_LOG_INIT;
 		state.selectedUser = GameState::CurrentSelectedUser();
 
 		if (state.selectedUser == Settings::ReturnSettingValue("ProfileToLoad")) {
 			Keyboard::AutoEnterGame();
 		}
 		else if (state.selectedUser == "New profile") {
-			_LOG_SETLEVEL(LogLevel::Error);
-			_LOG("(Auto Load) Invalid Profile Name" << std::endl); // Yeah, the profile they're looking for doesn't exist :(
-			_LOG_SETLEVEL(LogSettings::defaultLogLevel);
+			LOG_ERROR("(Auto Load) Invalid Profile Name" << std::endl); // Yeah, the profile they're looking for doesn't exist :(
 			state.forkInToasterNewProfile = true;
 		}
 		else { // Not the profile we're looking for. Move down 1.

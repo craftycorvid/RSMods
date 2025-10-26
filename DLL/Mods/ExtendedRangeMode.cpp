@@ -56,10 +56,10 @@ void ERMode::Initialize() {
 	std::map<std::string, RSColor> emptyMap;
 
 	for (int str = 0; str < 6; str++)
-		customColors.push_back(emptyMap);
+		customColors.emplace_back(emptyMap);
 }
 
-void ERMode::SetCustomColors(int strIdx, ColorMap customColorMap) {
+void ERMode::SetCustomColors(int strIdx, const ColorMap& customColorMap) {
 	customColors[strIdx] = customColorMap;
 }
 
@@ -68,7 +68,7 @@ void ERMode::SetCustomColors(int strIdx, ColorMap customColorMap) {
 /// </summary>
 /// <param name="strings"> - Pointers to string colors</param>
 /// <param name="colorType"> - String of color type</param>
-void ERMode::SetColors(std::vector<uintptr_t> strings, std::string colorType) {
+void ERMode::SetColors(std::vector<uintptr_t> strings, const std::string& colorType) {
 	for (int strIndex = 0; strIndex < 6;strIndex++) {
 		if (strings[strIndex] == NULL)
 			return;
@@ -76,7 +76,6 @@ void ERMode::SetColors(std::vector<uintptr_t> strings, std::string colorType) {
 		*(RSColor*)strings[strIndex] = customColors[strIndex][colorType];
 	}
 }
-
 
 std::vector<RSColor> oldNormal, oldDisabled, oldEnabled, oldGlow, oldAmb;
 
@@ -120,8 +119,6 @@ std::vector<std::vector<RSColor>> defaultColors;
 /// Set colors of strings depending on INI settings.
 /// </summary>
 void ERMode::Toggle7StringMode() {
-	_LOG_INIT;
-
 	std::vector<uintptr_t> stringsTest, stringsGlow, stringsDisabled, stringsAmb, stringsEnabled, stringsPegInTune, stringsPegNotInTune, pegsTuning, stringsText, stringsPart, stringsBodyNorm, stringsBodyAcc, stringsBodyPrev;
 
 	// Get the original values for the strings.
@@ -247,7 +244,7 @@ void ERMode::Toggle7StringMode() {
 
 		InitStrings(stringsTest, Text);
 		SetColors(stringsTest, colorsTest);
-		_LOG("Set custom colors" << std::endl);
+		LOG_INFO("Set custom colors" << std::endl);
 	}
 }
 
@@ -332,7 +329,7 @@ void ERMode::DoRainbow() {
 			if (newH > 360)
 				newH -= 360;
 
-			// Since we only make textures for 180 possiblities, we can narrow out results down to 180 different values (0-179).
+			// Since we only make textures for 180 possibilities, we can narrow out results down to 180 different values (0-179).
 			if (newH > 4)
 				customNoteColorH = (newH / 2) - 1;
 			else
@@ -373,8 +370,6 @@ void ERMode::DoRainbow() {
 /// <param name="B"> - Blue (Color to look for)</param>
 /// <returns></returns>
 bool IsMatch(std::vector<uintptr_t> strings, int R, int G, int B) {
-	_LOG_INIT;
-
 	if (strings[0] == NULL)
 		return false;
 
@@ -382,88 +377,9 @@ bool IsMatch(std::vector<uintptr_t> strings, int R, int G, int B) {
 	int g = (int)std::round((*(RSColor*)strings[0]).g * 255);
 	int b = (int)std::round((*(RSColor*)strings[0]).b * 255);
 	if (R == 63)
-		_LOG(std::dec << R << " " << r << " " << (R == r) << " " << G << " " << g << " " << (G == g) << " " << B << " " << b << " " << (B == b) << std::endl);
+		LOG_INFO(std::dec << R << " " << r << " " << (R == r) << " " << G << " " << g << " " << (G == g) << " " << B << " " << b << " " << (B == b) << std::endl);
 
 	if (R == r && G == g && B == b)
 		return true;
 	return false;
 }
-
-
-//_LOG(std::hex << stringsEnabled[0] << std::endl);
-
-/*
-_LOG("Normal" << i << " " << (*(Color*)stringsNormal[i]).r * 255 << " " << (*(Color*)stringsNormal[i]).g * 255 << " " << (*(Color*)stringsNormal[i]).b * 255 << std::endl);
-_LOG("Disabled" << i << " " << (*(Color*)stringsDisabled[i]).r * 255 << " " << (*(Color*)stringsDisabled[i]).g * 255 << " " << (*(Color*)stringsDisabled[i]).b * 255 << std::endl);
-_LOG("Enabled" << i << " " << (*(Color*)stringsEnabled[i]).r * 255 << " " << (*(Color*)stringsEnabled[i]).g * 255 << " " << (*(Color*)stringsEnabled[i]).b * 255 << std::endl);
-_LOG("Glow" << i << " " << (*(Color*)stringsGlow[i]).r * 255 << " " << (*(Color*)stringsGlow[i]).g * 255 << " " << (*(Color*)stringsGlow[i]).b * 255 << std::endl);
-_LOG("Amb" << i << " " << (*(Color*)stringsAmb[i]).r * 255 << " " << (*(Color*)stringsAmb[i]).g * 255 << " " << (*(Color*)stringsAmb[i]).b * 255 << std::endl);
-_LOG("PegInTune" << i << " " << (*(Color*)stringsPegInTune[i]).r * 255 << " " << (*(Color*)stringsPegInTune[i]).g * 255 << " " << (*(Color*)stringsPegInTune[i]).b * 255 << std::endl);
-_LOG("PegNotInTune" << i << " " << (*(Color*)stringsPegNotInTune[i]).r * 255 << " " << (*(Color*)stringsPegNotInTune[i]).g * 255 << " " << (*(Color*)stringsPegNotInTune[i]).b * 255 << std::endl);
-_LOG("Text" << i << " " << (*(Color*)stringsText[i]).r * 255 << " " << (*(Color*)stringsText[i]).g * 255 << " " << (*(Color*)stringsText[i]).b * 255 << std::endl);
-_LOG("Part" << i << " " << (*(Color*)stringsPart[i]).r * 255 << " " << (*(Color*)stringsPart[i]).g * 255 << " " << (*(Color*)stringsPart[i]).b * 255 << std::endl);
-_LOG("BodyNorm" << i << " " << (*(Color*)stringsBodyNorm[i]).r * 255 << " " << (*(Color*)stringsBodyNorm[i]).g * 255 << " " << (*(Color*)stringsBodyNorm[i]).b * 255 << std::endl);
-_LOG("BodyAcc" << i << " " << (*(Color*)stringsBodyAcc[i]).r * 255 << " " << (*(Color*)stringsBodyAcc[i]).g * 255 << " " << (*(Color*)stringsBodyAcc[i]).b * 255 << std::endl);
-_LOG("BodyPrev" << i << " " << (*(Color*)stringsBodyPrev[i]).r * 255 << " " << (*(Color*)stringsBodyPrev[i]).g * 255 << " " << (*(Color*)stringsBodyPrev[i]).b * 255 << std::endl);
-_LOG(std::endl;
-*/
-
-
-/*int a0 = 0, a1 = 0, a2 = 0, a3 = 0;
-
-	for (int i = 0; i < 17;i++) {
-		stringsTest.clear();
-		int current = 0x350 + i * 0x18;
-		InitStrings(stringsTest, current);
-
-		if (IsMatch(stringsTest, 191, 95, 95))
-			_LOG("Ambient " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 255, 79, 90))
-			_LOG("Enabled " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 76, 23, 27))
-			_LOG_HEAD<< "Disabled " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 255, 0, 16))
-			_LOG("StringsGlow " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 191, 0, 15))
-			_LOG("PegsTuning " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 0, 0, 0)) {
-			a0++;
-			if (a0 == 1)
-				_LOG("PegsReset " << std::hex << current << std::endl);
-			else if (a0 == 2)
-				_LOG("PegsSuccess " << std::hex << current << std::endl);
-		}
-		else if (IsMatch(stringsTest, 255, 255, 255))
-			_LOG("PegsOutOfTune " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 249, 146, 137))
-			_LOG("BodypartsAccent " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 178, 0, 14))
-			_LOG("PegsInTune " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 255, 64, 64)) {
-			a2++;
-			if (a2 == 1)
-				_LOG("RegistarTextIndicator " << std::hex << current << std::endl);
-			else if (a2 == 2)
-				_LOG("ForkParticles " << std::hex << current << std::endl);
-		}
-		else if (IsMatch(stringsTest, 64, 41, 41))
-			_LOG("BodypartsPreview " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 255, 0, 0))
-			_LOG("BodypartsNormal " << std::hex << current << std::endl);
-		else if (IsMatch(stringsTest, 255, 5, 0)) {
-			a3++;
-			if (a3 == 1)
-				_LOG("GA_Main " << std::hex << current << std::endl);
-			else if (a3 == 2)
-				_LOG("GA_Additive " << std::hex << current << std::endl);
-			else if (a3 == 3)
-				_LOG("GA_UI " << std::hex << current << std::endl);
-		}
-	} */
-
-	/*for (int i = 0; i < 6;i++) {
-		_LOG(std::hex << std::setfill('0') << std::setw(2) << (int)((*(Color*)stringsGlow[i]).r * 255);
-		LOG << std::hex << std::setfill('0') << std::setw(2) << (int)((*(Color*)stringsGlow[i]).g * 255);
-		LOG << std::hex << std::setfill('0') << std::setw(2) << (int)((*(Color*)stringsGlow[i]).b * 255);
-		LOG << std::endl);
-	}*/

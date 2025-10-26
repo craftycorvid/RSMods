@@ -9,10 +9,9 @@ namespace BugPrevention {
 	/// In this fix, we jump over the interior of the for-loop (marked as a while with a break case) that writes to invalid memory.
 	/// </summary>
 	void PreventOculusCrash() {
-		_LOG_INIT;
-
 		MemUtil::PatchAdr(Offsets::ptr_OculusCrashJmp, "\xE9\x19\x02\x00\x00\x90", 6);
-		_LOG("(BUG PREVENTION) Prevented Oculus Crash" << std::endl);
+
+		LOG_INFO("(BUG PREVENTION) Prevented Oculus Crash" << std::endl);
 	}
 
 	/// <summary>
@@ -21,10 +20,9 @@ namespace BugPrevention {
 	/// So when the user encounters a broken tone, all they need to do is change the tone and the tones should start working again.
 	/// </summary>
 	void PreventStuckTone() {
-		_LOG_INIT;
-
 		MemUtil::PatchAdr(Offsets::ptr_StuckToneJmp, "\xEB", 1);
-		_LOG("(BUG PREVENTION) Prevented Tone Bug" << std::endl);
+
+		LOG_INFO("(BUG PREVENTION) Prevented Tone Bug" << std::endl);
 	}
 
 	/// <summary>
@@ -32,11 +30,10 @@ namespace BugPrevention {
 	/// It crashes with a memory access violation. The following code skips over the while loop that may eventually crash.
 	/// </summary>
 	void PreventPnPCrash() {
-		_LOG_INIT;
-
 		MemUtil::PatchAdr(Offsets::ptr_PnpJmp_1, "\xE9\x19\x02\x00\x00\x90", 6);
 		MemUtil::PatchAdr(Offsets::ptr_PnpJmp_2, "\x90\x90\x90\x90\x90\x90", 6);
-		_LOG("(BUG PREVENTION) Prevented PnP Crash" << std::endl);
+
+		LOG_INFO("(BUG PREVENTION) Prevented PnP Crash" << std::endl);
 	}
 
 	/// <summary>
@@ -47,12 +44,10 @@ namespace BugPrevention {
 	/// This mod prevents the checks for those characters to allow the user to have more complex passwords.
 	/// </summary>
 	void AllowComplexPasswords() {
-		_LOG_INIT;
-
 		MemUtil::PatchAdr(Offsets::ptr_Password_LimitCharacters, "\x90\x90", 2);
 		MemUtil::PatchAdr(Offsets::ptr_Password_LimitCharacters_Clipboard, "\x90\x90", 2);
 
-		_LOG("(BUG PREVENTION) Allowed Complex Uplay Passwords" << std::endl);
+		LOG_INFO("(BUG PREVENTION) Allowed Complex Uplay Passwords" << std::endl);
 	}
 
 	void __declspec(naked) advancedDisplayCrashHook()
@@ -87,13 +82,11 @@ namespace BugPrevention {
 	/// This mod tries to prevent that by exiting the function if ECX (the memory address it is reading from) is NULL.
 	/// </summary>
 	void PreventAdvancedDisplayCrash() {
-		_LOG_INIT;
-
 		MemUtil::PlaceHook(Offsets::ptr_AdvancedDisplayCrash, advancedDisplayCrashHook, 7);
 
 		FlushInstructionCache(GetCurrentProcess(), (void*)Offsets::ptr_AdvancedDisplayCrash.Get(), 7);
 
-		_LOG("(BUG PREVENTION) Prevented Advanced Display Crash" << std::endl);
+		LOG_INFO("(BUG PREVENTION) Prevented Advanced Display Crash" << std::endl);
 	}
 
 
@@ -103,25 +96,21 @@ namespace BugPrevention {
 	/// This just patches out those checks, so it won't crash when EBX is a nullptr.
 	/// </summary>
 	void PreventPortAudioInDeviceCrash() {
-		_LOG_INIT;
-
 		// Overwrite some code that doesn't do null checks with NOP.
 		// Be very careful in this code. If you overwrite the next instruction, then you end up breaking audio input.
 		// NB: JZ has been replaced by JL, now it's 10 bytes in total
 		MemUtil::PatchAdr(Offsets::ptr_PortAudioInCrash, "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90", 10);
 
-		_LOG("(BUG PREVENTION) Prevented Port Audio In Device Crash" << std::endl);
+		LOG_INFO("(BUG PREVENTION) Prevented Port Audio In Device Crash" << std::endl);
 	}
 
 	/// <summary>
 	/// Prevention for crash caused by certain audio devices (like Voicemeter virtual cables).
 	/// </summary>
 	void PreventExtraAudioDevicesCrash() {
-		_LOG_INIT;
-
 		MemUtil::PatchAdr(Offsets::ptr_AdditionalAudioDevicesCrash, "\x90\x90\x90\x90\x90\x31\xC9\x31\xDB", 9);
 
-		_LOG("(BUG PREVENTION) Prevented Additional Audio Devices Crash" << std::endl);
+		LOG_INFO("(BUG PREVENTION) Prevented Additional Audio Devices Crash" << std::endl);
 	}
 
 	/// <summary>

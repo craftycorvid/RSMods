@@ -26,15 +26,11 @@ bool GameState::IsMultiplayer() {
 /// </summary>
 /// <returns>Profile Name</returns>
 std::string GameState::CurrentSelectedUser() {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	uintptr_t badValue = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_selectedProfileName, Offsets::ptr_selectedProfileNameOffsets);
 
 	// If the pointer is invalid just return nothing
 	if (!badValue) {
-		_LOG("Invalid Pointer: CurrentSelectedUser" << std::endl);
+		LOG_ERROR("Invalid Pointer: CurrentSelectedUser" << std::endl);
 		return (std::string)"";
 	}
 
@@ -62,8 +58,10 @@ bool IsSongKeyStringValid(const char* str, size_t max_len)
 	if (strLen <= 13 || strLen > max_len)
 		return false;
 
-	std::string playPrefix = "Play_";
-	return strncmp(playPrefix.data(), str, sizeof(playPrefix));
+	std::string_view sv(str, strLen);
+
+	constexpr std::string_view prefix = "Play_";
+	return sv.size() >= prefix.size() && sv.substr(0, prefix.size()) == prefix;
 }
 
 /// <summary>
@@ -79,7 +77,7 @@ std::string GameState::GetSongKey() {
 		// Check if it's null terminated within a reasonable number of bytes
 		if (IsSongKeyStringValid(previewEvent, 50))
 		{
-			std::string previewName = std::string(previewEvent);
+			auto previewName = std::string(previewEvent);
 
 			// If the preview name contains "Play_", which is required by Wwise.
 			if (previewName.length() > 13 && previewName._Starts_with("Play_")) {
@@ -98,8 +96,6 @@ std::string GameState::GetSongKey() {
 /// <param name="GameNotLoaded"> - Should we trust the pointer?</param>
 /// <returns>Internal Menu Name</returns>
 std::string GameState::GetCurrentMenu(bool GameNotLoaded) {
-	_LOG_INIT;
-
 	bool failedToReadPreMainMenuAddr = false;
 
 	// It seems like the third level of the pointer isn't initialized until you reach the UPLAY login screen,
@@ -122,8 +118,7 @@ std::string GameState::GetCurrentMenu(bool GameNotLoaded) {
 		}
 		else
 		{
-			//_LOG_SETLEVEL(LogLevel::Info);
-			//_LOG("Invalid Pointer: GetCurrentMenu(" << std::boolalpha << GameNotLoaded << ") @ LVL 2" << std::endl);
+			//_LOG_INFO("Invalid Pointer: GetCurrentMenu(" << std::boolalpha << GameNotLoaded << ") @ LVL 2" << std::endl);
 			failedToReadPreMainMenuAddr = true;
 		}
 	}
@@ -135,11 +130,8 @@ std::string GameState::GetCurrentMenu(bool GameNotLoaded) {
 	// If game hasn't loaded, take the safer, but possibly slower route
 
 	uintptr_t currentMenuAddr = MemUtil::FindDMAAddy(Offsets::ptr_currentMenu, Offsets::ptr_currentMenuOffsets, GameNotLoaded);
-
-	// Null Pointer Check
 	if (!currentMenuAddr) {
-		//_LOG_SETLEVEL(LogLevel::Error);
-		//_LOG("Invalid Pointer: GetCurrentMenu(" << std::boolalpha << GameNotLoaded << ") @ LVL 3" << std::endl);
+		//LOG_ERROR("Invalid Pointer: GetCurrentMenu(" << std::boolalpha << GameNotLoaded << ") @ LVL 3" << std::endl);
 		return "where are we actually";
 	}
 
@@ -152,16 +144,11 @@ std::string GameState::GetCurrentMenu(bool GameNotLoaded) {
 /// </summary>
 /// <param name="enabled"> - Should we turn on colors or turn off?</param>
 void GameState::ToggleCB(bool enabled) {
-	_LOG_INIT;
-
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	uintptr_t addrTimer = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_timer, Offsets::ptr_timerBaseOffsets);
 	uintptr_t cbEnabled = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_colorBlindMode, Offsets::ptr_colorBlindModeOffsets);
 
-	// Null Pointers Check
 	if (!addrTimer || !cbEnabled) {
-		// _LOG("Invalid Pointers: ToggleCB(" << std::boolalpha << enabled << ")" << std::endl); // Disabled because it causes log to get huge real quick
+		// LOG_ERROR("Invalid Pointers: ToggleCB(" << std::boolalpha << enabled << ")" << std::endl); // Disabled because it causes log to get huge real quick
 		return;
 	}
 

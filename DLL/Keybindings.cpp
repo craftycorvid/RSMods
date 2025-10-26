@@ -7,18 +7,16 @@ namespace Keybindings {
 
 	void HandleTuningOffset() 
 	{
-		_LOG_INIT;
-
 		bool isCtrlPressed = GetKeyState(VK_CONTROL) & 0x8000;
+
 		Midi::tuningOffset += isCtrlPressed ? -1 : 1;
 		Midi::tuningOffset = std::clamp(Midi::tuningOffset, -3, 12);
-		_LOG("Triggered Mod Setting: Tuning Offset is now set to " << Midi::tuningOffset << std::endl);
+
+		LOG_INFO("Triggered Mod Setting: Tuning Offset is now set to " << Midi::tuningOffset << std::endl);
 	}
 
 	void HandleRewind() 
 	{
-		_LOG_INIT;
-
 		// SongTimer is stored in seconds, while RewindBy is stored in milliseconds.
 		// We need milliseconds to send to Wwise, so change SongTimer to milliseconds, then subtract the Rewind value.
 		AkTimeMs seekTo = (AkTimeMs)((SongTimer::SongTimer() * 1000) - Settings::GetModSetting("RewindBy"));
@@ -36,10 +34,11 @@ namespace Keybindings {
 		// Our seek time needs to be stored as milliseconds when sending to Wwise, but we need to have it in seconds when setting the GreyNoteTimer.
 		SongTimer::SetGreyNoteTimer(seekTo / 1000.f);
 
-		_LOG("(REWIND) Seeked to " << seekTo << "ms." << std::endl);
+		LOG_INFO("(REWIND) Seeked to " << seekTo << "ms." << std::endl);
 	}
 
-	void HandleLoopStart() {
+	void HandleLoopStart() 
+	{
 		if (GetKeyState(VK_CONTROL) & 0x8000) {
 			loopStart = loopEnd = NULL;
 		}
@@ -101,8 +100,6 @@ namespace Keybindings {
 
 	void HandleRRSpeed() 
 	{
-		_LOG_INIT;
-
 		float realSongSpeed = RiffRepeater::GetSpeed(true);
 		bool isCtrlPressed = GetKeyState(VK_CONTROL) & 0x8000;
 		auto interval = (float)Settings::GetModSetting("RRSpeedInterval");
@@ -118,7 +115,7 @@ namespace Keybindings {
 		RiffRepeater::EnableTimeStretch();
 		RiffRepeater::saveNewRRSpeedToFile = true;
 
-		_LOG("Triggered Mod: Song Speed set to " << realSongSpeed << "%" << std::endl);
+		LOG_INFO("Triggered Mod: Song Speed set to " << realSongSpeed << "%" << std::endl);
 	}
 
 	struct VolumeControlInfo 
@@ -165,15 +162,13 @@ namespace Keybindings {
 
 	void HandleKeyUp(WPARAM keyPressed) 
 	{
-		_LOG_INIT;
-
 		if (!GameState::GameLoaded) return; // Game must not be on the startup videos or it will crash
 		DispatchCommand(keyPressed, keyUpCommands);
 
 		// Control + A. Force us to read the Settings from the INI again, to renew our cached values.
 		if (keyPressed == 0x41 && (GetKeyState(VK_CONTROL) & 0x8000)) {
 			Settings::UpdateSettings();
-			_LOG("Triggered Setting Update" << std::endl);
+			LOG_INFO("Triggered Setting Update" << std::endl);
 		}
 
 		// Auto Tuning via MIDI mod. 
@@ -197,13 +192,11 @@ namespace Keybindings {
 
 	void UpdateSettingsOnGUIChange(LPARAM lParam)
 	{
-		_LOG_INIT;
-
 		auto pcds = (COPYDATASTRUCT*)lParam;
 		if (pcds->dwData == 1)
 		{
 			std::string currMsg = (char*)pcds->lpData;
-			_LOG(currMsg << std::endl);
+			LOG_INFO(currMsg << std::endl);
 
 			if (Contains(currMsg, "update")) {
 				if (Contains(currMsg, "all"))
@@ -231,16 +224,15 @@ namespace Keybindings {
 		}
 	}
 
-	void DispatchCommand(WPARAM keyPressed, const std::map<std::string, ModCommand, std::less<>>& commands) {
-		_LOG_INIT;
-
+	void DispatchCommand(WPARAM keyPressed, const std::map<std::string, ModCommand, std::less<>>& commands) 
+	{
 		for (const auto& [key, value] : commands) {
 
 			if (keyPressed == Settings::GetKeyBind(key)) {
 				value.action();
 
 				if (!value.logMessage.empty()) {
-					_LOG("Triggered: " << value.logMessage << std::endl);
+					LOG_INFO("Triggered: " << value.logMessage << std::endl);
 				}
 
 				return;

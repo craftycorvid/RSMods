@@ -120,7 +120,7 @@ std::unique_ptr<Gdiplus::Bitmap> CreateGradientBitmap(UINT width, UINT height, C
 
 	if (saveTextureToFile) {
 		CLSID pngClsid;
-		
+
 		if (CLSIDFromString(L"{557CF406-1A04-11D3-9A73-0000F81EF32E}", &pngClsid) >= 0) { // For BMP: {557cf400-1a04-11d3-9a73-0000f81ef32e}
 			bmp->Save(L"generatedTexture.png", &pngClsid);
 		}
@@ -170,12 +170,9 @@ bool CopyBitmapToTexture(IDirect3DTexture9* pTexture, Gdiplus::Bitmap& bitmap, U
 /// <param name="in_lineHeight"> - How thick should each line be?</param>
 /// <param name="howManyLines"> - How many lines should there be?</param>
 void D3D::GenerateTexture(IDirect3DDevice9* pDevice, IDirect3DTexture9** ppTexture, ColorList colorSet, UINT in_width, UINT in_height, int in_lineHeight, int howManyLines) {
-	_LOG_INIT;
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	const auto& gdiplusManager = GdiplusManager::GetInstance();
 	if (!gdiplusManager.IsInitialized()) {
-		_LOG("GDI+ failed to initialize" << std::endl);
+		LOG_ERROR("GDI+ failed to initialize" << std::endl);
 		return;
 	}
 
@@ -184,44 +181,44 @@ void D3D::GenerateTexture(IDirect3DDevice9* pDevice, IDirect3DTexture9** ppTextu
 	}
 
 	using namespace Gdiplus;
-	
+
 	auto bmp = CreateGradientBitmap(in_width, in_height, colorSet, in_lineHeight, howManyLines);
 
 	if (!bmp) {
-		_LOG("Failed to create bitmap" << std::endl);
+		LOG_ERROR("Failed to create bitmap" << std::endl);
 		return;
 	}
 
 	HRESULT hr_D3DX = D3DXCreateTexture(pDevice, in_width, in_height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, ppTexture);
 
 	if (*ppTexture == NULL) { // User is spam updating their INI through the GUI. D3DX textures are becoming NULL references.
-		_LOG("User is spam updating their INI through the GUI. D3DXCreateTexture returned ");
+		LOG_ERROR("User is spam updating their INI through the GUI. D3DXCreateTexture returned ");
 
 		switch (hr_D3DX) {
-			case (D3D_OK):
-				_LOG_NOHEAD("D3D_OK" << std::endl);
+			case (D3D_OK): 
+				LOG_NOHEAD("D3D_OK" << std::endl);
 				break;
 			case (D3DERR_INVALIDCALL):
-				_LOG_NOHEAD("D3DERR_INVALIDCALL" << std::endl);
+				LOG_NOHEAD("D3DERR_INVALIDCALL" << std::endl);
 				break;
 			case (D3DERR_NOTAVAILABLE):
-				_LOG_NOHEAD("D3DERR_NOTAVAILABLE" << std::endl);
+				LOG_NOHEAD("D3DERR_NOTAVAILABLE" << std::endl);
 				break;
 			case (D3DERR_OUTOFVIDEOMEMORY):
-				_LOG_NOHEAD("D3DERR_OUTOFVIDEOMEMORY" << std::endl);
+				LOG_NOHEAD("D3DERR_OUTOFVIDEOMEMORY" << std::endl);
 				break;
 			case (E_OUTOFMEMORY):
-				_LOG_NOHEAD("E_OUTOFMEMORY" << std::endl);
+				LOG_NOHEAD("E_OUTOFMEMORY" << std::endl);
 				break;
 			default: // Non-documented error
-				_LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
+				LOG_NOHEAD("NOT DOCUMENTED!" << std::endl);
 				break;
 		}
 		return;
 	}
-	
+
 	if (!CopyBitmapToTexture(*ppTexture, *bmp, in_width, in_height)) {
-		_LOG("Failed to copy bitmap to texture" << std::endl);
+		LOG_ERROR("Failed to copy bitmap to texture" << std::endl);
 		ReleaseTexture(ppTexture);
 		return;
 	}
@@ -258,7 +255,7 @@ void ClampColorComponents(RSColor& c) {
 	auto clamp = [](float& value) {
 		if (value > 1.0f) value = value - (value - 1.0f);
 		if (value < 0.0f) value *= -1.0f;
-	};
+		};
 
 	clamp(c.r);
 	clamp(c.g);
@@ -325,30 +322,30 @@ void GenerateSingleColorTexture(IDirect3DDevice9* pDevice, IDirect3DTexture9** p
 /// <param name="type"> - What type of texture should be created? (enum D3D::TextureType)</param>
 void D3D::GenerateTextures(IDirect3DDevice9* pDevice, TextureType type) {
 	ColorList colorSet;
-	
+
 	switch (type) {
-		case Random:
-		case Random_Solid:
-			GenerateRandomTextures(pDevice, type == Random_Solid);
-			break;
-		case Rainbow:
-			GenerateRainbowTextures(pDevice);
-			break;
-		case Strings:
-			GenerateColorTexture(pDevice, &customStringColorTexture, Settings::GetStringColors(false), Settings::GetStringColors(true));
-			break;
-		case Notes:
-			GenerateColorTexture(pDevice, &customStringColorTexture, Settings::GetNoteColors(false), Settings::GetNoteColors(true));
-			break;
-		case Noteway:
-			GenerateNotewayTexture(pDevice);
-			break;
-		case Gutter:
-			GenerateSingleColorTexture(pDevice, &gutterTexture, Settings::ReturnNotewayColor("CustomHighwayGutter"), 256, 16, 16, 1);
-			break;
-		case FretNums:
-			GenerateSingleColorTexture(pDevice, &fretNumTexture, Settings::ReturnNotewayColor("CustomFretNubmers"), 256, 16, 16, 1);
-			break;
+	case Random:
+	case Random_Solid:
+		GenerateRandomTextures(pDevice, type == Random_Solid);
+		break;
+	case Rainbow:
+		GenerateRainbowTextures(pDevice);
+		break;
+	case Strings:
+		GenerateColorTexture(pDevice, &customStringColorTexture, Settings::GetStringColors(false), Settings::GetStringColors(true));
+		break;
+	case Notes:
+		GenerateColorTexture(pDevice, &customStringColorTexture, Settings::GetNoteColors(false), Settings::GetNoteColors(true));
+		break;
+	case Noteway:
+		GenerateNotewayTexture(pDevice);
+		break;
+	case Gutter:
+		GenerateSingleColorTexture(pDevice, &gutterTexture, Settings::ReturnNotewayColor("CustomHighwayGutter"), 256, 16, 16, 1);
+		break;
+	case FretNums:
+		GenerateSingleColorTexture(pDevice, &fretNumTexture, Settings::ReturnNotewayColor("CustomFretNubmers"), 256, 16, 16, 1);
+		break;
 	}
 }
 
@@ -383,11 +380,8 @@ HRESULT D3D::GenerateSolidTexture(IDirect3DDevice9* pDevice, IDirect3DTexture9**
 }
 
 bool CalculateCRCFromLockedTexture(IDirect3DTexture9* texture, const D3DLOCKED_RECT& lockedRect, DWORD& o_crc) {
-	_LOG_INIT;
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	if (!lockedRect.pBits) {
-		_LOG("CRCForTexture: lockedRect.pBits is null" << std::endl);
+		LOG_ERROR("CRCForTexture: lockedRect.pBits is null" << std::endl);
 		return false;
 	}
 
@@ -399,8 +393,6 @@ bool CalculateCRCFromLockedTexture(IDirect3DTexture9* texture, const D3DLOCKED_R
 }
 
 void DebugCRCLocking(IDirect3DDevice9* pDevice) {
-	_LOG_INIT;
-
 	D3DCAPS9 pDeviceCaps;
 	IDirect3DSurface9* pRenderTarget;
 	D3DSURFACE_DESC surfaceDesc;
@@ -408,8 +400,7 @@ void DebugCRCLocking(IDirect3DDevice9* pDevice) {
 	pDevice->GetDeviceCaps(&pDeviceCaps);
 
 	for (int i = 0; i < pDeviceCaps.NumSimultaneousRTs - 1; i++) {
-		_LOG_SETLEVEL(LogLevel::Info);
-		_LOG("CRCForTexture: Trying RenderTarget(" << i << ")" << std::endl);
+		LOG_INFO("CRCForTexture: Trying RenderTarget(" << i << ")" << std::endl);
 
 		HRESULT rRenderTarget = pDevice->GetRenderTarget(i, &pRenderTarget);
 
@@ -418,37 +409,35 @@ void DebugCRCLocking(IDirect3DDevice9* pDevice) {
 			std::string poolType;
 
 			switch (surfaceDesc.Pool) {
-				case D3DPOOL_DEFAULT:
-					poolType = "D3DPOOL_DEFAULT";
-					break;
-				case D3DPOOL_MANAGED:
-					poolType = "D3DPOOL_MANAGED";
-					break;
-				case D3DPOOL_SYSTEMMEM:
-					poolType = "D3DPOOL_SYSTEMMEM";
-					break;
-				case D3DPOOL_SCRATCH:
-					poolType = "D3DPOOL_SCRATCH";
-					break;
-				case D3DPOOL_FORCE_DWORD:
-					poolType = "D3DPOOL_FORCE_DWORD";
-					break;
+			case D3DPOOL_DEFAULT:
+				poolType = "D3DPOOL_DEFAULT";
+				break;
+			case D3DPOOL_MANAGED:
+				poolType = "D3DPOOL_MANAGED";
+				break;
+			case D3DPOOL_SYSTEMMEM:
+				poolType = "D3DPOOL_SYSTEMMEM";
+				break;
+			case D3DPOOL_SCRATCH:
+				poolType = "D3DPOOL_SCRATCH";
+				break;
+			case D3DPOOL_FORCE_DWORD:
+				poolType = "D3DPOOL_FORCE_DWORD";
+				break;
 
-				default:
-					poolType = "UNKNOWN";
+			default:
+				poolType = "UNKNOWN";
 			}
 
-			_LOG("CRCForTexture: RenderTarget(" << i << ")->Pool == " << poolType << std::endl);
+			LOG_INFO("CRCForTexture: RenderTarget(" << i << ")->Pool == " << poolType << std::endl);
 		}
 		else if (rRenderTarget == D3DERR_NOTFOUND)
 		{
-			_LOG_SETLEVEL(LogLevel::Error);
-			_LOG("CRCForTexture: No Render Target At Index: " << i << std::endl);
+			LOG_ERROR("CRCForTexture: No Render Target At Index: " << i << std::endl);
 		}
 		else
 		{
-			_LOG_SETLEVEL(LogLevel::Error);
-			_LOG("CRCForTexure: pDevice->GetRenderTarget(" << i << ") has an invalid argument" << std::endl);
+			LOG_ERROR("CRCForTexure: pDevice->GetRenderTarget(" << i << ") has an invalid argument" << std::endl);
 		}
 
 		if (pRenderTarget != nullptr)
@@ -457,11 +446,8 @@ void DebugCRCLocking(IDirect3DDevice9* pDevice) {
 }
 
 bool D3D::CRCForTexture(LPDIRECT3DTEXTURE9 texture, IDirect3DDevice9* pDevice, DWORD& o_crc) {
-	_LOG_INIT;
-	_LOG_SETLEVEL(LogLevel::Error);
-
 	if (!texture || !pDevice) {
-		_LOG("CRCForTexture: Invalid parameters" << std::endl);
+		LOG_ERROR("CRCForTexture: Invalid parameters" << std::endl);
 		return false;
 	}
 
@@ -472,12 +458,11 @@ bool D3D::CRCForTexture(LPDIRECT3DTEXTURE9 texture, IDirect3DDevice9* pDevice, D
 		return CalculateCRCFromLockedTexture(texture, lockedRect, o_crc);
 	}
 	else {
-		_LOG("CRCForTexture: FAILED. LockRect == D3DERR_INVALIDCALL" << std::endl);
+		LOG_ERROR("CRCForTexture: FAILED. LockRect == D3DERR_INVALIDCALL" << std::endl);
 
 		DebugCRCLocking(pDevice);
 
-		_LOG_SETLEVEL(LogLevel::Info);
-		_LOG("CRCForTexture: END" << std::endl);
+		LOG_INFO("CRCForTexture: END" << std::endl);
 		return false;
 	}
 }

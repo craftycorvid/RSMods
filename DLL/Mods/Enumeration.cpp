@@ -30,8 +30,6 @@ void __declspec(naked) Hook_EnumerationService() {
 }
 
 void Enumeration::HookEnumerationService() {
-	_LOG_INIT;
-
 	uint32_t BaseTextAddress = MemUtil::GetTextSectionAddress();
 
 	const char* sig = "\x55\x8B\xEC\x6A\x00\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\x00\x53\x57\x50\x8D\x45\x00\x64\xA3\x00\x00\x00\x00\x33\xDB\x38\x5E\x00\x0F\x84";
@@ -41,16 +39,16 @@ void Enumeration::HookEnumerationService() {
 	short len = 0x5;
 
 	if (hookAddr == NULL) {
-		_LOG("Failed to find Steam enumeration location!");
+		LOG_ERROR("Failed to find Steam enumeration location!");
 		return;
 	}
 
 	hookBackAddr = hookAddr + len;
 	if (MemUtil::PlaceHook((void*)hookAddr, Hook_EnumerationService, len)) {
-		_LOG("Hooked Steam enumeration function successfully!" << std::endl);
+		LOG_INFO("Hooked Steam enumeration function successfully!" << std::endl);
 	}
 	else {
-		_LOG("Failed to hook function!" << std::endl);
+		LOG_ERROR("Failed to hook function!" << std::endl);
 	}
 }
 
@@ -61,7 +59,7 @@ void Enumeration::ForceEnumeration() {
 	// Get memory address for Enumeration flag
 
 	// Normally it would go via a regular pointer, but... this is simpler to find
-	//uintptr_t rsSteamServiceFlagsPtr = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_enumerateService, Offsets::ptr_enumerateServiceOffsets);
+	// uintptr_t rsSteamServiceFlagsPtr = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_enumerateService, Offsets::ptr_enumerateServiceOffsets);
 
 	if (rsSteamServiceFlagsPtr)
 	{
