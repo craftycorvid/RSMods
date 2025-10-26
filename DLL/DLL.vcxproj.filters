@@ -294,6 +294,12 @@
     <ClCompile Include="Twitch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ModManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MemUtil.hpp">
@@ -600,6 +606,9 @@
       <Filter>Main Headers</Filter>
     </ClInclude>
     <ClInclude Include="Twitch.hpp">
+      <Filter>Main Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ModManager.hpp">
       <Filter>Main Headers</Filter>
     </ClInclude>
   </ItemGroup>

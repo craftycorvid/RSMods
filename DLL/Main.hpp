@@ -24,6 +24,4 @@
 #include "Keybindings.hpp"
 #include "Twitch.hpp"
 
-inline const double DefaultNSPTimeLimit = 10.9899997711182; // The default time for NSP.
-
 inline std::string selectedUser = "";

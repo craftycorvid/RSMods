@@ -11,6 +11,7 @@
 #include "Mods/VoiceOverControl.hpp"
 #include "Twitch.hpp"
 #include "CC/ControlServer.hpp"
+#include "Menu.hpp"
 
 struct ModCommand {
     std::function<bool()> condition = [] { return true; };
@@ -19,7 +20,7 @@ struct ModCommand {
 };
 
 namespace Keybindings {
-    void DispatchCommand(WPARAM keyPressed, const std::map<std::string, ModCommand>& commands);
+    void DispatchCommand(WPARAM keyPressed, const std::map<std::string, ModCommand, std::less<>>& commands);
 
     void HandleKeyUp(WPARAM keyPressed);
     void HandleKeyDown(WPARAM keyPressed);

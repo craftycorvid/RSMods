@@ -151,7 +151,7 @@ void ERMode::Toggle7StringMode() {
 		return;
 	}
 
-	if ((D3DHooks::AttemptedERInThisSong && D3DHooks::UseERExclusivelyInThisSong) || (D3DHooks::AttemptedERInTuner && D3DHooks::UseERInTuner)) {
+	if ((ERMode::AttemptedERInThisSong && ERMode::UseERExclusivelyInThisSong) || (AttemptedERInTuner && UseERInTuner)) {
 		switch (Settings::GetModSetting("CustomStringColors")) {
 			case 0: // User wants original Rocksmith colors
 				break;

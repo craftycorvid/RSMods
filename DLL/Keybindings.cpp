@@ -2,8 +2,8 @@
 #include "Keybindings.hpp"
 
 namespace Keybindings {
-	std::map<std::string, ModCommand> keyUpCommands;
-	std::map<std::string, ModCommand> keyDownCommands;
+	std::map<std::string, ModCommand, std::less<>> keyUpCommands;
+	std::map<std::string, ModCommand, std::less<>> keyDownCommands;
 
 	void HandleTuningOffset() 
 	{
@@ -183,7 +183,7 @@ namespace Keybindings {
 		}
 
 		if (D3DHooks::debug && keyPressed == VK_BACK) {
-			D3DHooks::menuEnabled = !D3DHooks::menuEnabled;
+			Menu::menuEnabled = !Menu::menuEnabled;
 		}
 	}
 
@@ -231,11 +231,12 @@ namespace Keybindings {
 		}
 	}
 
-	void DispatchCommand(WPARAM keyPressed, const std::map<std::string, ModCommand>& commands) {
+	void DispatchCommand(WPARAM keyPressed, const std::map<std::string, ModCommand, std::less<>>& commands) {
 		_LOG_INIT;
 
 		for (const auto& [key, value] : commands) {
-			if (keyPressed == Settings::GetKeyBind(key) && value.condition()) {
+
+			if (keyPressed == Settings::GetKeyBind(key)) {
 				value.action();
 
 				if (!value.logMessage.empty()) {
@@ -301,7 +302,7 @@ namespace Keybindings {
 		keyUpCommands["ToggleExtendedRangeKey"] = 
 		{ 
 			[] { return true; }, 
-			[] { D3DHooks::UseERExclusivelyInThisSong = !D3DHooks::UseERExclusivelyInThisSong; GameState::ToggleCB(D3DHooks::UseERExclusivelyInThisSong); }, 
+			[] { ERMode::UseERExclusivelyInThisSong = !ERMode::UseERExclusivelyInThisSong; GameState::ToggleCB(ERMode::UseERExclusivelyInThisSong); },
 			"Toggle Extended Range" 
 		};
 		keyUpCommands["MutePlayer1Key"] = 

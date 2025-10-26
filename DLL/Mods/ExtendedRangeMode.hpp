@@ -21,6 +21,11 @@ namespace ERMode {
 	inline bool RainbowEnabled = false;
 	inline bool RainbowNotesEnabled = false;
 	inline bool ColorsSaved = false;
+	inline bool AttemptedERInTuner = false; // If true, then we are safe to look for the ER In Tuner variable.
+	inline bool UseERInTuner = false; // If true, ER Mode will toggle on in the tuner.
+	inline bool UseEROrColorsInThisSong = false; // If true, ER Mode will toggle on (includes custom colors).
+	inline bool UseERExclusivelyInThisSong = false; // If true, ER Mode will toggle on.
+	inline bool AttemptedERInThisSong = false; // If true, then we are safe to look for the ER variable.
 
 	inline int currentOffsetIdx = 0;
 	inline int currColor = 0;

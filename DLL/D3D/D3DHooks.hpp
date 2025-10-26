@@ -51,41 +51,29 @@ namespace D3DHooks {
 	inline bool resetHeadstockCache = true; // Do we want to reset the headstock cache? Triggers when opening tuning menu
 	inline bool toggleSkyline = false; // Do we want to toggle the skyline right now? Triggers to false when turned on/ off
 	inline int EnumSliderVal = 10000; // Sleep every X ms for enumeration (1000 ms = 1s)
-	inline bool LoftOff = false; // Is the loft disabled right now? Toggles when loft turns off (True - No Loft, False - Loft)
 	inline bool SkylineOff = false; // Is the skyline disabled right now? Toggles when skyline turns off (True - No Skyline, False - Skyline)
 	inline bool DrawSkylineInMenu = false; // If the user is in "Song" mode of Toggle Skyline, should we draw the skyline in this menu (True - Skyline, False - No Skyline)
+	
 	inline bool GreenScreenWall = false; // If true, set the Greenscreen wall up. This helps call it in Lesson mode for No-Loft users (True - Black wall, False - Loft)
-	inline bool GuitarSpeakPresent = false; // If true, read the notes inputted and press the key combo provided. (True - On, False - Off)
 	inline bool RemoveLyrics = false; // If true, remove the lyrics from Learn A Song & Non-stop Play. (True - No Lyrics, False - Keep Lyrics)
+	
 	inline bool RemoveHeadstockInThisMenu = false; // If true, the headstock of the guitar / bass will be disabled in this menu. (True - No Headstock, False - Keep Headstock)
 	inline bool showSongTimerOnScreen = false; // If true, the current song timer will be shown in the top-right of the screen. This will only work when inside a song. (True - Show, False - Hide)
 	inline bool DiscoModeEnabled = false; // If true, we do the trippy effects that disco mode is known for (True - Disco, False - Normal).
 	inline std::map<IDirect3DDevice9*, std::pair<DWORD, DWORD>> DiscoModeInitialSetting; // List of all the pDevices that have been affected by Disco Mode
 	inline bool ToggleOffLoftWhenDoneWithMod = false; // If true, we save this until after the mod is done and re-enable it.
 	inline bool PrideMode = false; // If true, the background will be cycle through colors.
-	inline bool RainbowNotes = false; // If true, the notes will turn rainbow along with the stems.
-	inline bool AutomatedSongTimer = false; // If true, we will always show the song timer.
+	inline bool RainbowNotes = false; // If true, the notes will turn rainbow along with the stems
 	inline bool AutomatedSelectedVolume = false; // If true, we will always show the selected volume.
-	inline bool AttemptedERInThisSong = false; // If true, then we are safe to look for the ER variable.
-	inline bool UseEROrColorsInThisSong = false; // If true, ER Mode will toggle on (includes custom colors).
-	inline bool UseERExclusivelyInThisSong = false; // If true, ER Mode will toggle on.
-	inline bool AttemptedERInTuner = false; // If true, then we are safe to look for the ER In Tuner variable.
-	inline bool UseERInTuner = false; // If true, ER Mode will toggle on in the tuner.
+
 	inline bool RecreateTextures = false; // User has triggered an update, so we need to re-create textures.
 	inline bool RecreateTextureTimer = false; // If user spams recreating textures then we end up with a lot of memory usage. Limit how often we update textures.
 
 	// Dev Functions
 	inline bool startLogging = false; // Should we log what's happening in Hook_DIP? Logs to log.txt in your RS2014 directory
 
-	// ImGUI Settings
-	inline bool menuEnabled = false; // Do we show the user the ImGUI settings menu?
-	inline bool enableColorBlindCheckboxGUI = false; // Do we allow the user to change Colorblind mode in the imGUI menu?
-	inline std::vector<std::string> GuitarSpeakStartingTexts;
-
 	// Misc
 	inline bool setAllToNoteGradientTexture = false; // Should we override the 6-string note textures with the 7-string note textures?
-
-	inline const char* windowName = "Rocksmith 2014"; // Console Window Title
 
 	/// <summary>
 	/// Convert time stored as a float of seconds, to h:m:s

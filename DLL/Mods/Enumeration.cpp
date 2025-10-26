@@ -47,10 +47,10 @@ void Enumeration::HookEnumerationService() {
 
 	hookBackAddr = hookAddr + len;
 	if (MemUtil::PlaceHook((void*)hookAddr, Hook_EnumerationService, len)) {
-		_LOG("Hooked Steam enumeration function successfully!");
+		_LOG("Hooked Steam enumeration function successfully!" << std::endl);
 	}
 	else {
-		_LOG("Failed to hook function!");
+		_LOG("Failed to hook function!" << std::endl);
 	}
 }
 

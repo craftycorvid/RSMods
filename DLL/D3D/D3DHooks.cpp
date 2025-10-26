@@ -14,8 +14,8 @@ HRESULT APIENTRY D3DHooks::Hook_DP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE P
 		Stream_Data->Release();
 
 	// Note-tails for Extended Range / Custom Colors
-	if (AttemptedERInThisSong && UseEROrColorsInThisSong && NOTE_TAILS) {
-		GameState::ToggleCB(UseERExclusivelyInThisSong);
+	if (ERMode::AttemptedERInThisSong && ERMode::UseEROrColorsInThisSong && NOTE_TAILS) {
+		GameState::ToggleCB(ERMode::UseERExclusivelyInThisSong);
 
 		switch (Settings::GetModSetting("SeparateNoteColors")) {
 			case 0: // Use same color scheme on notes as we do on strings
@@ -426,8 +426,8 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	}*/
 
 	// Extended Range / Custom Colors (includes separate note colors)
-	if (AttemptedERInThisSong && UseEROrColorsInThisSong) {
-		GameState::ToggleCB(UseERExclusivelyInThisSong);
+	if (ERMode::AttemptedERInThisSong && ERMode::UseEROrColorsInThisSong) {
+		GameState::ToggleCB(ERMode::UseERExclusivelyInThisSong);
 
 		// Settings::GetModSetting("SeparateNoteColors") == 1 -> Default Colors, so don't do anything.
 

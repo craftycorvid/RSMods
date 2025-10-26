@@ -35,7 +35,7 @@ namespace Menu {
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		if (D3DHooks::menuEnabled) {
+		if (Menu::menuEnabled) {
 			ImGui::Begin("RS Mods");
 			Menu::AddMidiMenu();
 			Menu::AddCalibrationMenu();
