@@ -121,9 +121,3 @@ inline bool IsToBeRemoved(std::vector<Mesh> list, Mesh mesh) {
 
 	return false;
 }
-
-/*--------------------------- GENERAL D3D -----------------------------*/
-
-
-/*--------------------------- LOG -----------------------------*/
-

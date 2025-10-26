@@ -270,6 +270,7 @@
     <ClInclude Include="CC\Effects\HighwayScrollSpeedEffect.hpp" />
     <ClInclude Include="D3DInfo.h" />
     <ClInclude Include="D3DOverlay.hpp" />
+    <ClInclude Include="D3D\GdiplusManager.hpp" />
     <ClInclude Include="GameState.hpp" />
     <ClInclude Include="Keybindings.hpp" />
     <ClInclude Include="Keyboard.hpp" />

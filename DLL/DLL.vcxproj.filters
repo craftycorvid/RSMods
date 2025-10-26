@@ -611,6 +611,9 @@
     <ClInclude Include="ModManager.hpp">
       <Filter>Main Headers</Filter>
     </ClInclude>
+    <ClInclude Include="D3D\GdiplusManager.hpp">
+      <Filter>D3D</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="xinput1_3.def">

@@ -26,11 +26,7 @@ namespace D3DHooks {
 	inline UINT Offset = 0;
 	inline UINT vertexBufferSize;
 
-#if defined(_DEBUG) || defined(_WWISE_LOGS)
 	inline bool debug = true;
-#else
-	inline bool debug = false;
-#endif
 
 	inline bool regenerateUserDefinedTexture = false;
 	
