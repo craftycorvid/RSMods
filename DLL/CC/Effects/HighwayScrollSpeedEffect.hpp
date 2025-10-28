@@ -6,15 +6,15 @@ namespace CrowdControl::Effects {
 	public:
 		double multiplier = 5.0;
 
-		HighwayScrollSpeedEffect(int64_t durationMilliseconds, double speedMultiplier) : multiplier(speedMultiplier)
+		explicit HighwayScrollSpeedEffect(int64_t durationMilliseconds, double speedMultiplier) : multiplier(speedMultiplier)
 		{
 			duration_ms = durationMilliseconds;
 
 			incompatibleEffects = { "halfscrollspeed", "doublescrollspeed", "triplescrollspeed" };
 		}
 
-		EffectStatus Test(Request request);
-		EffectStatus Start(Request request);
+		EffectStatus Test(const Request& request);
+		EffectStatus Start(const Request& request);
 		EffectStatus Stop();
 
 	private:

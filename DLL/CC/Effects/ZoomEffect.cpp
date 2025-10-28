@@ -4,22 +4,22 @@
 using namespace CrowdControl::Enums;
 
 namespace CrowdControl::Effects {
-	EffectStatus ZoomEffect::Test(Request request)
+	EffectStatus ZoomEffect::Test(const Request& request)
 	{
 		LOG_INFO("ZoomEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
 	}
 
 
-	EffectStatus ZoomEffect::Start(Request request)
+	EffectStatus ZoomEffect::Start(const Request& request)
 	{
 		LOG_INFO("ZoomEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		auto rootObject = ObjectUtil::GetRootObject();

@@ -8,11 +8,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus KillGuitarVolumeEffect::Test(Request request)
+	EffectStatus KillGuitarVolumeEffect::Test(const Request& request)
 	{
 		LOG_INFO("KillGuitarVolumeEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -24,11 +24,11 @@ namespace CrowdControl::Effects {
 	/// New volume is set using Wwise_Sound_Query_SetRTPCValue_Char, the game calls it with both AK_INVALID_GAME_OBJECT and 0x1234 as object IDs 
 	/// </summary>
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or the same effect is running already, or EffectStatus::Sucess if we are in a song</returns>
-	EffectStatus KillGuitarVolumeEffect::Start(Request request)
+	EffectStatus KillGuitarVolumeEffect::Start(const Request& request)
 	{
 		LOG_INFO("KillGuitarVolumeEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		RTPCValue_type type = RTPCValue_GameObject; // Save old volume

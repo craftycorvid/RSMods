@@ -8,11 +8,11 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus ShuffleTonesEffect::Test(Request request)
+	EffectStatus ShuffleTonesEffect::Test(const Request& request)
 	{
 		LOG_INFO("ShuffleTonesEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -23,11 +23,11 @@ namespace CrowdControl::Effects { // Scales notes in a song to unusually small s
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus ShuffleTonesEffect::Start(Request request)
+	EffectStatus ShuffleTonesEffect::Start(const Request& request)
 	{
 		LOG_INFO("ShuffleTonesEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		SetDuration(request);

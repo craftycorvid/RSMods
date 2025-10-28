@@ -8,11 +8,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesCustomEffect::Test(Request request)
+	EffectStatus SolidNotesCustomEffect::Test(const Request& request)
 	{
 		LOG_INFO("SolidNotesCustomEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -35,11 +35,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesCustomEffect::Start(Request request)
+	EffectStatus SolidNotesCustomEffect::Start(const Request& request)
 	{
 		LOG_INFO("SolidNotesCustomEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		running = true;
@@ -82,11 +82,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesRandomEffect::Test(Request request)
+	EffectStatus SolidNotesRandomEffect::Test(const Request& request)
 	{
 		LOG_INFO("SolidNotesRandomEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -97,11 +97,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesRandomEffect::Start(Request request)
+	EffectStatus SolidNotesRandomEffect::Start(const Request& request)
 	{
 		LOG_INFO("SolidNotesRandomEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		LOG_INFO("SolidNotesRandomEffect - Colors Saved" << std::endl);
@@ -148,11 +148,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesCustomRGBEffect::Test(Request request)
+	EffectStatus SolidNotesCustomRGBEffect::Test(const Request& request)
 	{
 		LOG_INFO("SolidNotesCustomRGBEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -163,11 +163,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesCustomRGBEffect::Start(Request request)
+	EffectStatus SolidNotesCustomRGBEffect::Start(const Request& request)
 	{
 		LOG_INFO("SolidNotesCustomRGBEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		//Get color from parameters

@@ -8,11 +8,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus RemoveNotesEffect::Test(Request request)
+	EffectStatus RemoveNotesEffect::Test(const Request& request)
 	{
 		LOG_INFO("RemoveNotesEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -22,11 +22,11 @@ namespace CrowdControl::Effects {
 	/// Sets the scale of each object related to note heads to 0, hence making it temporarily invisible 
 	/// </summary>
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or the same effect is running already, or EffectStatus::Success if we are in a song</returns>
-	EffectStatus RemoveNotesEffect::Start(Request request)
+	EffectStatus RemoveNotesEffect::Start(const Request& request)
 	{
 		LOG_INFO("RemoveNotesEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		ScaleNotes(0);

@@ -10,11 +10,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus TurboSpeedEffect::Test(Request request)
+	EffectStatus TurboSpeedEffect::Test(const Request& request)
 	{
 		LOG_INFO("TurboSpeedEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -25,11 +25,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus TurboSpeedEffect::Start(Request request)
+	EffectStatus TurboSpeedEffect::Start(const Request& request)
 	{
 		LOG_INFO("TurboSpeedEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 		
 		RiffRepeater::SetSpeed(200.f, true);

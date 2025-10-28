@@ -62,54 +62,17 @@ void __declspec(naked) hook_fakeTitles() {
 /// <param name="text"> - Song List Name [ESP + 0x10] **DISCARDED**</param>
 /// <returns>New songlist name</returns>
 const char* __stdcall missingLocalization(int localizationNumber, char* text) {
-	text = "";
-	sprintf_s(&string_buffer[0], buffer_size, "%d", localizationNumber);
+	constexpr int SONG_LIST_START = 90000;
+	constexpr int SONG_LIST_COUNT = 20;
 
-	switch (localizationNumber)
-	{
-		case 90000:	// Song list 1
-			return songTitles[0].c_str();
-		case 90001: // Song list 2
-			return songTitles[1].c_str();
-		case 90002: // Song list 3
-			return songTitles[2].c_str();
-		case 90003: // Song list 4
-			return songTitles[3].c_str();
-		case 90004: // Song list 5
-			return songTitles[4].c_str();
-		case 90005: // Song list 6
-			return songTitles[5].c_str();
-		case 90006: // Song list 7
-			return songTitles[6].c_str();
-		case 90007: // Song list 8
-			return songTitles[7].c_str();
-		case 90008: // Song list 9
-			return songTitles[8].c_str();
-		case 90009: // Song list 10
-			return songTitles[9].c_str();
-		case 90010: // Song list 11
-			return songTitles[10].c_str();
-		case 90011: // Song list 12
-			return songTitles[11].c_str();
-		case 90012: // Song list 13
-			return songTitles[12].c_str();
-		case 90013: // Song list 14
-			return songTitles[13].c_str();
-		case 90014: // Song list 15
-			return songTitles[14].c_str();
-		case 90015: // Song list 16
-			return songTitles[15].c_str();
-		case 90016: // Song list 17
-			return songTitles[16].c_str();
-		case 90017: // Song list 18
-			return songTitles[17].c_str();
-		case 90018: // Song list 19
-			return songTitles[18].c_str();
-		case 90019: // Song list 20
-			return songTitles[19].c_str();
-		default:
-			return string_buffer;
+	int index = localizationNumber - SONG_LIST_START;
+
+	if (index >= 0 && index < SONG_LIST_COUNT && index < songTitles.size()) {
+		return songTitles[index].c_str();
 	}
+
+	sprintf_s(&string_buffer[0], buffer_size, "%d", localizationNumber);
+	return string_buffer;
 }
 
 /// <summary>
@@ -175,7 +138,6 @@ void CustomSongTitles::HookSongListsKoko() {
 
 	//Skip less printf parameters if those have been removed
 	MemUtil::PatchAdr(Offsets::patch_sprintfArg, (BYTE*)Offsets::patch_SprintfArgs, 1);
-
 	MemUtil::PlaceHook(Offsets::hookAddr_MissingLocalization, missingLocalizationHookFunc, len);
 }
 

@@ -8,11 +8,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus RainbowStringsEffect::Test(Request request)
+	EffectStatus RainbowStringsEffect::Test(const Request& request)
 	{
 		LOG_INFO("RainbowStringsEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -24,11 +24,11 @@ namespace CrowdControl::Effects {
 	/// Does not affect the note heads!
 	/// </summary>
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or the same effect is running already, or EffectStatus::Success if we are in a song</returns>
-	EffectStatus RainbowStringsEffect::Start(Request request)
+	EffectStatus RainbowStringsEffect::Start(const Request& request)
 	{
 		LOG_INFO("RainbowStringsEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		ERMode::RainbowEnabled = true;

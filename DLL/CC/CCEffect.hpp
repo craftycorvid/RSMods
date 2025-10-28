@@ -17,8 +17,10 @@ namespace CrowdControl::Effects {
 		int64_t duration_ms = 0;
 		std::chrono::steady_clock::time_point endTime;
 
-		virtual EffectStatus Test(Request request) = 0;
-		virtual EffectStatus Start(Request request) = 0;
+		virtual ~CCEffect() = default;
+
+		virtual EffectStatus Test(const Request& request) = 0;
+		virtual EffectStatus Start(const Request& request) = 0;
 		virtual EffectStatus Stop() = 0;
 
 		/**
@@ -30,15 +32,15 @@ namespace CrowdControl::Effects {
 		/// Sets duration for the current effect, and calculates endTime
 		/// Manually loops through the JSON members of the struct and sets the value of the member called "duration"
 		/// </summary>
-		void SetDuration(Request req);
+		void SetDuration(const Request& req);
 
 		/**
 		 * \brief Can this effect start? By default checks that a song is being played, no incompatible effects are running, and this effect is not running
 		 * \return True when this effect can start, false otherwise
 		 */
-		virtual bool CanStart(std::map<std::string, CCEffect*>* AllEffects);
+		virtual bool CanStart();
 
-		bool AreIncompatibleEffectsRunning(const std::map<std::string, CCEffect*>* AllEffects) const;
+		bool AreIncompatibleEffectsRunning() const;
 
 	protected:
 		/**

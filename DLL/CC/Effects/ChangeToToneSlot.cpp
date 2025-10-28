@@ -9,11 +9,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus ChangeToToneSlot::Test(Request request)
+	EffectStatus ChangeToToneSlot::Test(const Request& request)
 	{
 		LOG_INFO("ChangeToToneSlot::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -24,11 +24,11 @@ namespace CrowdControl::Effects {
 	/// Sends a keystroke to the game for the current tone slot (presses number 1 for first tone slot, number 2 for second, etc.)
 	/// </summary>
 	/// <returns> EffectStatus::Retry if we aren't currently in a song, or EffectStatus::Success if we are</returns>
-	EffectStatus ChangeToToneSlot::Start(Request request)
+	EffectStatus ChangeToToneSlot::Start(const Request& request)
 	{
 		LOG_INFO("ChangeToToneSlot::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		Util::SendKey(Settings::GetVKCodeForString(std::to_string(slot)));

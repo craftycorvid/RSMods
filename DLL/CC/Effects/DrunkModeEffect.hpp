@@ -5,12 +5,12 @@ namespace CrowdControl::Effects {
 	class DrunkModeEffect : public CCEffect
 	{
 	public:
-		DrunkModeEffect(int64_t durationMilliseconds) {
+		explicit DrunkModeEffect(int64_t durationMilliseconds) {
 			duration_ms = durationMilliseconds;
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 	};
 }

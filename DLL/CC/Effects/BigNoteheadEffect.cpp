@@ -7,11 +7,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus BigNoteheadEffect::Test(Request request)
+	EffectStatus BigNoteheadEffect::Test(const Request& request)
 	{
 		LOG_INFO("BigNoteheadEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -21,11 +21,11 @@ namespace CrowdControl::Effects {
 	/// Start the mod by making noteheads 2.5x the size.
 	/// </summary>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus BigNoteheadEffect::Start(Request request)
+	EffectStatus BigNoteheadEffect::Start(const Request& request)
 	{
 		LOG_INFO("BigNoteheadEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		SetNoteHeadScale(2.5);

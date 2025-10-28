@@ -5,14 +5,14 @@ namespace CrowdControl::Effects {
 	class BigNoteheadEffect : public CCEffect
 	{
 	public:
-		BigNoteheadEffect(int64_t durationMilliseconds) {
+		explicit BigNoteheadEffect(int64_t durationMilliseconds) {
 			duration_ms = durationMilliseconds;
 
 			incompatibleEffects = { "transparentnotes", "smallnoteheads", "removenotes" };
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 
 	private:

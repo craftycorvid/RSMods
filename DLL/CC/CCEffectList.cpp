@@ -26,8 +26,8 @@ using namespace CrowdControl::Structs;
 using namespace CrowdControl::EffectList;
 
 namespace CrowdControl::EffectList {
-	std::map<std::string, CCEffect*>& GetAllEffects() {
-		static std::map<std::string, CCEffect*> AllEffects{
+	 std::map<std::string, CCEffect*, std::less<>>& GetAllEffects() {
+		static std::map<std::string, CCEffect*, std::less<>> AllEffects{
 			{ "rainbowstrings", new RainbowStringsEffect(20000) },
 			{ "rainbownotes", new RainbowNotesEffect(20000)},
 			{ "drunkmode", new DrunkModeEffect(10000) },
@@ -66,8 +66,7 @@ namespace CrowdControl::EffectList {
 	/// <returns>True if the effect is running (only one effect of the same type can be running in the same time)</returns>
 	bool IsEffectEnabled(const std::string& effectName) {
 		const auto& allEffects = CrowdControl::EffectList::GetAllEffects();
-		auto it = allEffects.find(effectName);
-		if (it != allEffects.end()) {
+		if (auto it = allEffects.find(effectName); it != allEffects.end()) {
 			return it->second->running;
 		}
 		return false;

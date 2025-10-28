@@ -218,6 +218,8 @@ unsigned WINAPI MainThread() {
 			ModManager::UpdateGameLoadingState(loopState);
 		}
 	}
+
+	return 0;
 }
 
 /// <summary>

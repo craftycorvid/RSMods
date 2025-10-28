@@ -6,13 +6,12 @@ namespace CrowdControl::Effects {
 	public:
 		int slot;
 
-		ChangeToToneSlot(int _slot) {
-			slot = _slot;
+		explicit ChangeToToneSlot(int _slot) : slot(_slot){
 			incompatibleEffects = { "shuffletones" };
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 	};
 }

@@ -5,14 +5,14 @@ namespace CrowdControl::Effects {
 	class RemoveNotesEffect : public CCEffect
 	{
 	public:
-		RemoveNotesEffect(unsigned int durationMilliseconds) {
+		explicit RemoveNotesEffect(unsigned int durationMilliseconds) {
 			duration_ms = durationMilliseconds;
 
 			incompatibleEffects = { "transparentnotes", "bignoteheads", "smallnoteheads", "wavynotes"};
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 
 	private:

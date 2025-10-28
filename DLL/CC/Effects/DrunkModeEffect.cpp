@@ -10,11 +10,11 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus DrunkModeEffect::Test(Request request)
+	EffectStatus DrunkModeEffect::Test(const Request& request)
 	{
 		LOG_INFO("DrunkModeEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -25,11 +25,11 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 	/// Loft needs to be enabled for it to have the full effect, so we also call ToggleDrunkMode
 	/// </summary>
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or incompatible effects are running, or EffectStatus::Success if we are</returns>
-	EffectStatus DrunkModeEffect::Start(Request request)
+	EffectStatus DrunkModeEffect::Start(const Request& request)
 	{
 		LOG_INFO("DrunkModeEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		Settings::UpdateTwitchSetting("DrunkMode", "on");

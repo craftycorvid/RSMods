@@ -11,12 +11,12 @@ namespace CrowdControl::Effects {
 		}
 	}
 
-	void CCEffect::SetDuration(Request req) {
+	void CCEffect::SetDuration(const Request& req) {
 		if (req.duration)
 			duration_ms = req.duration;
 
 		// Is this ever used?
-		for (auto& el : req.parameters.items()) {
+		for (const auto& el : req.parameters.items()) {
 			if (el.value().contains("duration")) {
 				el.value().at("duration").get_to(duration_ms);
 				// Assuming this is in seconds, convert to ms
@@ -30,11 +30,11 @@ namespace CrowdControl::Effects {
 		endTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(duration_ms);
 	}
 
-	bool CCEffect::CanStart(std::map<std::string, CCEffect*>* AllEffects) {
-		return GameState::IsInSong() && !AreIncompatibleEffectsRunning(AllEffects) && !running;
+	bool CCEffect::CanStart() {
+		return GameState::IsInSong() && !AreIncompatibleEffectsRunning() && !running;
 	}
 
-	bool CCEffect::AreIncompatibleEffectsRunning(const std::map<std::string, CCEffect*>* AllEffects) const {
+	bool CCEffect::AreIncompatibleEffectsRunning() const {
 		const auto& allEffects = CrowdControl::EffectList::GetAllEffects();
 		return std::any_of(incompatibleEffects.begin(), incompatibleEffects.end(),
 			[&allEffects](const std::string& effectName) {

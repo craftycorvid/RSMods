@@ -8,7 +8,7 @@ namespace CrowdControl::Effects {
 	};
 
 	inline Vec3* vec;
-	inline bool wavy_notes_enabled = false;
+	inline bool wavyNotesEnabled = false;
 
 	inline void __declspec(naked) NotePositionHook()
 	{
@@ -33,7 +33,7 @@ namespace CrowdControl::Effects {
 		}
 
 		// Mess with the vector
-		if(wavy_notes_enabled)
+		if(wavyNotesEnabled)
 		{
 			if (vec->y > -5.0f) {
 				vec->y = vec->y + (sin(vec->z / 40.0f) * 4.0f);
@@ -71,7 +71,7 @@ namespace CrowdControl::Effects {
 	class WavyNotesEffect : public CCEffect
 	{
 	public:
-		WavyNotesEffect(int64_t durationMilliseconds)
+		explicit WavyNotesEffect(int64_t durationMilliseconds)
 		{
 			duration_ms = durationMilliseconds;
 
@@ -80,8 +80,8 @@ namespace CrowdControl::Effects {
 			MemUtil::PlaceHook(Offsets::ptr_wavyNotesHook, NotePositionHook, 41);
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 	};
 }

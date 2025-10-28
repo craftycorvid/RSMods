@@ -8,11 +8,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus RemoveInstrumentEffect::Test(Request request)
+	EffectStatus RemoveInstrumentEffect::Test(const Request& request)
 	{
 		LOG_INFO("RemoveInstrumentEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -22,11 +22,11 @@ namespace CrowdControl::Effects {
 	/// Sets the scale of each instrument related object (headstock, inlays, fretbars, ...) to 0, hence making it temporarily invisible 
 	/// </summary>
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or the same effect is running already, or EffectStatus::Success if we are in a song</returns>
-	EffectStatus RemoveInstrumentEffect::Start(Request request)
+	EffectStatus RemoveInstrumentEffect::Start(const Request& request)
 	{
 		LOG_INFO("RemoveInstrumentEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		SetInstrumentScale(0);

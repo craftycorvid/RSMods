@@ -8,11 +8,11 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus FYourFCEffect::Test(Request request)
+	EffectStatus FYourFCEffect::Test(const Request& request)
 	{
 		LOG_INFO("FYourFC::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -22,11 +22,11 @@ namespace CrowdControl::Effects { // Kills user's current note streak
 	/// Kills the player's current note streak for a certain duration
 	/// </summary>
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or incompatible effects are running, or EffectStatus::Sucess if we are</returns>
-	EffectStatus FYourFCEffect::Start(Request request)
+	EffectStatus FYourFCEffect::Start(const Request& request)
 	{
 		LOG_INFO("FYourFC::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		uintptr_t currentNoteStreak = 0;

@@ -4,14 +4,14 @@ namespace CrowdControl::Effects {
 	class TransparentNotesEffect : public CCEffect
 	{
 	public:
-		TransparentNotesEffect(int64_t durationMilliseconds) {
+		explicit TransparentNotesEffect(int64_t durationMilliseconds) {
 			duration_ms = durationMilliseconds;
 
 			incompatibleEffects = { "solidcustom", "solidrandom", "solidcustomrgb", "bignoteheads", "smallnoteheads", "removenotes" };
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 	};
 }

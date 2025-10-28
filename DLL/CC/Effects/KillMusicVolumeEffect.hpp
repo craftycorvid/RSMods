@@ -4,12 +4,12 @@ namespace CrowdControl::Effects {
 	class KillMusicVolumeEffect : public CCEffect
 	{
 	public:
-		KillMusicVolumeEffect(int64_t durationMilliseconds) {
+		explicit KillMusicVolumeEffect(int64_t durationMilliseconds) {
 			duration_ms = durationMilliseconds;
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		void Run() override;
 		EffectStatus Stop() override;
 

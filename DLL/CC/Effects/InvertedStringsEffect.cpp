@@ -22,11 +22,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus InvertedStringsEffect::Test(Request request)
+	EffectStatus InvertedStringsEffect::Test(const Request& request)
 	{
 		LOG_INFO("InvertedStringsEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -85,11 +85,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"></param>
 	/// <returns>EffectStatus::Success if completed successfully, or EffectStatus::Retry if we can't run it.</returns>
-	EffectStatus InvertedStringsEffect::Start(Request request)
+	EffectStatus InvertedStringsEffect::Start(const Request& request)
 	{
 		LOG_INFO("InvertedStringsEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		SaveInitialStringPos();

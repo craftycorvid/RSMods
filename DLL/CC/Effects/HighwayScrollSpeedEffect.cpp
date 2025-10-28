@@ -10,11 +10,11 @@ namespace CrowdControl::Effects {
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
 	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus HighwayScrollSpeedEffect::Test(Request request)
+	EffectStatus HighwayScrollSpeedEffect::Test(const Request& request)
 	{
 		LOG_INFO("HighwayScrollSpeedEffect::Test()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 
 		return EffectStatus::Success;
@@ -24,11 +24,11 @@ namespace CrowdControl::Effects {
 	/// Change scroll speed multiplier to let the user have more, or less, time to react to the notes appearing on screen.
 	/// </summary>
 	/// <returns> EffectStatus::Retry if we aren't currently in a song or incompatible effects are running, or EffectStatus::Sucess if we are</returns>
-	EffectStatus HighwayScrollSpeedEffect::Start(Request request)
+	EffectStatus HighwayScrollSpeedEffect::Start(const Request& request)
 	{
 		LOG_INFO("HighwayScrollSpeedEffect::Start()" << std::endl);
 
-		if (!CanStart(&EffectList::GetAllEffects()))
+		if (!CanStart())
 			return EffectStatus::Retry;
 		
 		WriteScrollSpeedMultiplier(multiplier);

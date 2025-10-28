@@ -36,7 +36,7 @@ namespace CrowdControl {
 		};
 
 		if (GetAllEffects().find(request.code) != GetAllEffects().end()) {
-			CCEffect* effect = GetAllEffects()[request.code];
+			CCEffect* effect = GetAllEffects().at(request.code);
 
 			switch (request.type)
 			{

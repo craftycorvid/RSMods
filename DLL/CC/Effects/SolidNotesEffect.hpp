@@ -6,23 +6,23 @@ namespace CrowdControl::Effects {
 	class SolidNotesRandomEffect : public CCEffect
 	{
 	public:
-		SolidNotesRandomEffect(int64_t durationMilliseconds) {
+		explicit SolidNotesRandomEffect(int64_t durationMilliseconds) {
 			duration_ms = durationMilliseconds;
 
 			incompatibleEffects = { "removenotes", "transparentnotes", "solidcustom", "solidcustomrgb", "rainbownotes" };
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 
 		/**
 		 * \brief Can this effect start? By default checks that a song is being played, no incompatible effects are running, and this effect is not running
 		 * \return True when this effect can start, false otherwise
 		 */
-		bool CanStart(std::map<std::string, CCEffect*>* AllEffects) override
+		bool CanStart() override
 		{
-			return ERMode::ColorsSaved && GameState::IsInSong() && !AreIncompatibleEffectsRunning(AllEffects) && !running;
+			return ERMode::ColorsSaved && GameState::IsInSong() && !AreIncompatibleEffectsRunning() && !running;
 		}
 
 	};
@@ -30,28 +30,28 @@ namespace CrowdControl::Effects {
 	class SolidNotesCustomEffect : public CCEffect
 	{
 	public:
-		SolidNotesCustomEffect(int64_t durationMilliseconds) {
+		explicit SolidNotesCustomEffect(int64_t durationMilliseconds) {
 			duration_ms = durationMilliseconds;
 
 			incompatibleEffects = { "removenotes", "transparentnotes", "solidrandom", "solidcustomrgb", "rainbownotes" };
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 	};
 
 	class SolidNotesCustomRGBEffect : public CCEffect
 	{
 	public:
-		SolidNotesCustomRGBEffect(int64_t durationMilliseconds) {
+		explicit SolidNotesCustomRGBEffect(int64_t durationMilliseconds) {
 			duration_ms = durationMilliseconds;
 
 			incompatibleEffects = { "removenotes", "transparentnotes", "solidcustom", "solidrandom", "rainbownotes" };
 		}
 
-		EffectStatus Test(Request request) override;
-		EffectStatus Start(Request request) override;
+		EffectStatus Test(const Request& request) override;
+		EffectStatus Start(const Request& request) override;
 		EffectStatus Stop() override;
 	};
 }
