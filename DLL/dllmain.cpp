@@ -89,11 +89,6 @@ unsigned WINAPI RiffRepeaterThread() {
 	while (!GameState::GameClosing) {
 		Sleep(100);
 
-		if (Settings::ReturnSettingValue("RRSpeedAboveOneHundred") != "on")
-		{
-			continue;
-		}
-
 		const auto songKey = GameState::GetSongKey();
 		if (songKey != previousSongKey) {
 			previousSongKey = songKey;
