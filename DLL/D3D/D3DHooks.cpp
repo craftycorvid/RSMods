@@ -153,6 +153,7 @@ HRESULT APIENTRY D3DHooks::Hook_Reset(IDirect3DDevice9* pDevice, D3DPRESENT_PARA
 
 	if (GameOverlay::DX9FontEncapsulation)
 		GameOverlay::DX9FontEncapsulation->OnLostDevice();
+	GameOverlay::fontCache.OnLostDevice();
 
 	// Reset Device. Call original Reset.
 	HRESULT ResetReturn = oReset(pDevice, pPresentationParameters);
@@ -161,6 +162,7 @@ HRESULT APIENTRY D3DHooks::Hook_Reset(IDirect3DDevice9* pDevice, D3DPRESENT_PARA
 
 	if (GameOverlay::DX9FontEncapsulation)
 		GameOverlay::DX9FontEncapsulation->OnResetDevice();
+	GameOverlay::fontCache.OnResetDevice();
 
 	return ResetReturn;
 }
