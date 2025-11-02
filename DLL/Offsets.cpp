@@ -40,7 +40,7 @@ void Offsets::Initialize() {
 	ptr_timeStretchCalculationsJmpBck = { {0x00409441, baseHandle + 0x000093A1 } };		// Code | dd 05 ? ? ? ? d8 d1 df e0 dd 05 ? ? ? ? (0x3B bytes after first byte in mask)
 	ptr_selectedProfileName = { {0x00F5F62C, 0x00F6062C} };					// Memory | Copied from Tuning.
 	ptr_twoRTCBypass = { {0x007C0C5F, baseHandle + 0x003C1A2F} };			// Code | dc a3 90 01 00 00 dc ? ? ? ? ? df e0 f6 c4 41 (0x28 bytes after first byte in mask)
-	ptr_NonStopPlayPreSongTimer = { {0x1224410, 0x00ff5ca8} };				// Static memory | 00 00 00 40 e1 fa 25 40
+	ptr_NonStopPlayPreSongTimer = { {0x1224410, baseHandle + 0x00E25CA8} };				// Static memory | 00 00 00 40 e1 fa 25 40
 	ptr_colorBlindMode = { {0x00F5F58C, 0x00F6058C} };						// Memory | Offset interpolated from others (old value +0x1000)
 	ptr_currentNoteStreak = { {0x00F5F62C, 0x00F6062C} };					// Memory | Copied from Tuning.
 	ptr_wavyNotesHook = { {0x007AE0AD, baseHandle + 0x003AF13D } };						// Code | 80 7c 24 0c 00 8b 45 0c d9 00 d9 5c 24 24 d9 40 04 (we want bytes d9 00)

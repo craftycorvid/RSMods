@@ -1,5 +1,16 @@
 #pragma once
 
+#include "QualityOfLife.hpp"
+#include "Mods/VolumeControl.hpp"
+#include "Mods/AudioDevices.hpp"
+#include "Mods/BugPrevention.hpp"
+#include "Mods/LaunchOnExternalMonitor.hpp"
+#include "Keyboard.hpp"
+#include "Mods/Loft.hpp"
+#include "Keybindings.hpp"
+#include "Mods/ExtendedRangeMode.hpp"
+#include "Mods/CustomSongTitles.hpp"
+#include "D3DInfo.h"
 #include <string>
 
 struct GameLoopState {
@@ -25,9 +36,9 @@ namespace ModManager {
     void LogSongIDForRiffRepeater();
     void EnableRiffRepeaterFeatures();
     void HandleInSongVisualMods(GameLoopState& state);
-    void HandleMidiAutoTuningInSong(GameLoopState& state);
+    void HandleMidiAutoTuningInSong();
     void HandleSongTimerDisplay(GameLoopState& state);
-    void HandleExtendedRangeInSong(GameLoopState& state);
+    void HandleExtendedRangeInSong(const GameLoopState& state);
     void HandleAutoLoadProfile(GameLoopState& state);
     void HandleSpecificProfileLoad(GameLoopState& state);
     void HandleAlwaysOnMods(GameLoopState& state);
@@ -42,7 +53,7 @@ namespace ModManager {
     void HandleMenuVisualMods(GameLoopState& state);
     void HandleMenuFeatures(GameLoopState& state);
     void HandleHeadstockCacheReset(GameLoopState& state);
-    void HandleExtendedRangeInTuner(GameLoopState& state);
+    void HandleExtendedRangeInTuner(const GameLoopState& state);
     void CleanupSongSpecificStates(GameLoopState& state);
     void ConfigureAlternativeSampleRate();
     void CheckIfGameHasLoaded();

@@ -23,5 +23,6 @@
 #include "QualityOfLife.hpp"
 #include "Keybindings.hpp"
 #include "Twitch.hpp"
+#include "ModManager.hpp"
 
 inline std::string selectedUser = "";

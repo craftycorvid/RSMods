@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Main.hpp"
-#include "ModManager.hpp"
 
 #if defined(_DEBUG) || defined(_WWISE_LOGS)
 bool debug = true;

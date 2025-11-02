@@ -1,16 +1,5 @@
 #include "stdafx.h"
 #include "ModManager.hpp"
-#include "QualityOfLife.hpp"
-#include "Mods/VolumeControl.hpp"
-#include "Mods/AudioDevices.hpp"
-#include "Mods/BugPrevention.hpp"
-#include "Mods/LaunchOnExternalMonitor.hpp"
-#include "Keyboard.hpp"
-#include "Mods/Loft.hpp"
-#include "Keybindings.hpp"
-#include "Mods/ExtendedRangeMode.hpp"
-#include "Mods/CustomSongTitles.hpp"
-#include "D3DInfo.h"
 
 namespace ModManager {
 	void InitializeConfiguration() {
@@ -336,7 +325,7 @@ namespace ModManager {
 	/// <summary>
 	/// Enables extended range mode in the tuner if applicable.
 	/// </summary>
-	void HandleExtendedRangeInTuner(GameLoopState& state) {
+	void HandleExtendedRangeInTuner(const GameLoopState& state) {
 		if (GameState::Menus::IsInPreSongTuner()) {
 			if (!ERMode::AttemptedERInTuner) {
 				if (!state.skipERSleep) {
@@ -486,7 +475,6 @@ namespace ModManager {
 			AudioDevices::GetMicrophoneVolume(Settings::ReturnSettingValue("OverrideInputVolumeDevice")) !=
 			Settings::GetModSetting("OverrideInputVolume")) 
 		{
-
 			AudioDevices::SetMicrophoneVolume(
 				Settings::ReturnSettingValue("OverrideInputVolumeDevice"),
 				Settings::GetModSetting("OverrideInputVolume")
@@ -528,13 +516,17 @@ namespace ModManager {
 	/// Manages custom non-stop play timer settings.
 	/// </summary>
 	void HandleNonStopPlayTimer() {
-		if (Settings::ReturnSettingValue("UseCustomNSPTimer") == "on" &&
-			SongTimer::GetNonStopPlayTimer() != (Settings::GetModSetting("CustomNSPTimeLimit") / 1000.0)) {
-			SongTimer::SetNonStopPlayTimer(Settings::GetModSetting("CustomNSPTimeLimit") / 1000.0);
-		}
-		else if (Settings::ReturnSettingValue("UseCustomNSPTimer") == "off" &&
-				 SongTimer::GetNonStopPlayTimer() != DefaultNSPTimeLimit) {
-			SongTimer::SetNonStopPlayTimer(DefaultNSPTimeLimit);
+		const bool useCustom = Settings::ReturnSettingValue("UseCustomNSPTimer") == "on";
+		const double desired = useCustom
+			? Settings::GetModSetting("CustomNSPTimeLimit") / 1000.0
+			: DefaultNSPTimeLimit;
+
+		const double current = SongTimer::GetNonStopPlayTimer();
+
+		const double eps = std::numeric_limits<double>::epsilon() * std::max(1.0, std::max(std::abs(desired), std::abs(current))) * 4;
+		if (std::abs(current - desired) > eps) {
+			LOG_INFO("Updating NSP timer...");
+			SongTimer::SetNonStopPlayTimer(desired);
 		}
 	}
 
@@ -585,7 +577,7 @@ namespace ModManager {
 		LogSongIDForRiffRepeater();
 		EnableRiffRepeaterFeatures();
 		HandleInSongVisualMods(state);
-		HandleMidiAutoTuningInSong(state);
+		HandleMidiAutoTuningInSong();
 		HandleSongTimerDisplay(state);
 		HandleExtendedRangeInSong(state);
 	}
@@ -682,7 +674,7 @@ namespace ModManager {
 	/// <summary>
 	/// Handles MIDI auto-tuning when entering a song.
 	/// </summary>
-	void HandleMidiAutoTuningInSong(GameLoopState& state) {
+	void HandleMidiAutoTuningInSong() {
 		if (Settings::ReturnSettingValue("AutoTuneForSong") == "on" &&
 			!Midi::alreadyAutomatedTuningInThisSong &&
 			(Settings::ReturnSettingValue("AutoTuneForSongWhen") == "tuner" ||
@@ -706,7 +698,7 @@ namespace ModManager {
 	/// <summary>
 	/// Detects and attempts to enable extended range mode for appropriate songs.
 	/// </summary>
-	void HandleExtendedRangeInSong(GameLoopState& state) {
+	void HandleExtendedRangeInSong(const GameLoopState& state) {
 		if (!ERMode::AttemptedERInThisSong) {
 			if (!state.skipERSleep) { // Tuning takes a second, or so, to get set by the game. We use this to make sure we have the right tuning numbers. Otherwise, we would never get ER mode to turn on properly.
 				Sleep(1500);
