@@ -72,28 +72,51 @@ void RiffRepeater::DisableTimeStretch() {
 /// <param name="songKey"> - SongKey for the current playing song.</param>
 /// <returns>QueryAudioObjectIDs == AK_SUCCESS</returns>
 bool RiffRepeater::LogSongID(const std::string& songKey) {
-	std::string playEvent = "Play_" + songKey;
+	if (songKey.empty()) return false;
+
+	std::string playEvent = std::string("Play_") + songKey;
 	AkUInt32 totalObjects = 0;
 
 	// Gets total number of objects so we know how much memory we need to allocate.
-	Wwise::SoundEngine::Query::QueryAudioObjectIDs(playEvent.c_str(), &totalObjects, NULL); 
+    AKRESULT resCount = Wwise::SoundEngine::Query::QueryAudioObjectIDs(playEvent.c_str(), &totalObjects, nullptr);
+	if (resCount != AK_Success && resCount != AK_PartialSuccess) {
+		loggedCurrentSongID = false;
+		LOG_ERROR("QueryAudioObjectIDs count failed for event " + playEvent << std::endl);
+		return false;
+	}
+	if (totalObjects == 0) {
+		loggedCurrentSongID = false;
+		LOG_INFO("No audio objects for event " + playEvent << std::endl);
+		return false;
+	}
 
-	std::vector<AkObjectInfo> memoryBlock(totalObjects);
+	std::vector<AkObjectInfo> objects(totalObjects);
+	AkUInt32 capacity = totalObjects;
 
 	// Get the Actor-Mixer ID that we need to manipulate the Time_Stretch parameter.
-	AKRESULT soundObjects = Wwise::SoundEngine::Query::QueryAudioObjectIDs(playEvent.c_str(), &totalObjects, memoryBlock.data()); 
+	resCount = Wwise::SoundEngine::Query::QueryAudioObjectIDs(playEvent.c_str(), &capacity, objects.data());
+	if (resCount != AK_Success && resCount != AK_PartialSuccess) {
+		loggedCurrentSongID = false;
+		LOG_ERROR("QueryAudioObjectIDs fill failed for event " + playEvent << std::endl);
+		return false;
+	}
+	if (capacity == 0) {
+		loggedCurrentSongID = false;
+		LOG_INFO("Zero objects returned on fill for event " + playEvent << std::endl);
+		return false;
+	}
 
-	if (totalObjects > 0 && !memoryBlock.empty()) {
+	if (!objects.empty()) {
 		// Save the Play_{SongKey} event and the Actor-Mixer ID to a map so we don't need to get it multiple times if the user leaves and comes back to the song.
 		// These values are static, PER SONG, so we could even make a database file (and/or csv) with these IDs in it to have an even bigger cache of them.
-		SongObjectIDs.try_emplace({ playEvent, memoryBlock[0].objID });
-												
+		SongObjectIDs.try_emplace(playEvent, objects[0].objID);
+		
 		// The Actor-Mixer ID we need is at the very beginning of the memory block.
-		currentSongID = memoryBlock[0].objID;
+		currentSongID = objects[0].objID;
 		loggedCurrentSongID = true;
 	}
 
-	return soundObjects == AK_Success;
+	return true;
 }
 
 
