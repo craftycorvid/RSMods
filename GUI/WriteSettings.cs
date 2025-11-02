@@ -146,6 +146,7 @@ namespace RSMods
                     { ReadSettings.FixOculusCrashIdentifier, CreateDefaultOnOldINI(ReadSettings.FixOculusCrashIdentifier, "off") }, // When the user has an Oculus / Meta headset connected to their computer, Rocksmith might crash. Turning this on might fix that.
                     { ReadSettings.FixBrokenTonesIdentifier, CreateDefaultOnOldINI(ReadSettings.FixBrokenTonesIdentifier, "off") }, // When the user encounters a bad tone, the tone system dies. This mod tries to prevent the tone system from dying.
                     { ReadSettings.UseCustomNSPTimerIdentifier, CreateDefaultOnOldINI(ReadSettings.UseCustomNSPTimerIdentifier, "off") }, // Allows the user to have a custom timer for Non-stop Play instead of the 10.9 seconds that it defaults to.
+                    { ReadSettings.DisplayCurrentAccuracyIdentifier, CreateDefaultOnOldINI(ReadSettings.DisplayCurrentAccuracyIdentifier, "off") },
                 }
             );
             saveSettingsOrDefaults.Add(

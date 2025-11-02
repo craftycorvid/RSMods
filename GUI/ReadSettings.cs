@@ -31,7 +31,7 @@ namespace RSMods
                              ToggleSkylineWhen, RemoveLaneMarkersEnabled, RemoveLyricsEnabled, RemoveLyricsWhen, GuitarSpeakEnabled, RemoveHeadstockWhen, ScreenShotScores,
                              MidiAutoTuning, MidiAutoTuningDevice, MidiInDevice, MidiAutoTuningWhen, MidiSoftwareSemitoneTriggers, MidiSoftwareSemitoneSettings, MidiSoftwareTrueTuningTriggers, MidiSoftwareTrueTuningSettings, ChordsMode,
                              RiffRepeaterAboveHundred, ShowCurrentNoteOnScreen, OnScreenFont, ProfileToLoad, ShowSongTimerWhen, ShowSelectedVolumeWhen, SecondaryMonitor, RemoveSongPreviews, OverrideInputVolumeEnabled, OverrideInputVolumeDevice,
-                             AllowAudioInBackground, BypassTwoRTCMessageBox, LinearRiffRepeater, UseAlternativeOutputSampleRate, AllowLooping, AllowRewind, FixOculusCrash, FixBrokenTones, UseCustomNSPTimer,
+                             AllowAudioInBackground, BypassTwoRTCMessageBox, LinearRiffRepeater, UseAlternativeOutputSampleRate, AllowLooping, AllowRewind, FixOculusCrash, FixBrokenTones, UseCustomNSPTimer, DisplayCurrentAccuracy,
 
 
                              // String Colors
@@ -163,7 +163,7 @@ namespace RSMods
             FixOculusCrashIdentifier                    = "FixOculusCrash = ",
             FixBrokenTonesIdentifier                    = "FixBrokenTones = ",
             UseCustomNSPTimerIdentifier                 = "UseCustomNSPTimer = ",
-
+            DisplayCurrentAccuracyIdentifier            = "DisplayCurrentAccuracy = ",
 
                 // String Colors (Normal {N} & Colorblind {CB})
                 // Normal String Colors
@@ -503,6 +503,9 @@ namespace RSMods
                     return FillSettingVariable(FixBrokenTonesIdentifier, SettingType.ON_OFF, currentLine, out FixBrokenTones);
                 if (IdentifierIsFound(currentLine, UseCustomNSPTimerIdentifier, identifierToGrab))
                     return FillSettingVariable(UseCustomNSPTimerIdentifier, SettingType.ON_OFF, currentLine, out UseCustomNSPTimer);
+                if (IdentifierIsFound(currentLine, DisplayCurrentAccuracyIdentifier, identifierToGrab))
+                    return FillSettingVariable(DisplayCurrentAccuracyIdentifier, SettingType.ON_OFF, currentLine, out DisplayCurrentAccuracy);
+
                 #endregion
                 #region String Colors
                 // String Colors (Normal {N} & Colorblind {CB})

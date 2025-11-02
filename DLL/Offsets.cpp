@@ -98,6 +98,9 @@ void Offsets::Initialize() {
 
 	patch_scrollSpeedLTTarget = { {0x0046A319, baseHandle + 0x006A7E9 } };					// Code | d9 43 1c d8 89 c0 00 00 00 de e9 d9 5d e0 (first opcode)
 	patch_scrollSpeedGTTarget = { {0x0046A2E9, baseHandle + 0x006A7B9 } };					// Code | d9 43 1c d8 89 c0 00 00 00 d8 43 20 (first opcode)
+
+	ptr_noteData = { {0x00F5F62C, 0x00F6062C} };
+	ptr_scoreAttackNoteData = { {0x00F5F62C, 0x00F6062C} };
 }
 
 namespace Offsets { // Addresses for pre-2021 patch are in the comments
@@ -203,6 +206,9 @@ namespace Offsets { // Addresses for pre-2021 patch are in the comments
 
 	// Faster dynamic density / scroll speed change
 	const char* patch_scrollSpeedChange = "\xD9\xE8\x90";
+
+	std::vector<unsigned int> ptr_noteDataOffsets{ 0xB0, 0x18, 0x4, 0x84, 0x0 };
+	std::vector<unsigned int> ptr_scoreAttackNoteDataOffsets{ 0xB0, 0x18, 0x4, 0x4C, 0x0 };
 }
 
 

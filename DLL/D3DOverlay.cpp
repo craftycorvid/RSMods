@@ -222,7 +222,87 @@ void HandleLooping() {
 
 }
 
-void GameOverlay::RenderOverlay(IDirect3DDevice9* pDevice) {
+static int MeasureLineHeight(ID3DXFont* font, const std::string& text, const RECT& rect, DWORD fmt) {
+	RECT r = rect;
+	int h = font->DrawTextA(nullptr, text.c_str(), -1, &r, fmt | DT_CALCRECT, 0);
+	if (h <= 0) h = (r.bottom - r.top);
+	return h;
+}
+
+static float ReadAccuracy() {
+	const bool isLAS = GameState::Menus::IsInLearnASongModes();
+	const bool isSA = GameState::Menus::IsInScoreAttackModes();
+
+	uintptr_t addr = 0;
+	if (isLAS) {
+		addr = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_noteData,
+			Offsets::ptr_noteDataOffsets);
+	}
+	else if (isSA) {
+		addr = MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_scoreAttackNoteData,
+			Offsets::ptr_scoreAttackNoteDataOffsets);
+	}
+	else {
+		return 0.0f;
+	}
+
+	if (!addr) return 0.0f;
+
+	if (isLAS) {
+		const LearnASongNoteData* data = reinterpret_cast<LearnASongNoteData*>(addr);
+
+		return data->getAccuracy();
+	}
+	else if (isSA) {
+		const ScoreAttackNoteData* data = reinterpret_cast<ScoreAttackNoteData*>(addr);
+		return data->getAccuracy();
+	}
+
+	return 0.0f;
+}
+
+void GameOverlay::DisplaySongAccuracy() {
+	if (Settings::ReturnSettingValue("DisplayCurrentAccuracy") == "on" &&
+		GameState::IsInSong() && SongTimer::SongTimer() != 0.f) {
+		auto left = static_cast<int>(WindowSize.width - WindowSize.width / 16.0f);
+		auto right = static_cast<int>(WindowSize.width - WindowSize.width / 96.0f);
+		auto top = static_cast<int>(WindowSize.height / 54.0f);
+		auto bottom = static_cast<int>(WindowSize.height / 16.0f);
+		RECT baseRect{ left, top, right, bottom };
+
+		float accuracy = ReadAccuracy();
+		std::stringstream ss;
+		ss << std::fixed << std::setprecision(2) << accuracy << "%";
+		std::string accuracyText = ss.str() + "%";
+
+		CComPtr<ID3DXFont> font;
+		FontKey key = FontKey::Make(Settings::ReturnSettingValue("OnScreenFont"),
+			(std::max)(static_cast<unsigned int>(1), WindowSize.height / 72),
+			WindowSize.width / 96, FW_NORMAL, false);
+		
+		if (fontCache.Get(pDevice, key, font)) {
+			int lh = MeasureLineHeight(font, accuracyText, baseRect, DT_RIGHT | DT_NOCLIP);
+			int gap = (std::max)(1, lh / 4);
+			top += lh + 2 * gap;
+			bottom += lh + 2 * gap;
+		}
+		else { //JIC
+			auto line = static_cast<int>(WindowSize.height / 54.0f);
+			top += line;
+			bottom += line;
+		}
+
+		DX9DrawText(
+			accuracyText,
+			whiteText,
+			left, top, right, bottom,
+			pDevice,
+			{ NULL, NULL },
+			DT_RIGHT | DT_NOCLIP);
+	}
+}
+
+void GameOverlay::RenderOverlay(IDirect3DDevice9* device) {
 	// Draw text on screen
 	// NOTE: NEVER USE SET VALUES. Always do division of WindowSize width AND heigh so every resolution should have the text in around the same spot.
 	if (GameState::GameLoaded) {
@@ -236,6 +316,7 @@ void GameOverlay::RenderOverlay(IDirect3DDevice9* pDevice) {
 		GameOverlay::DisplayRiffRepeaterOverHundredPercentSpeed();
 		GameOverlay::DisplayCurrentNote();
 		GameOverlay::DisplayCurrentTuningForAutoTune();
+		GameOverlay::DisplaySongAccuracy(); 
 
 		HandleLooping();
 	}

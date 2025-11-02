@@ -88,7 +88,8 @@ void Settings::Initialize()
 		{"AllowRewind", "off"},
 		{"FixOculusCrash", "off"},
 		{"FixBrokenTones", "off"},
-		{"UseCustomNSPTimer", "off"}
+		{"UseCustomNSPTimer", "off"},
+		{"DisplayCurrentAccuracy", "on"},
 	};
 
 	customSettings = {
@@ -295,6 +296,7 @@ void Settings::ReadModSettings() {
 	modSettings["FixOculusCrash"] = reader.GetValue("Toggle Switches", "FixOculusCrash", "off");
 	modSettings["FixBrokenTones"] = reader.GetValue("Toggle Switches", "FixBrokenTones", "off");
 	modSettings["UseCustomNSPTimer"] = reader.GetValue("Toggle Switches", "UseCustomNSPTimer", "off");
+	modSettings["DisplayCurrentAccuracy"] = reader.GetValue("Toggle Switches", "DisplayCurrentAccuracy", "off");
 }
 
 /// <summary>

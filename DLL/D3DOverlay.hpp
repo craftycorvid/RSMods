@@ -7,6 +7,8 @@
 #include <atlbase.h>
 #include <algorithm>
 #include "Keybindings.hpp"
+#include "NoteData.h"
+#include "GameState.hpp"
 
 namespace GameOverlay {
 	Resolution GetWindowSize();
@@ -27,6 +29,7 @@ namespace GameOverlay {
 	void DisplayRiffRepeaterOverHundredPercentSpeed();
 	void DisplayCurrentTuningForAutoTune();
 	void DisplayLoopStartEndTimes(float loopStart, float loopEnd);
+	void DisplaySongAccuracy();
 	void RenderOverlay(IDirect3DDevice9* pDevice);
 
 	const inline std::vector<std::string> mixerInternalNames = { // Needs to be char* as that's what SetRTPCValue needs.

@@ -62,6 +62,7 @@
             this.checkBox_FixBadBassTuning = new System.Windows.Forms.CheckBox();
             this.checkBox_ExtendedRangeDrop = new System.Windows.Forms.CheckBox();
             this.groupBox_EnabledMods = new System.Windows.Forms.GroupBox();
+            this.checkBox_DisplayCurrentAccuracy = new System.Windows.Forms.CheckBox();
             this.checkBox_CustomNSPTimer = new System.Windows.Forms.CheckBox();
             this.checkBox_FixBrokenTones = new System.Windows.Forms.CheckBox();
             this.checkBox_FixOculusCrash = new System.Windows.Forms.CheckBox();
@@ -1064,6 +1065,7 @@
             // 
             // groupBox_EnabledMods
             // 
+            this.groupBox_EnabledMods.Controls.Add(this.checkBox_DisplayCurrentAccuracy);
             this.groupBox_EnabledMods.Controls.Add(this.checkBox_CustomNSPTimer);
             this.groupBox_EnabledMods.Controls.Add(this.checkBox_FixBrokenTones);
             this.groupBox_EnabledMods.Controls.Add(this.checkBox_FixOculusCrash);
@@ -1107,6 +1109,17 @@
             this.groupBox_EnabledMods.TabIndex = 50;
             this.groupBox_EnabledMods.TabStop = false;
             this.groupBox_EnabledMods.Text = "Enabled Mods";
+            // 
+            // checkBox_DisplayCurrentAccuracy
+            // 
+            this.checkBox_DisplayCurrentAccuracy.AutoSize = true;
+            this.checkBox_DisplayCurrentAccuracy.Location = new System.Drawing.Point(144, 423);
+            this.checkBox_DisplayCurrentAccuracy.Name = "checkBox_DisplayCurrentAccuracy";
+            this.checkBox_DisplayCurrentAccuracy.Size = new System.Drawing.Size(138, 17);
+            this.checkBox_DisplayCurrentAccuracy.TabIndex = 80;
+            this.checkBox_DisplayCurrentAccuracy.Text = "Show Current Accuracy";
+            this.checkBox_DisplayCurrentAccuracy.UseVisualStyleBackColor = true;
+            this.checkBox_DisplayCurrentAccuracy.CheckedChanged += new System.EventHandler(this.Save_DisplaySongAccuracy);
             // 
             // checkBox_CustomNSPTimer
             // 
@@ -1811,7 +1824,7 @@
             this.tabPage_SetAndForget_CustomTunings.Controls.Add(this.label_CustomStringTunings);
             this.tabPage_SetAndForget_CustomTunings.Location = new System.Drawing.Point(4, 22);
             this.tabPage_SetAndForget_CustomTunings.Name = "tabPage_SetAndForget_CustomTunings";
-            this.tabPage_SetAndForget_CustomTunings.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_SetAndForget_CustomTunings.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_SetAndForget_CustomTunings.Size = new System.Drawing.Size(1080, 422);
             this.tabPage_SetAndForget_CustomTunings.TabIndex = 0;
             this.tabPage_SetAndForget_CustomTunings.Text = "Custom Tunings";
@@ -2220,10 +2233,10 @@
             this.tabPage_SetAndForget_CustomTones.Controls.Add(this.groupBox_CustomGuitarcadeTones);
             this.tabPage_SetAndForget_CustomTones.Controls.Add(this.button_LoadTones);
             this.tabPage_SetAndForget_CustomTones.Controls.Add(this.groupBox_CustomProfileTones);
-            this.tabPage_SetAndForget_CustomTones.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_SetAndForget_CustomTones.Location = new System.Drawing.Point(4, 22);
             this.tabPage_SetAndForget_CustomTones.Name = "tabPage_SetAndForget_CustomTones";
-            this.tabPage_SetAndForget_CustomTones.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage_SetAndForget_CustomTones.Size = new System.Drawing.Size(1080, 419);
+            this.tabPage_SetAndForget_CustomTones.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_SetAndForget_CustomTones.Size = new System.Drawing.Size(1080, 422);
             this.tabPage_SetAndForget_CustomTones.TabIndex = 1;
             this.tabPage_SetAndForget_CustomTones.Text = "Custom Tones";
             // 
@@ -2455,9 +2468,9 @@
             this.tabPage_SetAndForget_Misc.Controls.Add(this.button_CleanUpUnpackedCache);
             this.tabPage_SetAndForget_Misc.Controls.Add(this.button_AddDCInput);
             this.tabPage_SetAndForget_Misc.Controls.Add(this.button_RestoreCacheBackup);
-            this.tabPage_SetAndForget_Misc.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_SetAndForget_Misc.Location = new System.Drawing.Point(4, 22);
             this.tabPage_SetAndForget_Misc.Name = "tabPage_SetAndForget_Misc";
-            this.tabPage_SetAndForget_Misc.Size = new System.Drawing.Size(1080, 419);
+            this.tabPage_SetAndForget_Misc.Size = new System.Drawing.Size(1080, 422);
             this.tabPage_SetAndForget_Misc.TabIndex = 2;
             this.tabPage_SetAndForget_Misc.Text = "Misc";
             // 
@@ -2898,7 +2911,7 @@
             this.tab_Songlists.Controls.Add(this.groupBox_Songlist);
             this.tab_Songlists.Location = new System.Drawing.Point(4, 22);
             this.tab_Songlists.Name = "tab_Songlists";
-            this.tab_Songlists.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tab_Songlists.Padding = new System.Windows.Forms.Padding(3);
             this.tab_Songlists.Size = new System.Drawing.Size(1150, 513);
             this.tab_Songlists.TabIndex = 0;
             this.tab_Songlists.Text = "Song Lists";
@@ -2908,10 +2921,10 @@
             this.tab_Keybindings.BackColor = System.Drawing.Color.Azure;
             this.tab_Keybindings.Controls.Add(this.groupBox_Keybindings_AUDIO);
             this.tab_Keybindings.Controls.Add(this.groupBox_Keybindings_MODS);
-            this.tab_Keybindings.Location = new System.Drawing.Point(4, 25);
+            this.tab_Keybindings.Location = new System.Drawing.Point(4, 22);
             this.tab_Keybindings.Name = "tab_Keybindings";
-            this.tab_Keybindings.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tab_Keybindings.Size = new System.Drawing.Size(1150, 510);
+            this.tab_Keybindings.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_Keybindings.Size = new System.Drawing.Size(1150, 513);
             this.tab_Keybindings.TabIndex = 1;
             this.tab_Keybindings.Text = "Keybindings";
             // 
@@ -3075,10 +3088,10 @@
             this.tab_ModToggles.BackColor = System.Drawing.Color.Azure;
             this.tab_ModToggles.Controls.Add(this.TabController_ModSettings);
             this.tab_ModToggles.Controls.Add(this.groupBox_EnabledMods);
-            this.tab_ModToggles.Location = new System.Drawing.Point(4, 25);
+            this.tab_ModToggles.Location = new System.Drawing.Point(4, 22);
             this.tab_ModToggles.Name = "tab_ModToggles";
-            this.tab_ModToggles.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tab_ModToggles.Size = new System.Drawing.Size(1150, 510);
+            this.tab_ModToggles.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_ModToggles.Size = new System.Drawing.Size(1150, 513);
             this.tab_ModToggles.TabIndex = 2;
             this.tab_ModToggles.Text = "Enable / Disable Mods";
             // 
@@ -3103,7 +3116,7 @@
             this.tabPage_ModSettings_ER.Controls.Add(this.groupBox_StringColors);
             this.tabPage_ModSettings_ER.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_ER.Name = "tabPage_ModSettings_ER";
-            this.tabPage_ModSettings_ER.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_ModSettings_ER.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_ModSettings_ER.Size = new System.Drawing.Size(777, 426);
             this.tabPage_ModSettings_ER.TabIndex = 0;
             this.tabPage_ModSettings_ER.Text = "Extended Range";
@@ -3293,10 +3306,10 @@
             this.tabPage_ModSettings_DisableUI.Controls.Add(this.groupBox_LoftOffWhen);
             this.tabPage_ModSettings_DisableUI.Controls.Add(this.groupBox_ToggleSkylineWhen);
             this.tabPage_ModSettings_DisableUI.Controls.Add(this.groupBox_ToggleHeadstockOffWhen);
-            this.tabPage_ModSettings_DisableUI.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_ModSettings_DisableUI.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_DisableUI.Name = "tabPage_ModSettings_DisableUI";
-            this.tabPage_ModSettings_DisableUI.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage_ModSettings_DisableUI.Size = new System.Drawing.Size(777, 423);
+            this.tabPage_ModSettings_DisableUI.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_ModSettings_DisableUI.Size = new System.Drawing.Size(777, 426);
             this.tabPage_ModSettings_DisableUI.TabIndex = 3;
             this.tabPage_ModSettings_DisableUI.Text = "Disable UI Elements";
             // 
@@ -3396,10 +3409,10 @@
             this.tabPage_ModSettings_Automation.Controls.Add(this.groupBox_GuitarSpeak);
             this.tabPage_ModSettings_Automation.Controls.Add(this.groupBox_HowToEnumerate);
             this.tabPage_ModSettings_Automation.Controls.Add(this.groupBox_AutoLoadProfiles);
-            this.tabPage_ModSettings_Automation.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_ModSettings_Automation.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_Automation.Name = "tabPage_ModSettings_Automation";
-            this.tabPage_ModSettings_Automation.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage_ModSettings_Automation.Size = new System.Drawing.Size(777, 423);
+            this.tabPage_ModSettings_Automation.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_ModSettings_Automation.Size = new System.Drawing.Size(777, 426);
             this.tabPage_ModSettings_Automation.TabIndex = 1;
             this.tabPage_ModSettings_Automation.Text = "Automation";
             // 
@@ -3511,9 +3524,9 @@
             this.tabPage_ModSettings_AutoTuning.Controls.Add(this.groupBox_MidiAutoTuningWhen);
             this.tabPage_ModSettings_AutoTuning.Controls.Add(this.groupBox_MidiAutoTuningOffset);
             this.tabPage_ModSettings_AutoTuning.Controls.Add(this.groupBox_MidiAutoTuneDevice);
-            this.tabPage_ModSettings_AutoTuning.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_ModSettings_AutoTuning.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_AutoTuning.Name = "tabPage_ModSettings_AutoTuning";
-            this.tabPage_ModSettings_AutoTuning.Size = new System.Drawing.Size(777, 423);
+            this.tabPage_ModSettings_AutoTuning.Size = new System.Drawing.Size(777, 426);
             this.tabPage_ModSettings_AutoTuning.TabIndex = 4;
             this.tabPage_ModSettings_AutoTuning.Text = "Auto Tuning";
             // 
@@ -3780,9 +3793,9 @@
             this.tabPage_ModSettings_Misc.Controls.Add(this.groupBox_Backups);
             this.tabPage_ModSettings_Misc.Controls.Add(this.groupBox_RRSpeed);
             this.tabPage_ModSettings_Misc.Controls.Add(this.groupBox_ControlVolumeIncrement);
-            this.tabPage_ModSettings_Misc.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_ModSettings_Misc.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_Misc.Name = "tabPage_ModSettings_Misc";
-            this.tabPage_ModSettings_Misc.Size = new System.Drawing.Size(777, 423);
+            this.tabPage_ModSettings_Misc.Size = new System.Drawing.Size(777, 426);
             this.tabPage_ModSettings_Misc.TabIndex = 2;
             this.tabPage_ModSettings_Misc.Text = "Misc";
             // 
@@ -4186,10 +4199,10 @@
             // tab_SetAndForget
             // 
             this.tab_SetAndForget.Controls.Add(this.groupBox_SetAndForget);
-            this.tab_SetAndForget.Location = new System.Drawing.Point(4, 25);
+            this.tab_SetAndForget.Location = new System.Drawing.Point(4, 22);
             this.tab_SetAndForget.Name = "tab_SetAndForget";
-            this.tab_SetAndForget.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tab_SetAndForget.Size = new System.Drawing.Size(1150, 510);
+            this.tab_SetAndForget.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_SetAndForget.Size = new System.Drawing.Size(1150, 513);
             this.tab_SetAndForget.TabIndex = 3;
             this.tab_SetAndForget.Text = "Set And Forget Mods";
             this.tab_SetAndForget.UseVisualStyleBackColor = true;
@@ -4919,9 +4932,9 @@
             this.tab_Rocksmith.Controls.Add(this.label_Rocksmith_Thanks);
             this.tab_Rocksmith.Controls.Add(this.groupBox_Rocksmith_AudioSettings);
             this.tab_Rocksmith.Controls.Add(this.groupBox_Rocksmith_VisualSettings);
-            this.tab_Rocksmith.Location = new System.Drawing.Point(4, 25);
+            this.tab_Rocksmith.Location = new System.Drawing.Point(4, 22);
             this.tab_Rocksmith.Name = "tab_Rocksmith";
-            this.tab_Rocksmith.Size = new System.Drawing.Size(1150, 510);
+            this.tab_Rocksmith.Size = new System.Drawing.Size(1150, 513);
             this.tab_Rocksmith.TabIndex = 8;
             this.tab_Rocksmith.Text = "Rocksmith Settings";
             // 
@@ -5522,10 +5535,10 @@
             this.tab_Twitch.Controls.Add(this.label_AuthorizedAs);
             this.tab_Twitch.Controls.Add(this.label_TwitchAuthorized);
             this.tab_Twitch.Controls.Add(this.button_TwitchReAuthorize);
-            this.tab_Twitch.Location = new System.Drawing.Point(4, 25);
+            this.tab_Twitch.Location = new System.Drawing.Point(4, 22);
             this.tab_Twitch.Name = "tab_Twitch";
-            this.tab_Twitch.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tab_Twitch.Size = new System.Drawing.Size(1150, 510);
+            this.tab_Twitch.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_Twitch.Size = new System.Drawing.Size(1150, 513);
             this.tab_Twitch.TabIndex = 6;
             this.tab_Twitch.Text = "Twitch Bot (Beta)";
             // 
@@ -5873,10 +5886,10 @@
             this.tab_SoundPacks.Controls.Add(this.label_DownloadWwise);
             this.tab_SoundPacks.Controls.Add(this.label_AudioPsarcPleaseWait);
             this.tab_SoundPacks.Controls.Add(this.button_UnpackAudioPsarc);
-            this.tab_SoundPacks.Location = new System.Drawing.Point(4, 25);
+            this.tab_SoundPacks.Location = new System.Drawing.Point(4, 22);
             this.tab_SoundPacks.Name = "tab_SoundPacks";
-            this.tab_SoundPacks.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tab_SoundPacks.Size = new System.Drawing.Size(1150, 510);
+            this.tab_SoundPacks.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_SoundPacks.Size = new System.Drawing.Size(1150, 513);
             this.tab_SoundPacks.TabIndex = 10;
             this.tab_SoundPacks.Text = "Sound Packs";
             // 
@@ -6233,9 +6246,9 @@
             this.tab_Profiles.Controls.Add(this.progressBar_Profiles_LoadPsarcs);
             this.tab_Profiles.Controls.Add(this.listBox_Profiles_AvailableProfiles);
             this.tab_Profiles.Controls.Add(this.label_Profiles_AvailableProfiles);
-            this.tab_Profiles.Location = new System.Drawing.Point(4, 25);
+            this.tab_Profiles.Location = new System.Drawing.Point(4, 22);
             this.tab_Profiles.Name = "tab_Profiles";
-            this.tab_Profiles.Size = new System.Drawing.Size(1150, 510);
+            this.tab_Profiles.Size = new System.Drawing.Size(1150, 513);
             this.tab_Profiles.TabIndex = 9;
             this.tab_Profiles.Text = "Profile Edits";
             // 
@@ -6604,10 +6617,10 @@
             this.tab_GUISettings.Controls.Add(this.groupBox_ChangeTheme);
             this.tab_GUISettings.Controls.Add(this.checkBox_ChangeTheme);
             this.tab_GUISettings.Controls.Add(this.label_Credits);
-            this.tab_GUISettings.Location = new System.Drawing.Point(4, 25);
+            this.tab_GUISettings.Location = new System.Drawing.Point(4, 22);
             this.tab_GUISettings.Margin = new System.Windows.Forms.Padding(0);
             this.tab_GUISettings.Name = "tab_GUISettings";
-            this.tab_GUISettings.Size = new System.Drawing.Size(1150, 510);
+            this.tab_GUISettings.Size = new System.Drawing.Size(1150, 513);
             this.tab_GUISettings.TabIndex = 5;
             this.tab_GUISettings.Text = "GUI Settings";
             // 
@@ -7438,5 +7451,6 @@
         private System.Windows.Forms.CheckBox checkBox_ASIO_InputMic_EnableRefHack;
         private System.Windows.Forms.CheckBox checkBox_ASIO_Output_EnableRefHack;
         private System.Windows.Forms.RadioButton radio_WhammyFour;
+        private System.Windows.Forms.CheckBox checkBox_DisplayCurrentAccuracy;
     }
 }

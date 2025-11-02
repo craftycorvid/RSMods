@@ -614,6 +614,9 @@
     <ClInclude Include="D3D\GdiplusManager.hpp">
       <Filter>D3D</Filter>
     </ClInclude>
+    <ClInclude Include="NoteData.h">
+      <Filter>Main Headers\Structs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="xinput1_3.def">

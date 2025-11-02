@@ -731,6 +731,7 @@ namespace RSMods
             checkBox_FixOculusCrash.Checked = ReadSettings.ProcessSettings(ReadSettings.FixOculusCrashIdentifier) == "on";
             checkBox_FixBrokenTones.Checked = ReadSettings.ProcessSettings(ReadSettings.FixBrokenTonesIdentifier) == "on";
             checkBox_CustomNSPTimer.Checked = ReadSettings.ProcessSettings(ReadSettings.UseCustomNSPTimerIdentifier) == "on";
+            checkBox_DisplayCurrentAccuracy.Checked = ReadSettings.ProcessSettings(ReadSettings.DisplayCurrentAccuracyIdentifier) == "on";
             groupBox_NSPTimer.Visible = checkBox_CustomNSPTimer.Checked;
             nUpDown_NSPTimer.Value = GenUtil.EstablishMaxValue((GenUtil.StrToDecDef(ReadSettings.ProcessSettings(ReadSettings.CustomNSPTimeLimitIdentifier), 10000) / 1000), 60.000m);
         }
@@ -2498,6 +2499,8 @@ namespace RSMods
             SaveSettings_Save(ReadSettings.UseCustomNSPTimerIdentifier, checkBox_CustomNSPTimer.Checked.ToString().ToLower());
             groupBox_NSPTimer.Visible = checkBox_CustomNSPTimer.Checked;
         }
+
+        private void Save_DisplaySongAccuracy(object sender, EventArgs e) => SaveSettings_Save(ReadSettings.DisplayCurrentAccuracyIdentifier, checkBox_DisplayCurrentAccuracy.Checked.ToString().ToLower());
 
         private void Save_NSPTimer(object sender, EventArgs e) => SaveSettings_Save(ReadSettings.CustomNSPTimeLimitIdentifier, ((int)(nUpDown_NSPTimer.Value * 1000)).ToString());
 

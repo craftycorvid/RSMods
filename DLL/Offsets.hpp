@@ -211,4 +211,10 @@ namespace Offsets {
 
 	// Runtime data.
 	inline uintptr_t runtimeVersionStructValue;
+
+	extern std::vector<unsigned int> ptr_noteDataOffsets;
+	extern std::vector<unsigned int> ptr_scoreAttackNoteDataOffsets;
+
+	inline VersioningStruct<uintptr_t> ptr_noteData;
+	inline VersioningStruct<uintptr_t> ptr_scoreAttackNoteData;
 };
