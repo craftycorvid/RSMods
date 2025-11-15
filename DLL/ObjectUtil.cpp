@@ -2,6 +2,8 @@
 #include "ObjectUtil.hpp"
 
 namespace ObjectUtil {
+	std::mutex ObjectScaleMutex;
+
 	Object* GetRootObject() {
 		auto root = (Object*)MemUtil::FindDMAAddy(Offsets::baseHandle + Offsets::ptr_rootObject, Offsets::ptr_rootObjectOffsets, true);
 
@@ -12,31 +14,42 @@ namespace ObjectUtil {
 		return root;
 	}
 
+	void GetChildrenOfObject_SEH(Object* parent, std::vector<Object*>& children)
+	{
+		if (parent == nullptr) return;
+
+		try
+		{
+			Object** childrenArray = parent->children;
+			if (childrenArray == nullptr) {
+				return;
+			}
+
+			for (size_t i = 0; i < parent->childCount; i++)
+			{
+				if (childrenArray[i] != nullptr) {
+					children.push_back(parent->children[i]);
+				}
+			}
+		}
+		catch (std::exception& e)
+		{
+		}
+	}
+
 	std::vector<Object*> GetChildrenOfObject(Object* parent) {
 		std::vector<Object*> children;
 
 		if (parent == nullptr) return children;
 
-		// This could be a bad pointer even though it's not a nullptr.
-		try
-		{
-			for (size_t i = 0; i < parent->childCount; i++)
-			{
-				if (parent->children[i] != nullptr) {
-					children.push_back(parent->children[i]);
-				}
-			}
-		}
-		catch (const std::exception& e)
-		{
-			return children;
-		}
+		GetChildrenOfObject_SEH(parent, children);
 
 		return children;
 	}
 
 	void UpdateScales() {
 		ObjectUtil::Object* rootObject = ObjectUtil::GetRootObject();
+
 		std::vector<ObjectUtil::Object*> children = ObjectUtil::GetChildrenOfObject(rootObject);
 
 		for (auto child : children)
@@ -46,9 +59,9 @@ namespace ObjectUtil {
 				continue;
 			}
 
-			std::string className = child->className;
+			std::scoped_lock<std::mutex> lock(ObjectScaleMutex);
 
-			//If object class name is in object scale map
+			std::string className = child->className;
 			if (ObjectScaleMap.find(className) == ObjectScaleMap.end()) continue;
 
 			child->scale = ObjectScaleMap[className];
@@ -57,9 +70,11 @@ namespace ObjectUtil {
 
 	void SetObjectScales(const std::map<std::string, float>& scales)
 	{
+		std::scoped_lock<std::mutex> lock(ObjectScaleMutex);
+
 		//Apply scales to map
-		for (auto pair : scales) {
-			ObjectScaleMap[pair.first] = pair.second;
+		for (const auto& [key, value] : scales) {
+			ObjectScaleMap[key] = value;
 		}
 	}
 
