@@ -37,7 +37,7 @@ namespace Keybindings {
 		LOG_INFO("(REWIND) Seeked to " << seekTo << "ms." << std::endl);
 	}
 
-	void HandleLoopStart() 
+	void SetLoopStartingPoint() 
 	{
 		if (GetKeyState(VK_CONTROL) & 0x8000) {
 			loopStart = loopEnd = NULL;
@@ -50,13 +50,12 @@ namespace Keybindings {
 		}
 	}
 
-	void HandleLoopEnd() // Set loop ending point.
+	void SetLoopEndingPoint()
 	{ 
 		if (GetKeyState(VK_CONTROL) & 0x8000) {
 			loopEnd = NULL;
 		}
 		else {
-			// Set the end of the loop to the current time in the song.
 			loopEnd = SongTimer::SongTimer();
 
 			// If end point of the loop comes at the same time as, or before, the start of the loop, reset it to 0.
@@ -282,8 +281,14 @@ namespace Keybindings {
 		keyUpCommands["LoopStartKey"] = 
 		{ 
 			[] { return Settings::ReturnSettingValue("AllowLooping") == "on" && GameState::Menus::IsInModesWithAllowedFastRiffRepeater(); }, 
-			HandleLoopStart, 
+			SetLoopStartingPoint, 
 			"Loop Start Point Set" 
+		};
+		keyUpCommands["LoopEndKey"] =
+		{
+			[] { return Settings::ReturnSettingValue("AllowLooping") == "on" && GameState::Menus::IsInModesWithAllowedFastRiffRepeater(); },
+			SetLoopEndingPoint,
+			"Loop End Point Set"
 		};
 		keyUpCommands["RemoveLyricsKey"] = 
 		{ 
