@@ -728,7 +728,9 @@ namespace RSMods
             checkBox_ForceEnumeration.Checked = ReadSettings.ProcessSettings(ReadSettings.ForceReEnumerationEnabledIdentifier) != "off";
             checkBox_AllowRewind.Checked = ReadSettings.ProcessSettings(ReadSettings.AllowRewindIdentifier) == "on";
             groupBox_RewindBy.Visible = checkBox_AllowRewind.Checked;
+            groupBox_RewindLeadup.Visible = checkBox_AllowRewind.Checked;
             nUpDown_RewindBy.Value = GenUtil.EstablishMaxValue((GenUtil.StrToDecDef(ReadSettings.ProcessSettings(ReadSettings.RewindByIdentifier), 0) / 1000), 90.000m);
+            nUpDown_RewindLeadup.Value = GenUtil.EstablishMaxValue((GenUtil.StrToDecDef(ReadSettings.ProcessSettings(ReadSettings.RewindLeadupIdentifier), 0) / 1000), 90.000m);
             checkBox_FixOculusCrash.Checked = ReadSettings.ProcessSettings(ReadSettings.FixOculusCrashIdentifier) == "on";
             checkBox_FixBrokenTones.Checked = ReadSettings.ProcessSettings(ReadSettings.FixBrokenTonesIdentifier) == "on";
             checkBox_CustomNSPTimer.Checked = ReadSettings.ProcessSettings(ReadSettings.UseCustomNSPTimerIdentifier) == "on";
@@ -2499,9 +2501,11 @@ namespace RSMods
         {
             SaveSettings_Save(ReadSettings.AllowRewindIdentifier, checkBox_AllowRewind.Checked.ToString().ToLower());
             groupBox_RewindBy.Visible = checkBox_AllowRewind.Checked;
+            groupBox_RewindLeadup.Visible = checkBox_AllowRewind.Checked;
         }
 
         private void Save_RewindBy(object sender, EventArgs e) => SaveSettings_Save(ReadSettings.RewindByIdentifier, ((int)(nUpDown_RewindBy.Value * 1000)).ToString());
+        private void Save_RewindLeadup(object sender, EventArgs e) => SaveSettings_Save(ReadSettings.RewindLeadupIdentifier, ((int)(nUpDown_RewindLeadup.Value * 1000)).ToString());
 
         private void Save_FixOculusCrash(object sender, EventArgs e) => SaveSettings_Save(ReadSettings.FixOculusCrashIdentifier, checkBox_FixOculusCrash.Checked.ToString().ToLower());
 

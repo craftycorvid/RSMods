@@ -19,7 +19,7 @@ namespace Keybindings {
 	{
 		// SongTimer is stored in seconds, while RewindBy is stored in milliseconds.
 		// We need milliseconds to send to Wwise, so change SongTimer to milliseconds, then subtract the Rewind value.
-		AkTimeMs seekTo = (AkTimeMs)((SongTimer::SongTimer() * 1000) - Settings::GetModSetting("RewindBy"));
+		auto seekTo = static_cast<AkTimeMs>((SongTimer::SongTimer() * 1000) - Settings::GetModSetting("RewindBy") - Settings::GetModSetting("RewindLeadup"));
 
 		// RewindBy is greater than the amount of time we've been in the song.
 		// Reset seekTo to 0 to prevent seeking to a negative time.
@@ -32,7 +32,8 @@ namespace Keybindings {
 		// Tell Rocksmith to make all notes before the section we want the user to play to be greyed out.
 		// While this isn't absolutely necessary, it is best to have this run just in case.
 		// Our seek time needs to be stored as milliseconds when sending to Wwise, but we need to have it in seconds when setting the GreyNoteTimer.
-		SongTimer::SetGreyNoteTimer(seekTo / 1000.f);
+		AkTimeMs greyNoteTimerMs = seekTo - Settings::GetModSetting("RewindLeadup");
+		SongTimer::SetGreyNoteTimer(greyNoteTimerMs / 1000.f);
 
 		LOG_INFO("(REWIND) Seeked to " << seekTo << "ms." << std::endl);
 	}

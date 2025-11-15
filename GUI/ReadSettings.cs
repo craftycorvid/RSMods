@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using RSMods.Util;
 
 #pragma warning disable IDE0052
@@ -45,7 +45,7 @@ namespace RSMods
                              // Mod Settings
                              ExtendedRangeTuning, CheckForNewSongInterval, RiffRepeaterSpeedInterval, TuningPedal, MidiTuningOffset,
                              VolumeControlInterval, SecondaryMonitorXPosition, SecondaryMonitorYPosition, OverrideInputVolume, AlternativeOutputSampleRate, LoopingLeadUp,
-                             RewindBy, CustomNSPTimeLimit,
+                             RewindBy, RewindLeadup, CustomNSPTimeLimit,
 
                              // Guitar Speak
                              GuitarSpeakDelete, GuitarSpeakSpace, GuitarSpeakEnter, GuitarSpeakTab, GuitarSpeakPGUP, GuitarSpeakPGDN, GuitarSpeakUP, GuitarSpeakDN, GuitarSpeakESC,
@@ -213,6 +213,7 @@ namespace RSMods
             AlternativeOutputSampleRateIdentifier   = "AlternativeOutputSampleRate = ",
             LoopingLeadUpIdentifier                 = "LoopingLeadUp = ",
             RewindByIdentifier                      = "RewindBy = ",
+            RewindLeadupIdentifier                  = "RewindLeadup = ",
             CustomNSPTimeLimitIdentifier            = "CustomNSPTimeLimit = ",
 
             // Guitar Speak
@@ -601,6 +602,8 @@ namespace RSMods
                     return FillSettingVariable(LoopingLeadUpIdentifier, SettingType.STRING, currentLine, out LoopingLeadUp);
                 if (IdentifierIsFound(currentLine, RewindByIdentifier, identifierToGrab))
                     return FillSettingVariable(RewindByIdentifier, SettingType.STRING, currentLine, out RewindBy);
+                if (IdentifierIsFound(currentLine, RewindLeadupIdentifier, identifierToGrab))
+                    return FillSettingVariable(RewindLeadupIdentifier, SettingType.STRING, currentLine, out RewindLeadup);
                 if (IdentifierIsFound(currentLine, CustomNSPTimeLimitIdentifier, identifierToGrab))
                     return FillSettingVariable(CustomNSPTimeLimitIdentifier, SettingType.STRING, currentLine, out CustomNSPTimeLimit);
                 

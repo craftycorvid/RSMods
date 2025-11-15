@@ -107,6 +107,7 @@ void Settings::Initialize()
 		{"AlternativeOutputSampleRate", 48000},
 		{"LoopingLeadUp", 0},
 		{"RewindBy", 0},
+		{"RewindLeadup", 0},
 		{"CustomNSPTimeLimit", 10000},
 		{"OnScreenFontSize", 24},
 
@@ -222,6 +223,7 @@ void Settings::ReadModSettings() {
 		{"AlternativeOutputSampleRate", reader.GetLongValue("Mod Settings", "AlternativeOutputSampleRate", 48000)},
 		{"LoopingLeadUp", reader.GetLongValue("Mod Settings", "LoopingLeadUp", 0)},
 		{"RewindBy", reader.GetLongValue("Mod Settings", "RewindBy", 0)},
+		{"RewindLeadup", reader.GetLongValue("Mod Settings", "RewindLeadup", 0)},
 		{"CustomNSPTimeLimit", reader.GetLongValue("Mod Settings", "CustomNSPTimeLimit", 10000)},
 		{"OnScreenFontSize", reader.GetLongValue("Mod Settings", "OnScreenFontSize", 24)},
 
