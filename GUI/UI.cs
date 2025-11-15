@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using System.IO;
 using System.Linq;
@@ -694,6 +694,7 @@ namespace RSMods
             groupBox_LoopingLeadUp.Visible = checkBox_EnableLooping.Checked;
             nUpDown_LoopingLeadUp.Value = GenUtil.EstablishMaxValue((GenUtil.StrToDecDef(ReadSettings.ProcessSettings(ReadSettings.LoopingLeadUpIdentifier), 0) / 1000), 5.000m);
             listBox_ExtendedRangeTunings.SelectedIndex = (GenUtil.StrToIntDef(ReadSettings.ProcessSettings(ReadSettings.ExtendedRangeTuningIdentifier), 0) * -1) - 2; // Loads old ER tuning settings
+            trackBar_FontSize.Value = GenUtil.StrToIntDef(ReadSettings.ProcessSettings(ReadSettings.OnScreenFontSizeIdentifier), trackBar_FontSize.Minimum);
             checkBox_GuitarSpeakWhileTuning.Checked = ReadSettings.ProcessSettings(ReadSettings.GuitarSpeakTuningIdentifier) == "on";
             checkBox_ChangeTheme.Checked = ReadSettings.ProcessSettings(ReadSettings.CustomGUIThemeIdentifier) == "on";
             checkBox_ScreenShotScores.Checked = ReadSettings.ProcessSettings(ReadSettings.ScreenShotScoresIdentifier) == "on";
@@ -1127,7 +1128,7 @@ namespace RSMods
                     if (IdentifierToChange == entry.Key)
                     {
                         WriteSettings.saveSettingsOrDefaults[section][IdentifierToChange] = ChangedSettingValue;
-                        break; // We found what we need, so let's leave.
+                        break;
                     }
                 }
             }
@@ -4642,9 +4643,14 @@ namespace RSMods
                 Debug.WriteLine("Shutdown Midi In");
             }
         }
+
+        private void trackBar_FontSize_Scroll(object sender, EventArgs e) => lblCurrentFontSize.Text = $"Current font size: {trackBar_FontSize.Value}";
+
+        private void btnSaveFontSize_Click(object sender, EventArgs e)
+        {
+            SaveSettings_Save(ReadSettings.OnScreenFontSizeIdentifier, trackBar_FontSize.Value.ToString());
+        }
     }
-
-
 
     public class Midi
     {

@@ -245,6 +245,12 @@
             this.textBox_Note0Color = new System.Windows.Forms.TextBox();
             this.button_Note0ColorButton = new System.Windows.Forms.Button();
             this.tabPage_ModSettings_DisableUI = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnSaveFontSize = new System.Windows.Forms.Button();
+            this.lblCurrentFontSize = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.trackBar_FontSize = new System.Windows.Forms.TrackBar();
             this.groupBox_OnScreenFont = new System.Windows.Forms.GroupBox();
             this.label_FontTestNumbers = new System.Windows.Forms.Label();
             this.label_FontTestlowercase = new System.Windows.Forms.Label();
@@ -283,6 +289,8 @@
             this.label_SelectedMidiOutDevice = new System.Windows.Forms.Label();
             this.listBox_ListMidiOutDevices = new System.Windows.Forms.ListBox();
             this.tabPage_ModSettings_Misc = new System.Windows.Forms.TabPage();
+            this.groupBox_RewindLeadup = new System.Windows.Forms.GroupBox();
+            this.nUpDown_RewindLeadup = new System.Windows.Forms.NumericUpDown();
             this.button_SetSavePath = new System.Windows.Forms.Button();
             this.groupBox_RewindBy = new System.Windows.Forms.GroupBox();
             this.nUpDown_RewindBy = new System.Windows.Forms.NumericUpDown();
@@ -576,6 +584,8 @@
             this.tabPage_ModSettings_ER.SuspendLayout();
             this.groupBox_NoteColors.SuspendLayout();
             this.tabPage_ModSettings_DisableUI.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar_FontSize)).BeginInit();
             this.groupBox_OnScreenFont.SuspendLayout();
             this.groupBox_SongTimer.SuspendLayout();
             this.tabPage_ModSettings_Automation.SuspendLayout();
@@ -589,6 +599,8 @@
             this.groupBox_MidiAutoTuningOffset.SuspendLayout();
             this.groupBox_MidiAutoTuneDevice.SuspendLayout();
             this.tabPage_ModSettings_Misc.SuspendLayout();
+            this.groupBox_RewindLeadup.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nUpDown_RewindLeadup)).BeginInit();
             this.groupBox_RewindBy.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nUpDown_RewindBy)).BeginInit();
             this.groupBox_LoopingLeadUp.SuspendLayout();
@@ -3300,6 +3312,7 @@
             // tabPage_ModSettings_DisableUI
             // 
             this.tabPage_ModSettings_DisableUI.BackColor = System.Drawing.Color.Azure;
+            this.tabPage_ModSettings_DisableUI.Controls.Add(this.groupBox1);
             this.tabPage_ModSettings_DisableUI.Controls.Add(this.groupBox_OnScreenFont);
             this.tabPage_ModSettings_DisableUI.Controls.Add(this.groupBox_ToggleLyricsOffWhen);
             this.tabPage_ModSettings_DisableUI.Controls.Add(this.groupBox_SongTimer);
@@ -3312,6 +3325,68 @@
             this.tabPage_ModSettings_DisableUI.Size = new System.Drawing.Size(777, 426);
             this.tabPage_ModSettings_DisableUI.TabIndex = 3;
             this.tabPage_ModSettings_DisableUI.Text = "Disable UI Elements";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.btnSaveFontSize);
+            this.groupBox1.Controls.Add(this.lblCurrentFontSize);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.trackBar_FontSize);
+            this.groupBox1.Location = new System.Drawing.Point(186, 308);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(228, 115);
+            this.groupBox1.TabIndex = 100010;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "On Screen Font Size";
+            // 
+            // btnSaveFontSize
+            // 
+            this.btnSaveFontSize.Location = new System.Drawing.Point(147, 86);
+            this.btnSaveFontSize.Name = "btnSaveFontSize";
+            this.btnSaveFontSize.Size = new System.Drawing.Size(75, 23);
+            this.btnSaveFontSize.TabIndex = 4;
+            this.btnSaveFontSize.Text = "Save";
+            this.btnSaveFontSize.UseVisualStyleBackColor = true;
+            this.btnSaveFontSize.Click += new System.EventHandler(this.btnSaveFontSize_Click);
+            // 
+            // lblCurrentFontSize
+            // 
+            this.lblCurrentFontSize.AutoSize = true;
+            this.lblCurrentFontSize.Location = new System.Drawing.Point(11, 89);
+            this.lblCurrentFontSize.Name = "lblCurrentFontSize";
+            this.lblCurrentFontSize.Size = new System.Drawing.Size(0, 13);
+            this.lblCurrentFontSize.TabIndex = 3;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(203, 53);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(19, 13);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "80";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(11, 53);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(13, 13);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "8";
+            // 
+            // trackBar_FontSize
+            // 
+            this.trackBar_FontSize.Location = new System.Drawing.Point(6, 20);
+            this.trackBar_FontSize.Maximum = 80;
+            this.trackBar_FontSize.Minimum = 8;
+            this.trackBar_FontSize.Name = "trackBar_FontSize";
+            this.trackBar_FontSize.Size = new System.Drawing.Size(216, 45);
+            this.trackBar_FontSize.SmallChange = 2;
+            this.trackBar_FontSize.TabIndex = 0;
+            this.trackBar_FontSize.Value = 8;
+            this.trackBar_FontSize.Scroll += new System.EventHandler(this.trackBar_FontSize_Scroll);
             // 
             // groupBox_OnScreenFont
             // 
@@ -3781,6 +3856,7 @@
             // tabPage_ModSettings_Misc
             // 
             this.tabPage_ModSettings_Misc.BackColor = System.Drawing.Color.Azure;
+            this.tabPage_ModSettings_Misc.Controls.Add(this.groupBox_RewindLeadup);
             this.tabPage_ModSettings_Misc.Controls.Add(this.button_SetSavePath);
             this.tabPage_ModSettings_Misc.Controls.Add(this.groupBox_RewindBy);
             this.tabPage_ModSettings_Misc.Controls.Add(this.groupBox_LoopingLeadUp);
@@ -3799,6 +3875,36 @@
             this.tabPage_ModSettings_Misc.TabIndex = 2;
             this.tabPage_ModSettings_Misc.Text = "Misc";
             // 
+            // groupBox_RewindLeadup
+            // 
+            this.groupBox_RewindLeadup.Controls.Add(this.nUpDown_RewindLeadup);
+            this.groupBox_RewindLeadup.Location = new System.Drawing.Point(472, 341);
+            this.groupBox_RewindLeadup.Name = "groupBox_RewindLeadup";
+            this.groupBox_RewindLeadup.Size = new System.Drawing.Size(154, 62);
+            this.groupBox_RewindLeadup.TabIndex = 100013;
+            this.groupBox_RewindLeadup.TabStop = false;
+            this.groupBox_RewindLeadup.Text = "Rewind Lead Up (seconds)";
+            this.groupBox_RewindLeadup.Visible = false;
+            // 
+            // nUpDown_RewindLeadup
+            // 
+            this.nUpDown_RewindLeadup.DecimalPlaces = 3;
+            this.nUpDown_RewindLeadup.Increment = new decimal(new int[] {
+            250,
+            0,
+            0,
+            196608});
+            this.nUpDown_RewindLeadup.Location = new System.Drawing.Point(16, 23);
+            this.nUpDown_RewindLeadup.Maximum = new decimal(new int[] {
+            90,
+            0,
+            0,
+            0});
+            this.nUpDown_RewindLeadup.Name = "nUpDown_RewindLeadup";
+            this.nUpDown_RewindLeadup.Size = new System.Drawing.Size(120, 20);
+            this.nUpDown_RewindLeadup.TabIndex = 0;
+            this.nUpDown_RewindLeadup.ValueChanged += new System.EventHandler(this.Save_RewindLeadup);
+            // 
             // button_SetSavePath
             // 
             this.button_SetSavePath.Location = new System.Drawing.Point(651, 263);
@@ -3813,7 +3919,7 @@
             // groupBox_RewindBy
             // 
             this.groupBox_RewindBy.Controls.Add(this.nUpDown_RewindBy);
-            this.groupBox_RewindBy.Location = new System.Drawing.Point(358, 343);
+            this.groupBox_RewindBy.Location = new System.Drawing.Point(312, 341);
             this.groupBox_RewindBy.Name = "groupBox_RewindBy";
             this.groupBox_RewindBy.Size = new System.Drawing.Size(154, 62);
             this.groupBox_RewindBy.TabIndex = 100012;
@@ -3843,7 +3949,7 @@
             // groupBox_LoopingLeadUp
             // 
             this.groupBox_LoopingLeadUp.Controls.Add(this.nUpDown_LoopingLeadUp);
-            this.groupBox_LoopingLeadUp.Location = new System.Drawing.Point(358, 267);
+            this.groupBox_LoopingLeadUp.Location = new System.Drawing.Point(312, 265);
             this.groupBox_LoopingLeadUp.Name = "groupBox_LoopingLeadUp";
             this.groupBox_LoopingLeadUp.Size = new System.Drawing.Size(154, 62);
             this.groupBox_LoopingLeadUp.TabIndex = 100011;
@@ -3876,14 +3982,14 @@
             this.groupBox_Profiles_RevertBackup.Controls.Add(this.listBox_Profiles_ListBackups);
             this.groupBox_Profiles_RevertBackup.Location = new System.Drawing.Point(7, 290);
             this.groupBox_Profiles_RevertBackup.Name = "groupBox_Profiles_RevertBackup";
-            this.groupBox_Profiles_RevertBackup.Size = new System.Drawing.Size(327, 123);
+            this.groupBox_Profiles_RevertBackup.Size = new System.Drawing.Size(299, 123);
             this.groupBox_Profiles_RevertBackup.TabIndex = 100010;
             this.groupBox_Profiles_RevertBackup.TabStop = false;
             this.groupBox_Profiles_RevertBackup.Text = "Revert Profile To Backup";
             // 
             // button_Profiles_RevertBackup
             // 
-            this.button_Profiles_RevertBackup.Location = new System.Drawing.Point(91, 94);
+            this.button_Profiles_RevertBackup.Location = new System.Drawing.Point(56, 94);
             this.button_Profiles_RevertBackup.Name = "button_Profiles_RevertBackup";
             this.button_Profiles_RevertBackup.Size = new System.Drawing.Size(146, 23);
             this.button_Profiles_RevertBackup.TabIndex = 1;
@@ -3896,7 +4002,7 @@
             this.listBox_Profiles_ListBackups.FormattingEnabled = true;
             this.listBox_Profiles_ListBackups.Location = new System.Drawing.Point(6, 19);
             this.listBox_Profiles_ListBackups.Name = "listBox_Profiles_ListBackups";
-            this.listBox_Profiles_ListBackups.Size = new System.Drawing.Size(314, 69);
+            this.listBox_Profiles_ListBackups.Size = new System.Drawing.Size(287, 69);
             this.listBox_Profiles_ListBackups.TabIndex = 0;
             // 
             // groupBox_OverrideInputVolume
@@ -6830,6 +6936,9 @@
             this.groupBox_NoteColors.ResumeLayout(false);
             this.groupBox_NoteColors.PerformLayout();
             this.tabPage_ModSettings_DisableUI.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar_FontSize)).EndInit();
             this.groupBox_OnScreenFont.ResumeLayout(false);
             this.groupBox_OnScreenFont.PerformLayout();
             this.groupBox_SongTimer.ResumeLayout(false);
@@ -6849,6 +6958,8 @@
             this.groupBox_MidiAutoTuneDevice.PerformLayout();
             this.tabPage_ModSettings_Misc.ResumeLayout(false);
             this.tabPage_ModSettings_Misc.PerformLayout();
+            this.groupBox_RewindLeadup.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.nUpDown_RewindLeadup)).EndInit();
             this.groupBox_RewindBy.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.nUpDown_RewindBy)).EndInit();
             this.groupBox_LoopingLeadUp.ResumeLayout(false);
@@ -7452,5 +7563,13 @@
         private System.Windows.Forms.CheckBox checkBox_ASIO_Output_EnableRefHack;
         private System.Windows.Forms.RadioButton radio_WhammyFour;
         private System.Windows.Forms.CheckBox checkBox_DisplayCurrentAccuracy;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TrackBar trackBar_FontSize;
+        private System.Windows.Forms.GroupBox groupBox_RewindLeadup;
+        private System.Windows.Forms.NumericUpDown nUpDown_RewindLeadup;
+        private System.Windows.Forms.Label lblCurrentFontSize;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnSaveFontSize;
     }
 }

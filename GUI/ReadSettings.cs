@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using RSMods.Util;
 
 #pragma warning disable IDE0052
@@ -30,7 +30,7 @@ namespace RSMods
                              DiscoModeEnabled, RemoveHeadstockEnabled, RemoveSkylineEnabled, GreenscreenWallEnabled, ForceProfileEnabled, FretlessEnabled, RemoveInlaysEnabled, ToggleLoftWhen,
                              ToggleSkylineWhen, RemoveLaneMarkersEnabled, RemoveLyricsEnabled, RemoveLyricsWhen, GuitarSpeakEnabled, RemoveHeadstockWhen, ScreenShotScores,
                              MidiAutoTuning, MidiAutoTuningDevice, MidiInDevice, MidiAutoTuningWhen, MidiSoftwareSemitoneTriggers, MidiSoftwareSemitoneSettings, MidiSoftwareTrueTuningTriggers, MidiSoftwareTrueTuningSettings, ChordsMode,
-                             RiffRepeaterAboveHundred, ShowCurrentNoteOnScreen, OnScreenFont, ProfileToLoad, ShowSongTimerWhen, ShowSelectedVolumeWhen, SecondaryMonitor, RemoveSongPreviews, OverrideInputVolumeEnabled, OverrideInputVolumeDevice,
+                             RiffRepeaterAboveHundred, ShowCurrentNoteOnScreen, OnScreenFont, OnScreenFontSize, ProfileToLoad, ShowSongTimerWhen, ShowSelectedVolumeWhen, SecondaryMonitor, RemoveSongPreviews, OverrideInputVolumeEnabled, OverrideInputVolumeDevice,
                              AllowAudioInBackground, BypassTwoRTCMessageBox, LinearRiffRepeater, UseAlternativeOutputSampleRate, AllowLooping, AllowRewind, FixOculusCrash, FixBrokenTones, UseCustomNSPTimer, DisplayCurrentAccuracy,
 
 
@@ -147,6 +147,7 @@ namespace RSMods
             ChordsModeIdentifier                        = "ChordsMode = ",
             ShowCurrentNoteOnScreenIdentifier           = "ShowCurrentNoteOnScreen = ",
             OnScreenFontIdentifier                      = "OnScreenFont = ",
+            OnScreenFontSizeIdentifier                  = "OnScreenFontSize = ",
             ProfileToLoadIdentifier                     = "ProfileToLoad = ",
             ShowSongTimerWhenIdentifier                 = "ShowSongTimerWhen = ",
             ShowSelectedVolumeWhenIdentifier            = "ShowSelectedVolumeWhen = ",
@@ -471,6 +472,8 @@ namespace RSMods
                     return FillSettingVariable(ShowCurrentNoteOnScreenIdentifier, SettingType.ON_OFF, currentLine, out ShowCurrentNoteOnScreen);
                 if (IdentifierIsFound(currentLine, OnScreenFontIdentifier, identifierToGrab))
                     return FillSettingVariable(OnScreenFontIdentifier, SettingType.STRING, currentLine, out OnScreenFont);
+                if (IdentifierIsFound(currentLine, OnScreenFontSizeIdentifier, identifierToGrab))
+                    return FillSettingVariable(OnScreenFontSizeIdentifier, SettingType.STRING, currentLine, out OnScreenFontSize);
                 if (IdentifierIsFound(currentLine, ProfileToLoadIdentifier, identifierToGrab))
                     return FillSettingVariable(ProfileToLoadIdentifier, SettingType.STRING, currentLine, out ProfileToLoad);
                 if (IdentifierIsFound(currentLine, ShowSongTimerWhenIdentifier, identifierToGrab))

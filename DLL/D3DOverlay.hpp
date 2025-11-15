@@ -30,6 +30,7 @@ namespace GameOverlay {
 	void DisplayCurrentTuningForAutoTune();
 	void DisplayLoopStartEndTimes(float loopStart, float loopEnd);
 	void DisplaySongAccuracy();
+	void CheckCurrentFont();
 	void RenderOverlay(IDirect3DDevice9* pDevice);
 
 	const inline std::vector<std::string> mixerInternalNames = { // Needs to be char* as that's what SetRTPCValue needs.
@@ -58,6 +59,10 @@ namespace GameOverlay {
 	inline bool displayMixer = false;
 	inline bool displayCurrentVolume = false;
 	inline auto displayVolumeStartTime = std::chrono::steady_clock::time_point(); // Defaults to epoch time
+
+	inline static std::string cachedFontName = "";
+	inline static int cachedFontSize = 0;
+	inline static CComPtr<ID3DXFont> cachedFont;
 
 	struct FontKey {
 		std::string face;

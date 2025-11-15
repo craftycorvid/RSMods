@@ -29,23 +29,30 @@ Resolution GameOverlay::GetWindowSize() {
 /// <param name="format"> - DrawText format</param>
 void GameOverlay::DX9DrawText(const std::string& textToDraw, int textColorHex, int topLeftX, int topLeftY, int bottomRightX, int bottomRightY, LPDIRECT3DDEVICE9 pDevice, Resolution setFontSize, DWORD format)
 {
-	Resolution windowSize = GameOverlay::GetWindowSize();
+	CComPtr<ID3DXFont> font;
+	bool useInputFontSize = setFontSize.height != 0;
 
-	bool useInputFontSize = (setFontSize.width != 0 && setFontSize.height != 0);
+	if (useInputFontSize) {
+		int targetH = setFontSize.height;
+		const std::string face = Settings::ReturnSettingValue("OnScreenFont");
+		FontKey key = FontKey::Make(face, targetH, 0, FW_NORMAL, false);
 
-	int targetW = useInputFontSize ? setFontSize.width : (windowSize.width / 96);
-	int targetH = useInputFontSize ? setFontSize.height : (windowSize.height / 72);
-
-	const std::string face = Settings::ReturnSettingValue("OnScreenFont");
-	FontKey key = FontKey::Make(face, targetH, targetW, FW_NORMAL, false);
+		if (!fontCache.Get(pDevice, key, font)) {
+			LOG_ERROR("Could not acquire custom-sized font." << std::endl);
+			return;
+		}
+	}
+	else {
+		if (cachedFont) {
+			font = cachedFont;
+		}
+		else {
+			LOG_ERROR("Default font is not cached!" << std::endl);
+			return;
+		}
+	}
 
 	RECT TextRectangle{ topLeftX, topLeftY, bottomRightX, bottomRightY }; // Left, Top, Right, Bottom
-
-	CComPtr<ID3DXFont> font;
-	if (!fontCache.Get(pDevice, key, font)) {
-		LOG_ERROR("Could not acquire required font.");
-		return;
-	}
 
 	// Preload And Draw The Text (Supposed to reduce the performance hit (It's D3D/DX9 but still good practice))
 	font->PreloadTextA(textToDraw.c_str(), textToDraw.length());
@@ -273,15 +280,10 @@ void GameOverlay::DisplaySongAccuracy() {
 		float accuracy = ReadAccuracy();
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(2) << accuracy << "%";
-		std::string accuracyText = ss.str() + "%";
+		std::string accuracyText = ss.str();
 
-		CComPtr<ID3DXFont> font;
-		FontKey key = FontKey::Make(Settings::ReturnSettingValue("OnScreenFont"),
-			(std::max)(static_cast<unsigned int>(1), WindowSize.height / 72),
-			WindowSize.width / 96, FW_NORMAL, false);
-		
-		if (fontCache.Get(pDevice, key, font)) {
-			int lh = MeasureLineHeight(font, accuracyText, baseRect, DT_RIGHT | DT_NOCLIP);
+		if (cachedFont) {
+			int lh = MeasureLineHeight(cachedFont, accuracyText, baseRect, DT_RIGHT | DT_NOCLIP);
 			int gap = (std::max)(1, lh / 4);
 			top += lh + 2 * gap;
 			bottom += lh + 2 * gap;
@@ -302,21 +304,42 @@ void GameOverlay::DisplaySongAccuracy() {
 	}
 }
 
+void GameOverlay::CheckCurrentFont() {
+	const std::string currentFontName = Settings::ReturnSettingValue("OnScreenFont");
+	const int currentFontSize = Settings::GetModSetting("OnScreenFontSize");
+
+	if (cachedFontName != currentFontName || cachedFontSize != currentFontSize || !cachedFont) {
+		LOG_INFO("Font settings changed. Re-caching default font..." << std::endl);
+
+		FontKey newKey = FontKey::Make(currentFontName, currentFontSize, 0, FW_NORMAL, false);
+		CComPtr<ID3DXFont> newFont;
+
+		if (fontCache.Get(pDevice, newKey, newFont)) {
+			cachedFont = newFont;
+			cachedFontName = currentFontName;
+			cachedFontSize = currentFontSize;
+		}
+		else {
+			LOG_ERROR("Failed to create and cache new default font!" << std::endl);
+		}
+	}
+}
+
 void GameOverlay::RenderOverlay(IDirect3DDevice9* device) {
 	// Draw text on screen
 	// NOTE: NEVER USE SET VALUES. Always do division of WindowSize width AND heigh so every resolution should have the text in around the same spot.
 	if (GameState::GameLoaded) {
-		Resolution windowSize = GameOverlay::GetWindowSize();
-
 		WindowSize = GetWindowSize();
 		pDevice = device;
 
-		GameOverlay::DisplayMixer();
-		GameOverlay::DisplaySongTimer();
-		GameOverlay::DisplayRiffRepeaterOverHundredPercentSpeed();
-		GameOverlay::DisplayCurrentNote();
-		GameOverlay::DisplayCurrentTuningForAutoTune();
-		GameOverlay::DisplaySongAccuracy(); 
+		CheckCurrentFont();
+
+		DisplayMixer();
+		DisplaySongTimer();
+		DisplayRiffRepeaterOverHundredPercentSpeed();
+		DisplayCurrentNote();
+		DisplayCurrentTuningForAutoTune();
+		DisplaySongAccuracy();
 
 		HandleLooping();
 	}
