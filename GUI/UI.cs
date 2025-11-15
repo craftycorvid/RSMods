@@ -1069,7 +1069,6 @@ namespace RSMods
                 else if (sender == textBox_NewKeyAssignment_AUDIO)
                     textBox_NewKeyAssignment_AUDIO.Text = e.KeyCode.ToString();
             }
-
         }
 
         private void Keypress_CheckMouse(object sender, MouseEventArgs e)
@@ -1084,8 +1083,21 @@ namespace RSMods
 
         }
 
-        private void Keypress_LoadKeys(object sender, EventArgs e) => textBox_NewKeyAssignment_MODS.Text = Dictionaries.refreshKeybindingList()[listBox_Modlist_MODS.SelectedIndex];
-        private void Keypress_LoadVolumes(object sender, EventArgs e) => textBox_NewKeyAssignment_AUDIO.Text = Dictionaries.refreshAudioKeybindingList()[listBox_Modlist_AUDIO.SelectedIndex];
+        private void Keypress_LoadKeys(object sender, EventArgs e)
+        {
+            if (listBox_Modlist_MODS.SelectedIndex != -1)
+            {
+                textBox_NewKeyAssignment_MODS.Text = Dictionaries.refreshKeybindingList()[listBox_Modlist_MODS.SelectedIndex];
+            }
+        }
+
+        private void Keypress_LoadVolumes(object sender, EventArgs e)
+        {
+            if (listBox_Modlist_AUDIO.SelectedIndex != -1)
+            {
+                textBox_NewKeyAssignment_AUDIO.Text = Dictionaries.refreshAudioKeybindingList()[listBox_Modlist_AUDIO.SelectedIndex];
+            }
+        }
         #endregion
         #region Reset To Default
         private void Reset_DefaultSettings(object sender, EventArgs e)
@@ -3507,7 +3519,7 @@ namespace RSMods
 
         private void Profiles_UnpackProfile()
         {
-            if (currentUnpackedProfile != listBox_Profiles_AvailableProfiles.SelectedItem.ToString())
+            if (listBox_Profiles_AvailableProfiles.SelectedItem != null && currentUnpackedProfile != listBox_Profiles_AvailableProfiles.SelectedItem.ToString())
             {
                 currentUnpackedProfile = listBox_Profiles_AvailableProfiles.SelectedItem.ToString();
 
@@ -3517,6 +3529,8 @@ namespace RSMods
 
         private void Profiles_ChangeSelectedProfile(object sender, EventArgs e)
         {
+            if (listBox_Profiles_AvailableProfiles.SelectedItem == null) return;
+
             button_Profiles_LoadSongs.Visible = true;
             groupBox_Profiles_Rewards.Visible = true;
             groupBox_Profile_MoreSongLists.Visible = true;
