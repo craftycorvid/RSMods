@@ -19,7 +19,7 @@ namespace LaunchOnExternalMonitor {
 		// Set the windows top left corner to StartX and StartY.
 		RECT windowSize;
 		if (hWnd && GetWindowRect(hWnd, &windowSize)) {
-			SetWindowPos(hWnd, HWND_TOPMOST, startX, startY, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top, SWP_SHOWWINDOW);
+			SetWindowPos(hWnd, HWND_TOP, startX, startY, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top, SWP_SHOWWINDOW);
 		}
 	}
 }
