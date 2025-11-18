@@ -122,9 +122,9 @@ bool GuitarSpeak::RunGuitarSpeak() {
 
 				// Press the key the user set for this note.
 				else if(keyToVKey.find(buttonToPress) != keyToVKey.end()) {
-					PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYDOWN, keyToVKey.find(buttonToPress)->second, 0);
+					PostMessage(D3DHooks::GetGameWindow(), WM_KEYDOWN, keyToVKey.find(buttonToPress)->second, 0);
 					Sleep(30);
-					PostMessage(FindWindow(NULL, L"Rocksmith 2014"), WM_KEYUP, keyToVKey.find(buttonToPress)->second, 0);
+					PostMessage(D3DHooks::GetGameWindow(), WM_KEYUP, keyToVKey.find(buttonToPress)->second, 0);
 
 					if (verbose)
 						LOG_INFO("(GS) " << keyToVKey.find(buttonToPress)->first << " was used by Guitar Speak." << std::endl);

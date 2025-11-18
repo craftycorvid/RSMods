@@ -78,6 +78,17 @@ namespace D3DHooks {
 	/// <returns>std::string of time in "h:m:s" format.</returns>
 	std::string ConvertFloatTimeToStringTime(float timeInSeconds);
 	void RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice);
+
+	inline HWND cachedGameHwnd = nullptr;
+	inline HWND GetGameWindow() {
+		if (cachedGameHwnd) {
+			return cachedGameHwnd;
+		}
+
+		cachedGameHwnd = FindWindowA(nullptr, "Rocksmith 2014");
+
+		return cachedGameHwnd;
+	}
 }
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

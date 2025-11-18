@@ -6,7 +6,7 @@ Resolution GameOverlay::GetWindowSize() {
 	RECT windowSize;
 
 	Resolution currentSize;
-	if (GetWindowRect(FindWindow(nullptr, L"Rocksmith 2014"), &windowSize))
+	if (GetWindowRect(D3DHooks::GetGameWindow(), &windowSize))
 	{
 		currentSize.width = windowSize.right - windowSize.left;
 		currentSize.height = windowSize.bottom - windowSize.top;

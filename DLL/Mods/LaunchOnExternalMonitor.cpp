@@ -8,17 +8,16 @@ namespace LaunchOnExternalMonitor {
 	/// <param name="startX"> - top LEFT of the screen</param>
 	/// <param name="startY"> - TOP left of the screen</param>
 	void SendRocksmithToScreen(int startX, int startY) {
-		// Get HWND of Rocksmith.
-		HWND hWnd = FindWindow(NULL, L"Rocksmith 2014");
-
+		HWND hWnd = D3DHooks::GetGameWindow();
+	
 		while (!hWnd) {
 			Sleep(500);
-			HWND hWnd = FindWindow(NULL, L"Rocksmith 2014");
+			hWnd = FindWindowA(nullptr, "Rocksmith 2014");
 		}
 		
 		// Set the windows top left corner to StartX and StartY.
 		RECT windowSize;
-		if (hWnd && GetWindowRect(hWnd, &windowSize)) {
+		if (GetWindowRect(hWnd, &windowSize)) {
 			SetWindowPos(hWnd, HWND_TOP, startX, startY, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top, SWP_SHOWWINDOW);
 		}
 	}
