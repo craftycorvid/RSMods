@@ -114,6 +114,12 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 		return true;
 
 	switch (msg) {
+		case WM_ACTIVATEAPP:
+			if (keyPressed == false && D3DHooks::cachedIsInSong)
+			{
+				return CallWindowProc(D3DHooks::oWndProc, hWnd, msg, TRUE, lParam);	
+			}
+			break;
 		case WM_SYSCOMMAND:
 			// Makes ALT + ENTER cause F11 to be pressed.
 			// This is mainly so a user can use a common shortcut, that works in most games now-a-days.
@@ -153,6 +159,23 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 	return CallWindowProc(D3DHooks::oWndProc, hWnd, msg, keyPressed, lParam);
 }
 
+void ForceTopMode() {
+	bool actuallyInSong = GameState::IsInSong();
+
+	static bool lastState = false;
+	if (actuallyInSong != lastState) {
+		if (actuallyInSong) {
+			SetWindowPos(D3DHooks::GetGameWindow(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		}
+		else {
+			SetWindowPos(D3DHooks::GetGameWindow(), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		}
+		lastState = actuallyInSong;
+	}
+
+	D3DHooks::cachedIsInSong = actuallyInSong;
+}
+
 /// <summary>
 /// Hook on game boot. Initialize all our own UI elements (text on screen, and ImGUI).
 /// </summary>
@@ -167,6 +190,7 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 	Menu::Init(pDevice, (LONG_PTR)WndProc);
 	Menu::RenderImGuiMenu();
 	Menu::UpdateStringTextures(pDevice);
+	ForceTopMode();
 	GameOverlay::RenderOverlay(pDevice);
 	D3DHooks::RegenerateTwitchNoteColors(pDevice);
 	
