@@ -115,7 +115,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 
 	switch (msg) {
 		case WM_ACTIVATEAPP:
-			if (keyPressed == false && D3DHooks::cachedIsInSong)
+			if (keyPressed == false && Settings::ReturnSettingValue("PreventMidSongPause") == "on" && D3DHooks::cachedIsInSong)
 			{
 				return CallWindowProc(D3DHooks::oWndProc, hWnd, msg, TRUE, lParam);	
 			}
@@ -159,21 +159,21 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 	return CallWindowProc(D3DHooks::oWndProc, hWnd, msg, keyPressed, lParam);
 }
 
-void ForceTopMode() {
-	bool actuallyInSong = GameState::IsInSong();
+void UpdateGameWindowStacking() {
+	if (Settings::ReturnSettingValue("PreventMidSongPause") == "on") {
+		bool actuallyInSong = GameState::IsInSong();
 
-	static bool lastState = false;
-	if (actuallyInSong != lastState) {
-		if (actuallyInSong) {
-			SetWindowPos(D3DHooks::GetGameWindow(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		static bool lastState = false;
+		if (actuallyInSong != lastState) {
+			HWND position = actuallyInSong ? HWND_TOPMOST : HWND_NOTOPMOST;
+
+			SetWindowPos(D3DHooks::GetGameWindow(), position, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+			
+			lastState = actuallyInSong;
 		}
-		else {
-			SetWindowPos(D3DHooks::GetGameWindow(), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-		}
-		lastState = actuallyInSong;
+
+		D3DHooks::cachedIsInSong = actuallyInSong;
 	}
-
-	D3DHooks::cachedIsInSong = actuallyInSong;
 }
 
 /// <summary>
@@ -190,7 +190,7 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 	Menu::Init(pDevice, (LONG_PTR)WndProc);
 	Menu::RenderImGuiMenu();
 	Menu::UpdateStringTextures(pDevice);
-	ForceTopMode();
+	UpdateGameWindowStacking();
 	GameOverlay::RenderOverlay(pDevice);
 	D3DHooks::RegenerateTwitchNoteColors(pDevice);
 	

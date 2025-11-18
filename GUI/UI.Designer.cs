@@ -62,6 +62,7 @@
             this.checkBox_FixBadBassTuning = new System.Windows.Forms.CheckBox();
             this.checkBox_ExtendedRangeDrop = new System.Windows.Forms.CheckBox();
             this.groupBox_EnabledMods = new System.Windows.Forms.GroupBox();
+            this.checkBox_PreventMidSongPause = new System.Windows.Forms.CheckBox();
             this.checkBox_DisplayCurrentAccuracy = new System.Windows.Forms.CheckBox();
             this.checkBox_CustomNSPTimer = new System.Windows.Forms.CheckBox();
             this.checkBox_FixBrokenTones = new System.Windows.Forms.CheckBox();
@@ -1077,6 +1078,7 @@
             // 
             // groupBox_EnabledMods
             // 
+            this.groupBox_EnabledMods.Controls.Add(this.checkBox_PreventMidSongPause);
             this.groupBox_EnabledMods.Controls.Add(this.checkBox_DisplayCurrentAccuracy);
             this.groupBox_EnabledMods.Controls.Add(this.checkBox_CustomNSPTimer);
             this.groupBox_EnabledMods.Controls.Add(this.checkBox_FixBrokenTones);
@@ -1117,10 +1119,21 @@
             this.groupBox_EnabledMods.Controls.Add(this.checkBox_RemoveHeadstock);
             this.groupBox_EnabledMods.Location = new System.Drawing.Point(18, 23);
             this.groupBox_EnabledMods.Name = "groupBox_EnabledMods";
-            this.groupBox_EnabledMods.Size = new System.Drawing.Size(319, 448);
+            this.groupBox_EnabledMods.Size = new System.Drawing.Size(319, 469);
             this.groupBox_EnabledMods.TabIndex = 50;
             this.groupBox_EnabledMods.TabStop = false;
             this.groupBox_EnabledMods.Text = "Enabled Mods";
+            // 
+            // checkBox_PreventMidSongPause
+            // 
+            this.checkBox_PreventMidSongPause.AutoSize = true;
+            this.checkBox_PreventMidSongPause.Location = new System.Drawing.Point(144, 446);
+            this.checkBox_PreventMidSongPause.Name = "checkBox_PreventMidSongPause";
+            this.checkBox_PreventMidSongPause.Size = new System.Drawing.Size(144, 17);
+            this.checkBox_PreventMidSongPause.TabIndex = 81;
+            this.checkBox_PreventMidSongPause.Text = "Prevent Pause Mid Song";
+            this.checkBox_PreventMidSongPause.UseVisualStyleBackColor = true;
+            this.checkBox_PreventMidSongPause.CheckedChanged += new System.EventHandler(this.Save_PreventMidSongPause);
             // 
             // checkBox_DisplayCurrentAccuracy
             // 
@@ -3117,7 +3130,7 @@
             this.TabController_ModSettings.Location = new System.Drawing.Point(343, 23);
             this.TabController_ModSettings.Name = "TabController_ModSettings";
             this.TabController_ModSettings.SelectedIndex = 0;
-            this.TabController_ModSettings.Size = new System.Drawing.Size(785, 452);
+            this.TabController_ModSettings.Size = new System.Drawing.Size(785, 469);
             this.TabController_ModSettings.TabIndex = 100007;
             // 
             // tabPage_ModSettings_ER
@@ -3129,7 +3142,7 @@
             this.tabPage_ModSettings_ER.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_ER.Name = "tabPage_ModSettings_ER";
             this.tabPage_ModSettings_ER.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_ModSettings_ER.Size = new System.Drawing.Size(777, 426);
+            this.tabPage_ModSettings_ER.Size = new System.Drawing.Size(777, 443);
             this.tabPage_ModSettings_ER.TabIndex = 0;
             this.tabPage_ModSettings_ER.Text = "Extended Range";
             // 
@@ -3322,7 +3335,7 @@
             this.tabPage_ModSettings_DisableUI.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_DisableUI.Name = "tabPage_ModSettings_DisableUI";
             this.tabPage_ModSettings_DisableUI.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_ModSettings_DisableUI.Size = new System.Drawing.Size(777, 426);
+            this.tabPage_ModSettings_DisableUI.Size = new System.Drawing.Size(777, 443);
             this.tabPage_ModSettings_DisableUI.TabIndex = 3;
             this.tabPage_ModSettings_DisableUI.Text = "Disable UI Elements";
             // 
@@ -3487,7 +3500,7 @@
             this.tabPage_ModSettings_Automation.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_Automation.Name = "tabPage_ModSettings_Automation";
             this.tabPage_ModSettings_Automation.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_ModSettings_Automation.Size = new System.Drawing.Size(777, 426);
+            this.tabPage_ModSettings_Automation.Size = new System.Drawing.Size(777, 443);
             this.tabPage_ModSettings_Automation.TabIndex = 1;
             this.tabPage_ModSettings_Automation.Text = "Automation";
             // 
@@ -3601,7 +3614,7 @@
             this.tabPage_ModSettings_AutoTuning.Controls.Add(this.groupBox_MidiAutoTuneDevice);
             this.tabPage_ModSettings_AutoTuning.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_AutoTuning.Name = "tabPage_ModSettings_AutoTuning";
-            this.tabPage_ModSettings_AutoTuning.Size = new System.Drawing.Size(777, 426);
+            this.tabPage_ModSettings_AutoTuning.Size = new System.Drawing.Size(777, 443);
             this.tabPage_ModSettings_AutoTuning.TabIndex = 4;
             this.tabPage_ModSettings_AutoTuning.Text = "Auto Tuning";
             // 
@@ -3871,7 +3884,7 @@
             this.tabPage_ModSettings_Misc.Controls.Add(this.groupBox_ControlVolumeIncrement);
             this.tabPage_ModSettings_Misc.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ModSettings_Misc.Name = "tabPage_ModSettings_Misc";
-            this.tabPage_ModSettings_Misc.Size = new System.Drawing.Size(777, 426);
+            this.tabPage_ModSettings_Misc.Size = new System.Drawing.Size(777, 443);
             this.tabPage_ModSettings_Misc.TabIndex = 2;
             this.tabPage_ModSettings_Misc.Text = "Misc";
             // 
@@ -7571,5 +7584,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnSaveFontSize;
+        private System.Windows.Forms.CheckBox checkBox_PreventMidSongPause;
     }
 }

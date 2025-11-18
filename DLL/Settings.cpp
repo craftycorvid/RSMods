@@ -89,7 +89,8 @@ void Settings::Initialize()
 		{"FixOculusCrash", "off"},
 		{"FixBrokenTones", "off"},
 		{"UseCustomNSPTimer", "off"},
-		{"DisplayCurrentAccuracy", "on"},
+		{"DisplayCurrentAccuracy", "off"},
+		{"PreventMidSongPause", "off"},
 	};
 
 	customSettings = {
@@ -301,6 +302,7 @@ void Settings::ReadModSettings() {
 	modSettings["FixBrokenTones"] = reader.GetValue("Toggle Switches", "FixBrokenTones", "off");
 	modSettings["UseCustomNSPTimer"] = reader.GetValue("Toggle Switches", "UseCustomNSPTimer", "off");
 	modSettings["DisplayCurrentAccuracy"] = reader.GetValue("Toggle Switches", "DisplayCurrentAccuracy", "off");
+	modSettings["PreventMidSongPause"] = reader.GetValue("Toggle Switches", "PreventMidSongPause", "off");
 }
 
 /// <summary>

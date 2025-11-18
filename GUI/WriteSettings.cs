@@ -147,6 +147,7 @@ namespace RSMods
                     { ReadSettings.FixBrokenTonesIdentifier, CreateDefaultOnOldINI(ReadSettings.FixBrokenTonesIdentifier, "off") }, // When the user encounters a bad tone, the tone system dies. This mod tries to prevent the tone system from dying.
                     { ReadSettings.UseCustomNSPTimerIdentifier, CreateDefaultOnOldINI(ReadSettings.UseCustomNSPTimerIdentifier, "off") }, // Allows the user to have a custom timer for Non-stop Play instead of the 10.9 seconds that it defaults to.
                     { ReadSettings.DisplayCurrentAccuracyIdentifier, CreateDefaultOnOldINI(ReadSettings.DisplayCurrentAccuracyIdentifier, "off") },
+                    { ReadSettings.PreventMidSongPauseIdentifier, CreateDefaultOnOldINI(ReadSettings.PreventMidSongPauseIdentifier, "off") },
                 }
             );
             saveSettingsOrDefaults.Add(

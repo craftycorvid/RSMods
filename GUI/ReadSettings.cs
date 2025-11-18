@@ -31,7 +31,7 @@ namespace RSMods
                              ToggleSkylineWhen, RemoveLaneMarkersEnabled, RemoveLyricsEnabled, RemoveLyricsWhen, GuitarSpeakEnabled, RemoveHeadstockWhen, ScreenShotScores,
                              MidiAutoTuning, MidiAutoTuningDevice, MidiInDevice, MidiAutoTuningWhen, MidiSoftwareSemitoneTriggers, MidiSoftwareSemitoneSettings, MidiSoftwareTrueTuningTriggers, MidiSoftwareTrueTuningSettings, ChordsMode,
                              RiffRepeaterAboveHundred, ShowCurrentNoteOnScreen, OnScreenFont, OnScreenFontSize, ProfileToLoad, ShowSongTimerWhen, ShowSelectedVolumeWhen, SecondaryMonitor, RemoveSongPreviews, OverrideInputVolumeEnabled, OverrideInputVolumeDevice,
-                             AllowAudioInBackground, BypassTwoRTCMessageBox, LinearRiffRepeater, UseAlternativeOutputSampleRate, AllowLooping, AllowRewind, FixOculusCrash, FixBrokenTones, UseCustomNSPTimer, DisplayCurrentAccuracy,
+                             AllowAudioInBackground, BypassTwoRTCMessageBox, LinearRiffRepeater, UseAlternativeOutputSampleRate, AllowLooping, AllowRewind, FixOculusCrash, FixBrokenTones, UseCustomNSPTimer, DisplayCurrentAccuracy, PreventMidSongPause,
 
 
                              // String Colors
@@ -165,6 +165,7 @@ namespace RSMods
             FixBrokenTonesIdentifier                    = "FixBrokenTones = ",
             UseCustomNSPTimerIdentifier                 = "UseCustomNSPTimer = ",
             DisplayCurrentAccuracyIdentifier            = "DisplayCurrentAccuracy = ",
+            PreventMidSongPauseIdentifier               = "PreventMidSongPause = ",
 
                 // String Colors (Normal {N} & Colorblind {CB})
                 // Normal String Colors
@@ -509,6 +510,8 @@ namespace RSMods
                     return FillSettingVariable(UseCustomNSPTimerIdentifier, SettingType.ON_OFF, currentLine, out UseCustomNSPTimer);
                 if (IdentifierIsFound(currentLine, DisplayCurrentAccuracyIdentifier, identifierToGrab))
                     return FillSettingVariable(DisplayCurrentAccuracyIdentifier, SettingType.ON_OFF, currentLine, out DisplayCurrentAccuracy);
+                if (IdentifierIsFound(currentLine, PreventMidSongPauseIdentifier, identifierToGrab))
+                    return FillSettingVariable(PreventMidSongPauseIdentifier, SettingType.ON_OFF, currentLine, out PreventMidSongPause);
 
                 #endregion
                 #region String Colors
