@@ -18,7 +18,7 @@ namespace ObjectUtil {
 	{
 		if (parent == nullptr) return;
 
-		try
+		__try
 		{
 			Object** childrenArray = parent->children;
 			if (childrenArray == nullptr) {
@@ -32,7 +32,7 @@ namespace ObjectUtil {
 				}
 			}
 		}
-		catch (std::exception& e)
+		__except (EXCEPTION_EXECUTE_HANDLER)
 		{
 		}
 	}
