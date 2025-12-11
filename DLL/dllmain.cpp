@@ -101,6 +101,8 @@ unsigned WINAPI RiffRepeaterThread() {
 	return 0;
 }
 
+const bool ensureForcedTopMode = false;
+
 /// <summary>
 /// Handle Keypress Inputs. Used to toggle mods on / off. WARNING: RUNS (almost) EVERY FRAME
 /// </summary>
@@ -113,13 +115,18 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 	if (Menu::menuEnabled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, keyPressed, lParam))
 		return true;
 
+	if (Settings::ReturnSettingValue("PreventMidSongPause") == "on" && D3DHooks::cachedIsInSong) {
+		switch (msg) {
+			case WM_NCACTIVATE:
+			case WM_ACTIVATEAPP:
+			case WM_ACTIVATE:
+				return CallWindowProc(D3DHooks::oWndProc, hWnd, msg, TRUE, lParam);
+			case WM_KILLFOCUS:
+				return false;
+		}
+	}
+
 	switch (msg) {
-		case WM_ACTIVATEAPP:
-			if (keyPressed == false && Settings::ReturnSettingValue("PreventMidSongPause") == "on" && D3DHooks::cachedIsInSong)
-			{
-				return CallWindowProc(D3DHooks::oWndProc, hWnd, msg, TRUE, lParam);	
-			}
-			break;
 		case WM_SYSCOMMAND:
 			// Makes ALT + ENTER cause F11 to be pressed.
 			// This is mainly so a user can use a common shortcut, that works in most games now-a-days.
@@ -163,15 +170,17 @@ void UpdateGameWindowStacking() {
 	if (Settings::ReturnSettingValue("PreventMidSongPause") == "on") {
 		bool actuallyInSong = GameState::IsInSong();
 
-		static bool lastState = false;
-		if (actuallyInSong != lastState) {
-			HWND position = actuallyInSong ? HWND_TOPMOST : HWND_NOTOPMOST;
+		if (ensureForcedTopMode) {
+			static bool lastState = false;
+			if (actuallyInSong != lastState) {
+				HWND position = actuallyInSong ? HWND_TOPMOST : HWND_NOTOPMOST;
 
-			SetWindowPos(D3DHooks::GetGameWindow(), position, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-			
-			lastState = actuallyInSong;
+				SetWindowPos(D3DHooks::GetGameWindow(), position, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
+				lastState = actuallyInSong;
+			}
 		}
-
+	
 		D3DHooks::cachedIsInSong = actuallyInSong;
 	}
 }
