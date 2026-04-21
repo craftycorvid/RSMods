@@ -47,7 +47,7 @@ bool GuitarSpeak::RunGuitarSpeak() {
 	while (true) {
 		Sleep(timer);
 
-		std::string currentMenu = GameState::GetCurrentMenu();
+		GameState::currentMenu = GameState::GetCurrentMenu();
 
 		// If someone wants to tune in the setting menu they skip the check
 		if (GameState::Menus::IsInTuningMenus() && Settings::ReturnSettingValue("GuitarSpeakWhileTuning") == "off") {
