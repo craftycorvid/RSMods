@@ -62,6 +62,7 @@
             this.checkBox_FixBadBassTuning = new System.Windows.Forms.CheckBox();
             this.checkBox_ExtendedRangeDrop = new System.Windows.Forms.CheckBox();
             this.groupBox_EnabledMods = new System.Windows.Forms.GroupBox();
+            this.checkBox_RemoveFingerprints = new System.Windows.Forms.CheckBox();
             this.checkBox_PreventMidSongPause = new System.Windows.Forms.CheckBox();
             this.checkBox_DisplayCurrentAccuracy = new System.Windows.Forms.CheckBox();
             this.checkBox_CustomNSPTimer = new System.Windows.Forms.CheckBox();
@@ -246,6 +247,7 @@
             this.textBox_Note0Color = new System.Windows.Forms.TextBox();
             this.button_Note0ColorButton = new System.Windows.Forms.Button();
             this.tabPage_ModSettings_DisableUI = new System.Windows.Forms.TabPage();
+            this.groupBox_ToggleFingerprints = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnSaveFontSize = new System.Windows.Forms.Button();
             this.lblCurrentFontSize = new System.Windows.Forms.Label();
@@ -550,8 +552,6 @@
             this.label_SettingsSaved = new System.Windows.Forms.Label();
             this.fileSystemWatcher1 = new System.IO.FileSystemWatcher();
             this.button_UpdateRSMods = new System.Windows.Forms.Button();
-            this.groupBox_ToggleFingerprints = new System.Windows.Forms.GroupBox();
-            this.checkBox_RemoveFingerprints = new System.Windows.Forms.CheckBox();
             this.groupBox_HowToEnumerate.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nUpDown_ForceEnumerationXMS)).BeginInit();
             this.groupBox_LoftOffWhen.SuspendLayout();
@@ -1126,6 +1126,17 @@
             this.groupBox_EnabledMods.TabIndex = 50;
             this.groupBox_EnabledMods.TabStop = false;
             this.groupBox_EnabledMods.Text = "Enabled Mods";
+            // 
+            // checkBox_RemoveFingerprints
+            // 
+            this.checkBox_RemoveFingerprints.AutoSize = true;
+            this.checkBox_RemoveFingerprints.Location = new System.Drawing.Point(11, 446);
+            this.checkBox_RemoveFingerprints.Name = "checkBox_RemoveFingerprints";
+            this.checkBox_RemoveFingerprints.Size = new System.Drawing.Size(123, 17);
+            this.checkBox_RemoveFingerprints.TabIndex = 0;
+            this.checkBox_RemoveFingerprints.Text = "Remove Fingerprints";
+            this.checkBox_RemoveFingerprints.UseVisualStyleBackColor = true;
+            this.checkBox_RemoveFingerprints.CheckedChanged += new System.EventHandler(this.Save_RemoveFingerprints);
             // 
             // checkBox_PreventMidSongPause
             // 
@@ -3343,6 +3354,16 @@
             this.tabPage_ModSettings_DisableUI.TabIndex = 3;
             this.tabPage_ModSettings_DisableUI.Text = "Disable UI Elements";
             // 
+            // groupBox_ToggleFingerprints
+            // 
+            this.groupBox_ToggleFingerprints.Location = new System.Drawing.Point(6, 164);
+            this.groupBox_ToggleFingerprints.Name = "groupBox_ToggleFingerprints";
+            this.groupBox_ToggleFingerprints.Size = new System.Drawing.Size(168, 51);
+            this.groupBox_ToggleFingerprints.TabIndex = 71;
+            this.groupBox_ToggleFingerprints.TabStop = false;
+            this.groupBox_ToggleFingerprints.Text = "Toggle Fingerprints";
+            this.groupBox_ToggleFingerprints.Visible = false;
+            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.btnSaveFontSize);
@@ -4990,7 +5011,7 @@
             0});
             this.nUpDown_ASIO_CustomBufferSize.Location = new System.Drawing.Point(20, 129);
             this.nUpDown_ASIO_CustomBufferSize.Maximum = new decimal(new int[] {
-            496,
+            4096,
             0,
             0,
             0});
@@ -6886,27 +6907,6 @@
             this.button_UpdateRSMods.Visible = false;
             this.button_UpdateRSMods.Click += new System.EventHandler(this.CheckForUpdates_UpdateRSMods);
             this.button_UpdateRSMods.MouseHover += new System.EventHandler(this.ToolTips_Show);
-            // 
-            // groupBox_ToggleFingerprints
-            // 
-            this.groupBox_ToggleFingerprints.Location = new System.Drawing.Point(6, 164);
-            this.groupBox_ToggleFingerprints.Name = "groupBox_ToggleFingerprints";
-            this.groupBox_ToggleFingerprints.Size = new System.Drawing.Size(168, 51);
-            this.groupBox_ToggleFingerprints.TabIndex = 71;
-            this.groupBox_ToggleFingerprints.TabStop = false;
-            this.groupBox_ToggleFingerprints.Text = "Toggle Fingerprints";
-            this.groupBox_ToggleFingerprints.Visible = false;
-            // 
-            // checkBox_ToggleFingerprints
-            // 
-            this.checkBox_RemoveFingerprints.AutoSize = true;
-            this.checkBox_RemoveFingerprints.Location = new System.Drawing.Point(11, 446);
-            this.checkBox_RemoveFingerprints.Name = "checkBox_ToggleFingerprints";
-            this.checkBox_RemoveFingerprints.Size = new System.Drawing.Size(123, 17);
-            this.checkBox_RemoveFingerprints.TabIndex = 0;
-            this.checkBox_RemoveFingerprints.Text = "Remove Fingerprints";
-            this.checkBox_RemoveFingerprints.UseVisualStyleBackColor = true;
-            this.checkBox_RemoveFingerprints.CheckedChanged += new System.EventHandler(this.Save_RemoveFingerprints);
             // 
             // MainForm
             // 
