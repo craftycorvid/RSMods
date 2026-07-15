@@ -87,6 +87,11 @@ int Enumeration::GetCurrentDLCCount() {
 	std::filesystem::path dlcFolderPath = std::filesystem::current_path(); //tread carefully, this stuff likes to crash if the path is wrong
 	dlcFolderPath /= "dlc";
 
+	// If the user does not have a dlc folder, return 0.
+	if (!std::filesystem::exists(dlcFolderPath)) {
+		return 0;
+	}
+
 	return GetFileCount(dlcFolderPath);
 }
 
