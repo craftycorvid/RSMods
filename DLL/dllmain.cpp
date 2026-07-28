@@ -25,9 +25,6 @@ unsigned WINAPI EnumerationThread() {
 	while (!GameState::GameLoaded)
 		Sleep(5000);
 
-	Settings::ReadKeyBinds();
-	Settings::ReadModSettings();
-
 	int oldDLCCount = Enumeration::GetCurrentDLCCount();
 	int newDLCCount = oldDLCCount;
 
