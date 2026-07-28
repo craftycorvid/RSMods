@@ -230,6 +230,12 @@ uintptr_t MemUtil::FindDMAAddy(uintptr_t ptr, const std::vector<unsigned int>& o
 
 		addr += offset;
 	}
+
+	// The loop validates each address before stepping through it, which leaves the
+	// final address, the one the caller actually dereferences, unchecked.
+	if (safe && IsBadReadPtr((void*)addr))
+		return 0;
+
 	return addr;
 }
 
