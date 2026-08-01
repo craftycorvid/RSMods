@@ -238,7 +238,7 @@ namespace RSMods
 
                 if (newSavePath == string.Empty)
                 {
-                    MessageBox.Show("We cannot detect where you have Rocksmith2014 saves are located.", "Error: SavePath Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("We cannot detect where your Rocksmith2014 saves are located.", "Error: SavePath Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Environment.Exit(1);
                 }
 
@@ -258,7 +258,7 @@ namespace RSMods
 
                         if (newSavePath == string.Empty)
                         {
-                            MessageBox.Show("We cannot detect where you have Rocksmith2014 saves are located.", "Error: SavePath Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("We cannot detect where your Rocksmith2014 saves are located.", "Error: SavePath Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             Environment.Exit(1);
                         }
                     }
@@ -2696,7 +2696,7 @@ namespace RSMods
             label_TwitchChannelIDVal.DataBindings.Add(new Binding("Text", TwitchSettings.Get, "ChannelID", false, DataSourceUpdateMode.OnPropertyChanged));
             label_TwitchAccessTokenVal.DataBindings.Add(new Binding("Text", TwitchSettings.Get, "AccessToken", false, DataSourceUpdateMode.OnPropertyChanged));
 
-            // Hide values by default (Security just incase the streamer is live with RSMods on screen)
+            // Hide values by default (Security just in case the streamer is live with RSMods on screen)
             label_TwitchUsernameVal.DataBindings.Add(new Binding("Visible", checkBox_RevealTwitchAuthToken, "Checked", false, DataSourceUpdateMode.OnPropertyChanged));
             label_TwitchChannelIDVal.DataBindings.Add(new Binding("Visible", checkBox_RevealTwitchAuthToken, "Checked", false, DataSourceUpdateMode.OnPropertyChanged));
             label_TwitchAccessTokenVal.DataBindings.Add(new Binding("Visible", checkBox_RevealTwitchAuthToken, "Checked", false, DataSourceUpdateMode.OnPropertyChanged));
@@ -4296,7 +4296,7 @@ namespace RSMods
                         MessageBox.Show("Don't forget to hit \"Repack Audio Psarc\" when you're done.");
                     }
                     else
-                        MessageBox.Show("An error occured when converting your file.\nPlease contact the RSMods devs.");
+                        MessageBox.Show("An error occurred when converting your file.\nPlease contact the RSMods devs.");
 
                 }
             }

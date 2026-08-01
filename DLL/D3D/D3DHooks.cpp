@@ -402,11 +402,11 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	//if (Settings::ReturnSettingValue("DiscoModeEnabled") == "on") {
 	//	 //Need Lovro's Help With This :(
 	//	if (DiscoModeInitialSetting.find(pDevice) == DiscoModeInitialSetting.end()) { // We haven't saved this pDevice's initial values yet
-	//		DWORD initialAlphaValue = (DWORD)pDevice, initialSeperateValue = (DWORD)pDevice;
+	//		DWORD initialAlphaValue = (DWORD)pDevice, initialSeparateValue = (DWORD)pDevice;
 	//		pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, (DWORD*)initialAlphaValue);
-	//		pDevice->GetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, (DWORD*)initialSeperateValue);
+	//		pDevice->GetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, (DWORD*)initialSeparateValue);
 	//		
-	//		DiscoModeInitialSetting.insert({ pDevice, std::make_pair(initialAlphaValue, initialSeperateValue) });
+	//		DiscoModeInitialSetting.insert({ pDevice, std::make_pair(initialAlphaValue, initialSeparateValue) });
 	//	}
 	//	else { // We've seen this pDevice value before.
 	//		if (DiscoModeEnabled) { // Key was pressed to have Disco Mode on

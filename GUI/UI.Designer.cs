@@ -2407,7 +2407,7 @@
             this.button_AssignNewGuitarArcadeTone.Name = "button_AssignNewGuitarArcadeTone";
             this.button_AssignNewGuitarArcadeTone.Size = new System.Drawing.Size(224, 35);
             this.button_AssignNewGuitarArcadeTone.TabIndex = 114;
-            this.button_AssignNewGuitarArcadeTone.Text = "Assign Tone As New GuitarArcade Default";
+            this.button_AssignNewGuitarArcadeTone.Text = "Assign Tone As New Guitarcade Default";
             this.button_AssignNewGuitarArcadeTone.UseVisualStyleBackColor = true;
             this.button_AssignNewGuitarArcadeTone.Click += new System.EventHandler(this.SetForget_AssignNewGuitarArcadeTone);
             // 
@@ -5305,7 +5305,7 @@
             this.checkBox_Rocksmith_EnableRenderRes.Name = "checkBox_Rocksmith_EnableRenderRes";
             this.checkBox_Rocksmith_EnableRenderRes.Size = new System.Drawing.Size(160, 17);
             this.checkBox_Rocksmith_EnableRenderRes.TabIndex = 11;
-            this.checkBox_Rocksmith_EnableRenderRes.Text = "Seperate Render Resolution";
+            this.checkBox_Rocksmith_EnableRenderRes.Text = "Separate Render Resolution";
             this.checkBox_Rocksmith_EnableRenderRes.UseVisualStyleBackColor = true;
             this.checkBox_Rocksmith_EnableRenderRes.CheckedChanged += new System.EventHandler(this.Rocksmith_EnableRenderRes);
             // 

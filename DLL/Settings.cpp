@@ -441,7 +441,7 @@ std::string Settings::ReturnNotewayColor(const std::string& name) {
 /// Split input into list of strings, based on spaces
 /// </summary>
 /// <param name="input"> - Input string</param>
-/// <returns>List of strings taken from input, that were seperated by spaces.</returns>
+/// <returns>List of strings taken from input, that were separated by spaces.</returns>
 std::vector<std::string> Settings::SplitByWhitespace(const std::string& input) {
 	std::regex re("\\s+");
 	std::sregex_token_iterator first{ input.begin(), input.end(), re, -1 };

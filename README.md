@@ -19,7 +19,7 @@ Feel free to try the 1.2.8.0 version if you are on the Learn & Play version.
                   The string pegs shown in the tuner are not changed correctly. The colors change when the song starts, not in the tuner, meaning on first ER use, default colors will be shown in the tuner. It also means that if you last played an ER song, then go back to a standard tuned song - the pegs in the tuner will still show in ER colors.
       
 * **Custom Song List Titles**
-  * Normally those are not customizable in-game and simply listed as SONG LIST 1 to SONG LIST 6. Now you can customize those, making for example, a song list for only B Standard songs, only Excercise songs, etc.
+  * Normally those are not customizable in-game and simply listed as SONG LIST 1 to SONG LIST 6. Now you can customize those, making for example, a song list for only B Standard songs, only Exercise songs, etc.
   
 * **Add/Decrease Song Volume**
   * In case you are playing a song which is unusually low in volume, or is ear-piercingly loud, by invoking the functions of AudioKinetic audio engine used by the game, you can now modify volume of the music on the fly, without going in to the mixer. 
@@ -64,7 +64,7 @@ Feel free to try the 1.2.8.0 version if you are on the Learn & Play version.
   * By default, the speed for Riff Repeater is not linear - In standard Rocksmith 2014: 68% speed in Riff Repeater = 50% real speed. With this mod: 68% speed in Riff Repeater = 68% real speed.
 
 * **Enable looping**
-  * Allows you to loop sections of songs. This differs from Riff Repeater as we let you pick sections by the amount of time using specialized keybindings to set the loop begining and the loop end.
+  * Allows you to loop sections of songs. This differs from Riff Repeater as we let you pick sections by the amount of time using specialized keybindings to set the loop beginning and the loop end.
 
 * **Allow rewinding** 
   * If you mess up a section and want to retry it, you can go back in time for a set amount of seconds. 
@@ -128,15 +128,15 @@ Feel free to try the 1.2.8.0 version if you are on the Learn & Play version.
   ** Known issues; Some interfaces report the guitar input channel as one that the game isn't expecting, in this case - Direct Connected mode may not work for you particularly well. If you want to test before applying - go into Microphone Mode and see if your interface lets you have some note detection. If it does - then DC mode should work for you once enabled.
   
 * **Change Default tones** - **GUI Only**
-  * Add your favorite tones to slot number 1 on the tone stick. This is the default tone that is applied when the game loads up. There is a seperate one saved for Lead, Rhythm and Bass. You need to have a tone saved in your profile. It does not need to be assigned to a "tone stick" slot for the GUI to be able to load it and then set it as the new default. This is not a DLL mod! This means that removing the DLL will not reverse the change of this mod, as you will need to restore the backup of your cache.psarc or verify your steam files.
+  * Add your favorite tones to slot number 1 on the tone stick. This is the default tone that is applied when the game loads up. There is a separate one saved for Lead, Rhythm and Bass. You need to have a tone saved in your profile. It does not need to be assigned to a "tone stick" slot for the GUI to be able to load it and then set it as the new default. This is not a DLL mod! This means that removing the DLL will not reverse the change of this mod, as you will need to restore the backup of your cache.psarc or verify your steam files.
 
-  * Note: While the ability to change the tone of the Emulated Bass is available and can be added easily, we do not want to edit this tone nor do we condone anyone editting this tone. The Emulated Bass tone has a unique characteristic where it's always the same tone either in song, or in the menus. For this reason we believe that the default tone is most likely the best option to pick for the extensive range of songs / genres it can be used in.
+  * Note: While the ability to change the tone of the Emulated Bass is available and can be added easily, we do not want to edit this tone nor do we condone anyone editing this tone. The Emulated Bass tone has a unique characteristic where it's always the same tone either in song, or in the menus. For this reason we believe that the default tone is most likely the best option to pick for the extensive range of songs / genres it can be used in.
   
 * **Change Default Guitarcade tones** - **GUI Only**
   * If you just can't stand the sound of the tones in a Guitarcade game, you can change them here. This is not a DLL mod! This means that removing the DLL will not reverse the change of this mod, as you will need to restore the backup of your cache.psarc or verify your steam files.
   
 * **Backup Players Profile** - **GUI Only**
-  * Everytime the RSMods GUI is opened, it will make a backup of your Rockmsith Player Profiles. This is automated process to help recover from profile corruptions. Profile backups can be found in "Rocksmith2014/Profile_Backups/MM-DD-YYYY_HH-mm-ss".
+  * Every time the RSMods GUI is opened, it will make a backup of your Rocksmith Player Profiles. This is an automated process to help recover from profile corruptions. Profile backups can be found in "Rocksmith2014/Profile_Backups/MM-DD-YYYY_HH-mm-ss".
   
 ## Installation:
 * There's two options as how this mod can be installed:
@@ -147,7 +147,7 @@ Feel free to try the 1.2.8.0 version if you are on the Learn & Play version.
 ## Requirements:
 * Latest Steam version of Rocksmith 2014 Remastered on Windows, https://store.steampowered.com/app/221680/Rocksmith_2014_Edition__Remastered/
 * MS Visual C++ 2015-2019 Redistributable for the DLL, .NET framework for GUI/One-Click-Installer
-* Sorry Mac users, RS on Mac is it's own beast altogether, so we only support the Windows version
+* Sorry Mac users, RS on Mac is its own beast altogether, so we only support the Windows version
   
 ## Dependencies:
 * DirectX 9 SDK, ImGUI, GDI+, Detours, RtMidi - all of which are included in the project folder and should require no additional installations to compile and use the project
@@ -208,7 +208,7 @@ Section        | Entry             | Possible values | Info   |
 &nbsp; | ScreenShotScores | on/off | Takes a steam screenshot when you finish a song. Requires Steam's screenshot button to be set to F12. |
 &nbsp; | RRSpeedAboveOneHundred | on/off | Remove the 100% speed limit from Riff Repeater to play the songs faster than intended. |
 &nbsp; | AutoTuneForSong | on/off | If you have one of a few pedals we can send the pedal a signal to enable drop tuning to reduce the amount of time between playing songs. We use MIDI to send the signal. The pedals that are supported can be seen in the Q/A at the bottom of this page. |
-&nbsp; | ChordsMode | on/off | Extension of "AutoTuneForSong" where some pedals have two seperate modes they can be played in. This allows us to send the correct signals according to the setting you have on the pedal. |
+&nbsp; | ChordsMode | on/off | Extension of "AutoTuneForSong" where some pedals have two separate modes they can be played in. This allows us to send the correct signals according to the setting you have on the pedal. |
 &nbsp; | ShowCurrentNoteOnScreen | on/off | Reads the current note being played and displays it on screen. This only works for single notes so chords will **NOT** work properly. |
 &nbsp; | OnScreenFont | _font_name_ | Name of the font you want us to use when we need to show you text on screen. Default is Arial if we can't find the font you specify. |
 &nbsp; | ProfileToLoad | _profile_name_ | An extension of "ForceProfileLoad" where we will look for the profile you specify in the list of all profiles. This is helpful if you have multiple profiles, or multiple users who play on the same computer. |
