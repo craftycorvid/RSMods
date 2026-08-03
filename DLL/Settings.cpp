@@ -407,6 +407,56 @@ std::string Settings::ReturnSettingValue(const std::string& name) {
 }
 
 /// <summary>
+/// True when a mod toggle is set to "on". The single home for the on/off convention.
+/// </summary>
+bool Settings::IsOn(const std::string& name) {
+	return ReturnSettingValue(name) == "on";
+}
+
+/// <summary>
+/// True only when a mod toggle is literally "off". Deliberately not !IsOn: an unset or
+/// unrecognized value is neither on nor off, so this stays a faithful swap for == "off".
+/// </summary>
+bool Settings::IsOff(const std::string& name) {
+	return ReturnSettingValue(name) == "off";
+}
+
+/// <summary>
+/// Parse a raw "...When" INI value into its enum. Unrecognized / empty -> When::Unknown.
+/// </summary>
+Settings::When Settings::ParseWhen(std::string_view value) {
+	if (value == "manual")    return When::Manual;
+	if (value == "startup")   return When::Startup;
+	if (value == "song")      return When::Song;
+	if (value == "tuner")     return When::Tuner;
+	if (value == "automatic") return When::Automatic;
+	return When::Unknown;
+}
+
+/// <summary>
+/// Read a "...When" setting by name and return it parsed. See Settings::When.
+/// </summary>
+Settings::When Settings::GetWhen(const std::string& name) {
+	return ParseWhen(ReturnSettingValue(name));
+}
+
+/// <summary>
+/// Read the CustomStringColors mode. The stored int maps 1:1 onto the enum, so an
+/// out-of-range value stays out-of-range and falls through consumers' default cases.
+/// </summary>
+Settings::StringColorMode Settings::GetStringColorMode(const std::string& name) {
+	return static_cast<StringColorMode>(GetModSetting(name));
+}
+
+/// <summary>
+/// Read the SeparateNoteColorsMode. Like StringColorMode, the stored int maps 1:1 onto
+/// the enum, so out-of-range values are preserved for consumers' default handling.
+/// </summary>
+Settings::NoteColorMode Settings::GetNoteColorMode(const std::string& name) {
+	return static_cast<NoteColorMode>(GetModSetting(name));
+}
+
+/// <summary>
 /// Get Virtual Key code for input string
 /// </summary>
 /// <param name="vkString"> - std::map[key]</param>

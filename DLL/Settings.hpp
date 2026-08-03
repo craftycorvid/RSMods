@@ -17,7 +17,19 @@ namespace Settings {
 	unsigned int GetKeyBind(const std::string& name);
 	int GetModSetting(const std::string& name);
 	std::string ReturnSettingValue(const std::string& name);
+	bool IsOn(const std::string& name);
+	bool IsOff(const std::string& name);
 	std::string ReturnNotewayColor(const std::string& name);
+
+	enum class When { Unknown, Manual, Startup, Song, Tuner, Automatic };
+	When ParseWhen(std::string_view value);
+	When GetWhen(const std::string& name);
+
+	enum class StringColorMode { Default = 0, Zag = 1, Custom = 2, Test = 3 };
+	StringColorMode GetStringColorMode(const std::string& name);
+
+	enum class NoteColorMode { SameAsStrings = 0, Default = 1, Custom = 2 };
+	NoteColorMode GetNoteColorMode(const std::string& name);
 
 	int GetVKCodeForString(const std::string& vkString);
 	std::vector<RSColor> GetStringColors(bool CB);

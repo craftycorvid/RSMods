@@ -2,6 +2,8 @@
 #include "ExtendedRangeMode.hpp"
 #include "../StringState.h"
 
+using Settings::StringColorMode;
+
 /// <param name="stringnum"> - Number of string</param>
 /// <param name="state"> - Structs::string_state</param>
 /// <returns>Pointer to String Color</returns>
@@ -149,10 +151,10 @@ void ERMode::Toggle7StringMode() {
 	}
 
 	if ((ERMode::AttemptedERInThisSong && ERMode::UseERExclusivelyInThisSong) || (AttemptedERInTuner && UseERInTuner)) {
-		switch (Settings::GetModSetting("CustomStringColors")) {
-			case 0: // User wants original Rocksmith colors
+		switch (Settings::GetStringColorMode("CustomStringColors")) {
+			case StringColorMode::Default: // User wants original Rocksmith colors
 				break;
-			case 1: // User wants ZZ / Zag's colors (normal colors, but shifted down one string with a dark green on the top for Extended Range).
+			case StringColorMode::Zag: // User wants ZZ / Zag's colors (normal colors, but shifted down one string with a dark green on the top for Extended Range).
 				SetColors(stringsGlow, colorsGlow); // Zags custom low B color values manually entered; Glowed
 				SetColors(stringsDisabled, colorsDisabled); // Zags custom low B color values manually entered; Disabled
 				SetColors(stringsEnabled, colorsStrEna); // name="GuitarStringsEnabledColorBlind" id="237528906"
@@ -163,7 +165,7 @@ void ERMode::Toggle7StringMode() {
 				SetColors(stringsBodyAcc, colorsBodyAcc); // name="NotewayBodyPartsAccentBlind" id = "47948252"
 				SetColors(pegsTuning, colorsPegsTuning);
 				break;
-			case 2: // User wants their own custom (ER) colors
+			case StringColorMode::Custom: // User wants their own custom (ER) colors
 				SetColors(stringsEnabled, "Enabled_CB");
 				SetColors(stringsGlow, "Glow_CB");
 				SetColors(stringsDisabled, "Disabled_CB");
@@ -190,7 +192,7 @@ void ERMode::Toggle7StringMode() {
 			ColorsSaved = true;
 		}
 
-		if (Settings::GetModSetting("CustomStringColors") == 2) { // User wants their own custom (non-ER) colors
+		if (Settings::GetStringColorMode("CustomStringColors") == StringColorMode::Custom) { // User wants their own custom (non-ER) colors
 			SetColors(stringsEnabled, "Enabled_N");
 			SetColors(stringsGlow, "Glow_N");
 			SetColors(stringsDisabled, "Disabled_N");
@@ -205,7 +207,7 @@ void ERMode::Toggle7StringMode() {
 	}
 
 	//NOTE: this overrides string colors, no matter if ER song or not
-	if (Settings::GetModSetting("CustomStringColors") == 3) { // If you want the color testing menu to work
+	if (Settings::GetStringColorMode("CustomStringColors") == StringColorMode::Test) { // If you want the color testing menu to work
 		if (saveDefaults) {
 			defaultColors.clear();
 			for (int idx = 0; idx < 17; idx++) {

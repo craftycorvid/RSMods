@@ -1,6 +1,8 @@
 #include "../stdafx.h"
 #include "D3DHooks.hpp"
 
+using Settings::NoteColorMode;
+
 /// <summary>
 /// IDirect3DDevice9::DrawPrimitive Middleware. Mainly used for Note Tails
 /// </summary>
@@ -446,15 +448,15 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 
 		// Settings::GetModSetting("SeparateNoteColors") == 1 -> Default Colors, so don't do anything.
 
-		// Use same color scheme on notes as we do on strings (0) || Use Custom Note Color Scheme (2)
-		if (Settings::GetModSetting("SeparateNoteColorsMode") == 0 || (Settings::ReturnSettingValue("SeparateNoteColors") == "on" && Settings::GetModSetting("SeparateNoteColorsMode") == 2)) { 
+		// Color notes like strings (SameAsStrings) || Use Custom Note Color Scheme (Custom)
+		if (Settings::GetNoteColorMode("SeparateNoteColorsMode") == NoteColorMode::SameAsStrings || (Settings::IsOn("SeparateNoteColors") && Settings::GetNoteColorMode("SeparateNoteColorsMode") == NoteColorMode::Custom)) {
 
 			// Color notes like string colors
-			LPDIRECT3DTEXTURE9 textureToUseOnNotes = customStringColorTexture; 
+			LPDIRECT3DTEXTURE9 textureToUseOnNotes = customStringColorTexture;
 
 			// Custom colored notes
-			if (Settings::GetModSetting("SeparateNoteColorsMode") == 2)
-				textureToUseOnNotes = customNoteColorTexture; 
+			if (Settings::GetNoteColorMode("SeparateNoteColorsMode") == NoteColorMode::Custom)
+				textureToUseOnNotes = customNoteColorTexture;
 
 			// Change all pieces of note head's textures
 			if (IsToBeRemoved(sevenstring, current) || IsExtraRemoved(noteModifiers, currentThicc))  

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ModManager.hpp"
 
+using Settings::When;
+
 namespace ModManager {
 	void InitializeConfiguration() {
 		if (!(std::ifstream("RSMods.ini"))) {
@@ -20,11 +22,11 @@ namespace ModManager {
 		BugPrevention::PreventPortAudioInDeviceCrash();
 		BugPrevention::PreventExtraAudioDevicesCrash();
 
-		if (Settings::ReturnSettingValue("FixBrokenTones") == "on") {
+		if (Settings::IsOn("FixBrokenTones")) {
 			BugPrevention::PreventStuckTone();
 		}
 
-		if (Settings::ReturnSettingValue("FixOculusCrash") == "on") {
+		if (Settings::IsOn("FixOculusCrash")) {
 			BugPrevention::PreventOculusCrash();
 		}
 	}
@@ -169,17 +171,17 @@ namespace ModManager {
 		bool rsAsioBypassTwoRTC = false;
 		LOG_INFO("RS_ASIO Bypass2RTC: " << std::boolalpha << rsAsioBypassTwoRTC << std::endl);
 
-		if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on") {
+		if (Settings::IsOn("BypassTwoRTCMessageBox")) {
 			SetTwoRTCBypass(true);
 		}
 
 		// Patch x86 assembly for Riff Repeater speed logic to make it linear.
-		if (Settings::ReturnSettingValue("LinearRiffRepeater") == "on") {
+		if (Settings::IsOn("LinearRiffRepeater")) {
 			RiffRepeater::EnableLinearSpeeds();
 		}
 
 		// Allow the user to have a small amount of time to Alt+Tab while the game continues playing the audio.
-		if (Settings::ReturnSettingValue("AllowAudioInBackground") == "on") {
+		if (Settings::IsOn("AllowAudioInBackground")) {
 			VolumeControl::AllowAltTabbingWithAudio();
 		}
 	}
@@ -192,7 +194,7 @@ namespace ModManager {
 	{
 		Midi::tuningOffset = Settings::GetModSetting("TuningOffset");
 
-		if (Settings::ReturnSettingValue("AltOutputSampleRate") == "on" &&
+		if (Settings::IsOn("AltOutputSampleRate") &&
 			Settings::GetModSetting("AlternativeOutputSampleRate") != 48000) {
 			LOG_WARNING("[!] Overriding Output Sample Rate to " << Settings::GetModSetting("AlternativeOutputSampleRate") << std::endl);
 			AudioDevices::output_SampleRate = Settings::GetModSetting("AlternativeOutputSampleRate");
@@ -205,11 +207,11 @@ namespace ModManager {
 	/// Handles dynamic toggling of linear riff repeater mode.
 	/// </summary>
 	void HandleLinearRiffRepeaterToggle() {
-		if (Settings::ReturnSettingValue("LinearRiffRepeater") == "on" &&
+		if (Settings::IsOn("LinearRiffRepeater") &&
 			!RiffRepeater::currentlyEnabled_LinearRR) {
 			RiffRepeater::EnableLinearSpeeds();
 		}
-		else if (Settings::ReturnSettingValue("LinearRiffRepeater") == "off" &&
+		else if (Settings::IsOff("LinearRiffRepeater") &&
 			RiffRepeater::currentlyEnabled_LinearRR) {
 			RiffRepeater::DisableLinearSpeeds();
 		}
@@ -219,7 +221,7 @@ namespace ModManager {
 	/// Scans for MIDI devices when auto-tuning is enabled.
 	/// </summary>
 	void HandleMidiDeviceScanning() {
-		if (!Midi::scannedForMidiDevices && Settings::ReturnSettingValue("AutoTuneForSong") == "on") {
+		if (!Midi::scannedForMidiDevices && Settings::IsOn("AutoTuneForSong")) {
 			Midi::scannedForMidiDevices = true;
 			Midi::ReadMidiSettingsFromINI(
 				Settings::ReturnSettingValue("ChordsMode"),
@@ -257,7 +259,7 @@ namespace ModManager {
 	/// Manages the volume control overlay display timer.
 	/// </summary>
 	void HandleVolumeDisplay() {
-		if (Settings::ReturnSettingValue("VolumeControlEnabled") == "on" && MoreThanThreeSecondsPassed()) {
+		if (Settings::IsOn("VolumeControlEnabled") && MoreThanThreeSecondsPassed()) {
 			GameOverlay::displayCurrentVolume = false;	
 		}
 	}
@@ -266,8 +268,8 @@ namespace ModManager {
 	/// Handles mods that run regardless of game state.
 	/// </summary>
 	void HandleAlwaysOnMods(GameLoopState& state) {
-		if (Settings::ReturnSettingValue("RemoveHeadstockEnabled") == "on" &&
-			Settings::ReturnSettingValue("RemoveHeadstockWhen") == "startup") {
+		if (Settings::IsOn("RemoveHeadstockEnabled") &&
+			Settings::GetWhen("RemoveHeadstockWhen") == When::Startup) {
 			D3DHooks::RemoveHeadstockInThisMenu = true;
 		}
 
@@ -294,18 +296,18 @@ namespace ModManager {
 		}
 
 		if (!D3DHooks::SkylineOff &&
-			Settings::ReturnSettingValue("RemoveSkylineEnabled") == "on" &&
-			Settings::ReturnSettingValue("ToggleSkylineWhen") == "startup") {
+			Settings::IsOn("RemoveSkylineEnabled") &&
+			Settings::GetWhen("ToggleSkylineWhen") == When::Startup) {
 			D3DHooks::toggleSkyline = true;
 		}
 
-		if (!D3DHooks::RemoveLyrics && Settings::ReturnSettingValue("RemoveLyricsWhen") == "startup") {
+		if (!D3DHooks::RemoveLyrics && Settings::GetWhen("RemoveLyricsWhen") == When::Startup) {
 			D3DHooks::RemoveLyrics = true;
 		}
 
 		if (GameState::Menus::IsInPreSongTuner() &&
-			Settings::ReturnSettingValue("AutoTuneForSong") == "on" &&
-			Settings::ReturnSettingValue("AutoTuneForSongWhen") == "tuner" &&
+			Settings::IsOn("AutoTuneForSong") &&
+			Settings::GetWhen("AutoTuneForSongWhen") == When::Tuner &&
 			!Midi::alreadyAttemptedTuningInTuner &&
 			!Midi::alreadyAutomatedTuningInThisSong) {
 			Midi::AttemptTuningInTuner();
@@ -377,7 +379,7 @@ namespace ModManager {
 	/// Cleans up states that are only active during songs.
 	/// </summary>
 	void CleanupSongSpecificStates(GameLoopState& state) {
-		if (Settings::ReturnSettingValue("AllowLooping") == "on") {
+		if (Settings::IsOn("AllowLooping")) {
 			Keybindings::loopStart = NULL;
 			Keybindings::loopEnd = NULL;
 		}
@@ -393,8 +395,8 @@ namespace ModManager {
 		}
 
 		if (state.automatedSongTimer &&
-			Settings::ReturnSettingValue("ShowSongTimerEnabled") == "on" &&
-			Settings::ReturnSettingValue("ShowSongTimerWhen") == "automatic") {
+			Settings::IsOn("ShowSongTimerEnabled") &&
+			Settings::GetWhen("ShowSongTimerWhen") == When::Automatic) {
 			state.automatedSongTimer = false;
 			D3DHooks::showSongTimerOnScreen = false;
 		}
@@ -411,8 +413,8 @@ namespace ModManager {
 	/// Reverts visual mod states when exiting songs.
 	/// </summary>
 	void HandleMenuVisualMods(GameLoopState& state) {
-		if (Settings::ReturnSettingValue("RemoveHeadstockEnabled") == "on" &&
-			Settings::ReturnSettingValue("RemoveHeadstockWhen") == "song") {
+		if (Settings::IsOn("RemoveHeadstockEnabled") &&
+			Settings::GetWhen("RemoveHeadstockWhen") == When::Song) {
 			D3DHooks::RemoveHeadstockInThisMenu = false;
 		}
 
@@ -428,8 +430,8 @@ namespace ModManager {
 		}
 
 		if (D3DHooks::SkylineOff &&
-			Settings::ReturnSettingValue("RemoveSkylineEnabled") == "on" &&
-			Settings::ReturnSettingValue("ToggleSkylineWhen") == "song") {
+			Settings::IsOn("RemoveSkylineEnabled") &&
+			Settings::GetWhen("ToggleSkylineWhen") == When::Song) {
 			D3DHooks::toggleSkyline = true;
 			D3DHooks::DrawSkylineInMenu = true;
 		}
@@ -439,14 +441,14 @@ namespace ModManager {
 	/// Handles menu-specific features like Guitar Speak and song previews.
 	/// </summary>
 	void HandleMenuFeatures(GameLoopState& state) {
-		if (!state.guitarSpeakPresent && Settings::ReturnSettingValue("GuitarSpeak") == "on") {
+		if (!state.guitarSpeakPresent && Settings::IsOn("GuitarSpeak")) {
 			state.guitarSpeakPresent = true;
 			if (!GuitarSpeak::RunGuitarSpeak()) { // If we are in a menu where we don't want to read bad values
 				state.guitarSpeakPresent = false;
 			}
 		}
 
-		if (Settings::ReturnSettingValue("SongPreviews") == "on") {
+		if (Settings::IsOn("SongPreviews")) {
 			if (!VolumeControl::disabledSongPreviewAudio) {
 				VolumeControl::DisableSongPreviewAudio();
 			}
@@ -455,7 +457,7 @@ namespace ModManager {
 			VolumeControl::EnableSongPreviewAudio();
 		}
 
-		if (Settings::ReturnSettingValue("ScreenShotScores") == "on" &&
+		if (Settings::IsOn("ScreenShotScores") &&
 			GameState::Menus::IsInScoreMenus()) {
 			Keyboard::TakeScreenshot();
 		}
@@ -469,7 +471,7 @@ namespace ModManager {
 	/// So we aren't running the same textures over and over again.
 	/// </summary>
 	void HandleHeadstockCacheReset(GameLoopState& state) {
-		if (Settings::ReturnSettingValue("RemoveHeadstockEnabled") == "on" &&
+		if (Settings::IsOn("RemoveHeadstockEnabled") &&
 			!GameState::Menus::IsInTuningMenus() ||
 			GameState::currentMenu == "MissionMenu") {
 			D3DHooks::resetHeadstockCache = true;
@@ -489,7 +491,7 @@ namespace ModManager {
 	/// </summary>
 	void HandleExternalMonitor(GameLoopState& state) 
 	{
-		if (!state.movedToExternalDisplay && Settings::ReturnSettingValue("SecondaryMonitor") == "on") {
+		if (!state.movedToExternalDisplay && Settings::IsOn("SecondaryMonitor")) {
 			LaunchOnExternalMonitor::SendRocksmithToScreen(
 				Settings::GetModSetting("SecondaryMonitorXPosition"),
 				Settings::GetModSetting("SecondaryMonitorYPosition")
@@ -502,7 +504,7 @@ namespace ModManager {
 	/// Manages microphone volume override settings.
 	/// </summary>
 	void HandleMicrophoneVolumeOverride() {
-		if (Settings::ReturnSettingValue("OverrideInputVolumeEnabled") == "on" &&
+		if (Settings::IsOn("OverrideInputVolumeEnabled") &&
 			Settings::ReturnSettingValue("OverrideInputVolumeDevice") != "" &&
 			AudioDevices::GetMicrophoneVolume(Settings::ReturnSettingValue("OverrideInputVolumeDevice")) !=
 			Settings::GetModSetting("OverrideInputVolume")) 
@@ -519,9 +521,9 @@ namespace ModManager {
 	/// </summary>
 	void HandleAudioBackgroundToggle() 
 	{
-		if (Settings::ReturnSettingValue("AllowAudioInBackground") == "on" && !VolumeControl::allowedAltTabbingWithAudio) {
+		if (Settings::IsOn("AllowAudioInBackground") && !VolumeControl::allowedAltTabbingWithAudio) {
 			VolumeControl::AllowAltTabbingWithAudio();
-		} else if (Settings::ReturnSettingValue("AllowAudioInBackground") == "off" && VolumeControl::allowedAltTabbingWithAudio) {
+		} else if (Settings::IsOff("AllowAudioInBackground") && VolumeControl::allowedAltTabbingWithAudio) {
 			VolumeControl::DisableAltTabbingWithAudio(); // User originally wanted to NOT allow audio in the background, but they changed their mind, so we have to turn it on/
 		}
 	}
@@ -532,10 +534,9 @@ namespace ModManager {
 	void HandleTwoRTCBypassToggle()
 	{
 		static bool rsAsioBypassTwoRTC = false;
-
 		if (rsAsioBypassTwoRTC) return;
 
-		SetTwoRTCBypass(Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on");
+		SetTwoRTCBypass(Settings::IsOn("BypassTwoRTCMessageBox"));
 	}
 
 
@@ -543,7 +544,7 @@ namespace ModManager {
 	/// Manages custom non-stop play timer settings.
 	/// </summary>
 	void HandleNonStopPlayTimer() {
-		const bool useCustom = Settings::ReturnSettingValue("UseCustomNSPTimer") == "on";
+		const bool useCustom = Settings::IsOn("UseCustomNSPTimer");
 		const double desired = useCustom
 			? Settings::GetModSetting("CustomNSPTimeLimit") / 1000.0
 			: DefaultNSPTimeLimit;
@@ -572,7 +573,7 @@ namespace ModManager {
 	/// Configures buffer settings for alternative sample rates.
 	/// </summary>
 	void ConfigureAlternativeSampleRate() {
-		if (Settings::ReturnSettingValue("AltOutputSampleRate") == "on" &&
+		if (Settings::IsOn("AltOutputSampleRate") &&
 			Settings::GetModSetting("AlternativeOutputSampleRate") != 48000 &&
 			*(int*)Offsets::ptr_sampleRateBuffer.Get() != 5 &&
 			*(int*)Offsets::ptr_sampleRateBuffer.Get() != 2) {
@@ -613,7 +614,7 @@ namespace ModManager {
 	/// Handles automatic profile loading (AKA "Fork in the toaster" mod).
 	/// </summary>
 	void HandleAutoLoadProfile(GameLoopState& state) {
-		if (Settings::ReturnSettingValue("ForceProfileEnabled") != "on" ||
+		if (!Settings::IsOn("ForceProfileEnabled") ||
 			GameState::Menus::IsInMenusWithDisallowedAutoEnter() ||
 			state.forkInToasterNewProfile) {
 			return;
@@ -666,7 +667,7 @@ namespace ModManager {
 	/// Enables riff repeater time stretching features.
 	/// </summary>
 	void EnableRiffRepeaterFeatures() {
-		if (Settings::ReturnSettingValue("RRSpeedAboveOneHundred") == "on") {
+		if (Settings::IsOn("RRSpeedAboveOneHundred")) {
 			RiffRepeater::EnableTimeStretch();
 		}
 	}
@@ -676,21 +677,19 @@ namespace ModManager {
 	/// Manages visual mod states when entering a song.
 	/// </summary>
 	void HandleInSongVisualMods(GameLoopState& state) {
-		if (Settings::ReturnSettingValue("RemoveHeadstockEnabled") == "on" &&
-			Settings::ReturnSettingValue("RemoveHeadstockWhen") == "song") {
+		if (Settings::IsOn("RemoveHeadstockEnabled") &&
+			Settings::GetWhen("RemoveHeadstockWhen") == When::Song) {
 			D3DHooks::RemoveHeadstockInThisMenu = true;
 		}
 
-		if (Settings::ReturnSettingValue("ToggleLoftEnabled") == "on" &&
-			Settings::ReturnSettingValue("ToggleLoftWhen") == "song") {
+		if (Settings::IsOn("RemoveSkylineEnabled") &&
+			Settings::GetWhen("ToggleSkylineWhen") == When::Song) {
 			if (!state.loftOff) {
 				Loft::ToggleLoft();
 			}
 			state.loftOff = true;
 		}
 
-		if (Settings::ReturnSettingValue("RemoveSkylineEnabled") == "on" &&
-			Settings::ReturnSettingValue("ToggleSkylineWhen") == "song") {
 			if (!D3DHooks::SkylineOff) {
 				D3DHooks::toggleSkyline = true;
 			}
@@ -702,10 +701,10 @@ namespace ModManager {
 	/// Handles MIDI auto-tuning when entering a song.
 	/// </summary>
 	void HandleMidiAutoTuningInSong() {
-		if (Settings::ReturnSettingValue("AutoTuneForSong") == "on" &&
+		if (Settings::IsOn("AutoTuneForSong") &&
 			!Midi::alreadyAutomatedTuningInThisSong &&
-			(Settings::ReturnSettingValue("AutoTuneForSongWhen") == "tuner" ||
-				(Settings::ReturnSettingValue("AutoTuneForSongWhen") == "manual" && Midi::userWantsToUseAutoTuning))) {
+			(Settings::GetWhen("AutoTuneForSongWhen") == When::Tuner ||
+				(Settings::GetWhen("AutoTuneForSongWhen") == When::Manual && Midi::userWantsToUseAutoTuning))) {
 			Midi::AutomateTuning();
 		}
 	}
@@ -715,8 +714,8 @@ namespace ModManager {
 	/// </summary>
 	void HandleSongTimerDisplay(GameLoopState& state) {
 		if (!state.automatedSongTimer &&
-			Settings::ReturnSettingValue("ShowSongTimerEnabled") == "on" &&
-			Settings::ReturnSettingValue("ShowSongTimerWhen") == "automatic") {
+			Settings::IsOn("ShowSongTimerEnabled") &&
+			Settings::GetWhen("ShowSongTimerWhen") == When::Automatic) {
 			state.automatedSongTimer = true;
 			D3DHooks::showSongTimerOnScreen = true;
 		}
