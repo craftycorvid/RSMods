@@ -256,22 +256,7 @@ namespace ModManager {
 	/// Handles mods that run regardless of game state.
 	/// </summary>
 	void HandleAlwaysOnMods(GameLoopState& state) {
-		if (Settings::IsOn("RemoveHeadstockEnabled") &&
-			Settings::GetWhen("RemoveHeadstockWhen") == When::Startup) {
-			D3DHooks::RemoveHeadstockInThisMenu = true;
-		}
-
 		HandleVolumeDisplay();
-
-		if (!D3DHooks::SkylineOff &&
-			Settings::IsOn("RemoveSkylineEnabled") &&
-			Settings::GetWhen("ToggleSkylineWhen") == When::Startup) {
-			D3DHooks::toggleSkyline = true;
-		}
-
-		if (!D3DHooks::RemoveLyrics && Settings::GetWhen("RemoveLyricsWhen") == When::Startup) {
-			D3DHooks::RemoveLyrics = true;
-		}
 
 		if (GameState::Menus::IsInPreSongTuner() &&
 			Settings::IsOn("AutoTuneForSong") &&
@@ -314,7 +299,6 @@ namespace ModManager {
 	/// </summary>
 	void HandleInMenuState(GameLoopState& state) {
 		CleanupSongSpecificStates(state);
-		HandleMenuVisualMods(state);
 		HandleMenuFeatures(state);
 		HandleHeadstockCacheReset(state);
 
@@ -346,23 +330,6 @@ namespace ModManager {
 			Midi::RevertAutomatedTuning();
 			Midi::alreadyAttemptedTuningInTuner = false;
 			Midi::userWantsToUseAutoTuning = false;
-		}
-	}
-
-	/// <summary>
-	/// Reverts visual mod states when exiting songs.
-	/// </summary>
-	void HandleMenuVisualMods(GameLoopState& state) {
-		if (Settings::IsOn("RemoveHeadstockEnabled") &&
-			Settings::GetWhen("RemoveHeadstockWhen") == When::Song) {
-			D3DHooks::RemoveHeadstockInThisMenu = false;
-		}
-
-		if (D3DHooks::SkylineOff &&
-			Settings::IsOn("RemoveSkylineEnabled") &&
-			Settings::GetWhen("ToggleSkylineWhen") == When::Song) {
-			D3DHooks::toggleSkyline = true;
-			D3DHooks::DrawSkylineInMenu = true;
 		}
 	}
 
@@ -517,7 +484,6 @@ namespace ModManager {
 
 		LogSongIDForRiffRepeater();
 		EnableRiffRepeaterFeatures();
-		HandleInSongVisualMods(state);
 		HandleMidiAutoTuningInSong();
 		HandleSongTimerDisplay(state);
 	}
@@ -584,24 +550,6 @@ namespace ModManager {
 		}
 	}
 
-
-	/// <summary>
-	/// Manages visual mod states when entering a song.
-	/// </summary>
-	void HandleInSongVisualMods(GameLoopState& state) {
-		if (Settings::IsOn("RemoveHeadstockEnabled") &&
-			Settings::GetWhen("RemoveHeadstockWhen") == When::Song) {
-			D3DHooks::RemoveHeadstockInThisMenu = true;
-		}
-
-		if (Settings::IsOn("RemoveSkylineEnabled") &&
-			Settings::GetWhen("ToggleSkylineWhen") == When::Song) {
-			if (!D3DHooks::SkylineOff) {
-				D3DHooks::toggleSkyline = true;
-			}
-			D3DHooks::DrawSkylineInMenu = false;
-		}
-	}
 
 	/// <summary>
 	/// Handles MIDI auto-tuning when entering a song.

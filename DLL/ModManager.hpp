@@ -32,7 +32,6 @@ namespace ModManager {
     void EnableRiffRepeaterFeatures();
     void LogSongIDForRiffRepeater();
     void EnableRiffRepeaterFeatures();
-    void HandleInSongVisualMods(GameLoopState& state);
     void HandleMidiAutoTuningInSong();
     void HandleSongTimerDisplay(GameLoopState& state);
     void HandleAutoLoadProfile(GameLoopState& state);
@@ -44,7 +43,6 @@ namespace ModManager {
     void HandleNonStopPlayTimer();
     void HandleLinearRiffRepeaterToggle();
     void HandleMidiDeviceScanning();
-    void HandleMenuVisualMods(GameLoopState& state);
     void HandleMenuFeatures(GameLoopState& state);
     void HandleHeadstockCacheReset(GameLoopState& state);
     void CleanupSongSpecificStates(GameLoopState& state);
