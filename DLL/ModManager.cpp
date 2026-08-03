@@ -238,18 +238,6 @@ namespace ModManager {
 		}
 	}
 
-	/// <summary>
-	/// Handles rainbow string and note effects.
-	/// </summary>
-	void HandleRainbowEffects() {
-		if (ERMode::IsRainbowEnabled() || ERMode::IsRainbowNotesEnabled()) {
-			ERMode::DoRainbow();
-		}
-		else {
-			ERMode::Toggle7StringMode();
-		}
-	}
-
 	bool MoreThanThreeSecondsPassed() {
 		const auto currentTime = std::chrono::steady_clock::now();
 		return currentTime - GameOverlay::displayVolumeStartTime > std::chrono::seconds(3);
@@ -273,27 +261,7 @@ namespace ModManager {
 			D3DHooks::RemoveHeadstockInThisMenu = true;
 		}
 
-		if (GameState::LessonMode &&
-			Settings::ReturnSettingValue("ToggleLoftEnabled") == "on" &&
-			Settings::ReturnSettingValue("ToggleLoftWhen") != "manual") {
-			if (state.loftOff) {
-				Loft::ToggleLoft();
-			}
-			state.loftOff = false;
-
-			D3DHooks::GreenScreenWall = true; // Turn off in Lesson Mode(or the videos won't appear). Emulate effect with GreenScreenWall.
-		}
-
 		HandleVolumeDisplay();
-
-		if (!state.loftOff && !GameState::LessonMode &&
-			Settings::ReturnSettingValue("ToggleLoftEnabled") == "on" &&
-			Settings::ReturnSettingValue("ToggleLoftWhen") == "startup") {
-			Loft::ToggleLoft();
-			state.loftOff = true;
-
-			D3DHooks::GreenScreenWall = false;
-		}
 
 		if (!D3DHooks::SkylineOff &&
 			Settings::IsOn("RemoveSkylineEnabled") &&
@@ -340,39 +308,18 @@ namespace ModManager {
 		}
 
 		HandleAlwaysOnMods(state);
-		HandleRainbowEffects();
 	}
 
 	/// <summary>
 	/// Handles all state updates when the player is in menus.
 	/// </summary>
 	void HandleInMenuState(GameLoopState& state) {
-		HandleExtendedRangeInTuner(state);
 		CleanupSongSpecificStates(state);
 		HandleMenuVisualMods(state);
 		HandleMenuFeatures(state);
 		HandleHeadstockCacheReset(state);
 
 		GameState::previousMenu = GameState::currentMenu;
-	}
-
-	/// <summary>
-	/// Enables extended range mode in the tuner if applicable.
-	/// </summary>
-	void HandleExtendedRangeInTuner(const GameLoopState& state) {
-		if (GameState::Menus::IsInPreSongTuner()) {
-			if (!ERMode::AttemptedERInTuner) {
-				if (!state.skipERSleep) {
-					Sleep(1500);
-				}
-				ERMode::AttemptedERInTuner = true;
-				ERMode::UseERInTuner = SongTuning::IsExtendedRangeTuner();
-			}
-		}
-		else {
-			ERMode::AttemptedERInTuner = false;
-			ERMode::UseERInTuner = false;
-		}
 	}
 
 	/// <summary>
@@ -386,12 +333,6 @@ namespace ModManager {
 
 		if (!GameState::Menus::IsInScoreMenus() && RiffRepeater::currentlyEnabled_Above100) {
 			RiffRepeater::DisableTimeStretch();
-		}
-
-		if (ERMode::AttemptedERInThisSong) {
-			ERMode::UseERExclusivelyInThisSong = false;
-			ERMode::UseEROrColorsInThisSong = false;
-			ERMode::AttemptedERInThisSong = false;
 		}
 
 		if (state.automatedSongTimer &&
@@ -416,17 +357,6 @@ namespace ModManager {
 		if (Settings::IsOn("RemoveHeadstockEnabled") &&
 			Settings::GetWhen("RemoveHeadstockWhen") == When::Song) {
 			D3DHooks::RemoveHeadstockInThisMenu = false;
-		}
-
-		if (Settings::ReturnSettingValue("ToggleLoftEnabled") == "on" &&
-			Settings::ReturnSettingValue("ToggleLoftWhen") == "song") {
-			if (state.loftOff) {
-				Loft::ToggleLoft();
-				state.loftOff = false;
-			}
-			if (!GameState::LessonMode) {
-				D3DHooks::GreenScreenWall = false;
-			}
 		}
 
 		if (D3DHooks::SkylineOff &&
@@ -599,15 +529,12 @@ namespace ModManager {
 	/// </summary>
 	void HandleInSongState(GameLoopState& state) {
 		state.guitarSpeakPresent = false;
-		ERMode::AttemptedERInTuner = false;
-		ERMode::UseERInTuner = false;
 
 		LogSongIDForRiffRepeater();
 		EnableRiffRepeaterFeatures();
 		HandleInSongVisualMods(state);
 		HandleMidiAutoTuningInSong();
 		HandleSongTimerDisplay(state);
-		HandleExtendedRangeInSong(state);
 	}
 
 	/// <summary>
@@ -684,12 +611,6 @@ namespace ModManager {
 
 		if (Settings::IsOn("RemoveSkylineEnabled") &&
 			Settings::GetWhen("ToggleSkylineWhen") == When::Song) {
-			if (!state.loftOff) {
-				Loft::ToggleLoft();
-			}
-			state.loftOff = true;
-		}
-
 			if (!D3DHooks::SkylineOff) {
 				D3DHooks::toggleSkyline = true;
 			}
@@ -721,21 +642,4 @@ namespace ModManager {
 		}
 	}
 
-	/// <summary>
-	/// Detects and attempts to enable extended range mode for appropriate songs.
-	/// </summary>
-	void HandleExtendedRangeInSong(const GameLoopState& state) {
-		if (!ERMode::AttemptedERInThisSong) {
-			if (!state.skipERSleep) { // Tuning takes a second, or so, to get set by the game. We use this to make sure we have the right tuning numbers. Otherwise, we would never get ER mode to turn on properly.
-				Sleep(1500);
-			}
-			ERMode::UseERExclusivelyInThisSong = SongTuning::IsExtendedRangeSong();
-			ERMode::UseEROrColorsInThisSong = (Settings::ReturnSettingValue("ExtendedRangeEnabled") == "on" &&
-				ERMode::UseERExclusivelyInThisSong) ||
-				Settings::GetModSetting("CustomStringColors") == 2 ||
-				(Settings::ReturnSettingValue("SeparateNoteColors") == "on" &&
-					Settings::GetModSetting("SeparateNoteColorsMode") != 1);
-			ERMode::AttemptedERInThisSong = true;
-		}
-	}
 }

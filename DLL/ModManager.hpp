@@ -18,7 +18,6 @@ struct GameLoopState {
     bool skipERSleep = false; // If using RR past 100%, remove the 1.5s sleep on ER mode, to stop flickering colors.
     bool forkInToasterNewProfile = false; // If Auto Load Profile has a specified profile, and we can't find it, then this will be true.
     bool automatedSongTimer = false; // If true, we will always show the song timer.
-    bool loftOff = false; // Is the loft disabled right now? Toggles when loft turns off (True - No Loft, False - Loft)
     bool guitarSpeakPresent = false; // If true, read the notes inputted and press the key combo provided. (True - On, False - Off)
     std::string selectedUser;
 };
@@ -38,7 +37,6 @@ namespace ModManager {
     void HandleInSongVisualMods(GameLoopState& state);
     void HandleMidiAutoTuningInSong();
     void HandleSongTimerDisplay(GameLoopState& state);
-    void HandleExtendedRangeInSong(const GameLoopState& state);
     void HandleAutoLoadProfile(GameLoopState& state);
     void HandleSpecificProfileLoad(GameLoopState& state);
     void HandleAlwaysOnMods(GameLoopState& state);
@@ -48,12 +46,10 @@ namespace ModManager {
     void HandleNonStopPlayTimer();
     void HandleLinearRiffRepeaterToggle();
     void HandleMidiDeviceScanning();
-    void HandleRainbowEffects();
     void HandleExternalMonitor(GameLoopState& state);
     void HandleMenuVisualMods(GameLoopState& state);
     void HandleMenuFeatures(GameLoopState& state);
     void HandleHeadstockCacheReset(GameLoopState& state);
-    void HandleExtendedRangeInTuner(const GameLoopState& state);
     void CleanupSongSpecificStates(GameLoopState& state);
     void ConfigureAlternativeSampleRate();
     void CheckIfGameHasLoaded();

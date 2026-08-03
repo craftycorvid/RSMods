@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Keybindings.hpp"
+#include "Framework/Framework.hpp"
 
 namespace Keybindings {
 	std::map<std::string, ModCommand, std::less<>> keyUpCommands;
@@ -200,9 +201,9 @@ namespace Keybindings {
 
 			if (Contains(currMsg, "update")) {
 				if (Contains(currMsg, "all"))
-					Settings::UpdateSettings();
+					Framework::Registry().EnqueueSettingsUpdate([] { Settings::UpdateSettings(); });
 				else
-					Settings::ParseSettingUpdate(currMsg);
+					Framework::Registry().EnqueueSettingsUpdate([currMsg] { Settings::ParseSettingUpdate(currMsg); });
 			}
 			else if (Contains(currMsg, "WwiseEvent")) {
 				auto msgParts = Settings::SplitByWhitespace(currMsg);
