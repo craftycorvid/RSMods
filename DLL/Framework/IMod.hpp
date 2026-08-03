@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <vector>
 
 #include "GamePhase.hpp"
 
@@ -19,7 +20,12 @@ namespace Framework {
 		// Must be cheap and side-effect free.
 		virtual bool IsEnabled(const ModContext&) const { return true; }
 
-		virtual void OnInitialize(ModContext&)      {} // Host services are ready.
+		// Losing any claimed resource suppresses the mod.
+		virtual std::vector<std::string_view> ClaimsExclusive() const { return {}; }
+		// Higher wins; ties favor the lexicographically smaller Id().
+		virtual int Priority() const { return 0; }
+
+		virtual void OnInitialize(ModContext&)      {} // Host services are ready; subscribe to render callbacks here.
 		virtual void OnShutdown(ModContext&)        {}
 
 		virtual void OnSettingsChanged(ModContext&) {} // Applied AND delivered on MainThread.

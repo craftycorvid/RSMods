@@ -3,12 +3,14 @@
 #include "../RSColor.h"
 #include "ModRegistry.hpp"
 
+#include <algorithm>
 #include <functional>
 #include <mutex>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "ConflictResolver.hpp"
 #include "ModContext.hpp"
 #include "../Log.hpp"
 
@@ -17,7 +19,7 @@ namespace Framework {
 
 	enum class ModState {
 		Registered,
-		Inactive,
+		Inactive,   // Initialized but not effectively active: never-activated, user-disabled, or conflict-suppressed.
 		Active,
 		Faulted,
 	};
@@ -70,11 +72,11 @@ namespace Framework {
 			Invoke(record, &IMod::OnDisabled, "OnDisabled");
 		}
 
-		void Deactivate(Record& record) {
+		void Deactivate(Record& record, bool suppressed) {
 			Revert(record);
 			record.state = ModState::Inactive;
-
-			LOG_INFO("[Framework] " << record.mod->Id() << " disabled" << std::endl);
+			LOG_INFO("[Framework] " << record.mod->Id()
+				<< (suppressed ? " suppressed by a higher-priority conflicting mod" : " disabled") << std::endl);
 		}
 
 		void Activate(Record& record) {
@@ -95,7 +97,6 @@ namespace Framework {
 
 			Revert(record);
 			Fault(record, "threw in a tick hook");
-
 			return false;
 		}
 
@@ -114,29 +115,6 @@ namespace Framework {
 			if (!InvokeActive(record, &IMod::OnTick, "OnTick")) return;
 			if (phase == GamePhase::Menu && !InvokeActive(record, &IMod::OnMenuTick, "OnMenuTick")) return;
 			if (phase == GamePhase::Song) InvokeActive(record, &IMod::OnSongTick, "OnSongTick");
-		}
-
-		void ProcessRecord(Record& record, GamePhase phase) {
-			switch (record.state) {
-				case ModState::Registered:
-				case ModState::Faulted:
-					return;
-
-				case ModState::Inactive:
-					if (!EnabledSafe(record)) return;
-					Activate(record);
-					break;
-
-				case ModState::Active:
-					if (!EnabledSafe(record)) {
-						Deactivate(record);
-						return;
-					}
-					break;
-			}
-
-			if (record.state == ModState::Active)
-				ReconcileSongAndTick(record, phase);
 		}
 
 		void DrainSettings() {
@@ -162,10 +140,52 @@ namespace Framework {
 			}
 		}
 
+		bool IsActivatable(ModState state) const {
+			return state == ModState::Inactive || state == ModState::Active;
+		}
+
+		void BuildResolverIfNeeded() {
+			if (!resolverDirty)
+				return;
+
+			modResources.assign(records.size(), {});
+			for (size_t i = 0; i < records.size(); ++i) {
+				for (std::string_view resource : records[i].mod->ClaimsExclusive()) {
+					auto& resources = modResources[i];
+					const std::string owned(resource);
+					if (std::find(resources.begin(), resources.end(), owned) == resources.end())
+						resources.push_back(owned);
+				}
+			}
+			resolverDirty = false;
+		}
+
+		void ComputeRawEnabled(std::vector<char>& rawEnabled) {
+			rawEnabled.assign(records.size(), 0);
+			for (size_t i = 0; i < records.size(); ++i) {
+				if (IsActivatable(records[i].state))
+					rawEnabled[i] = EnabledSafe(records[i]);
+			}
+		}
+
+		void ResolveDesired(const std::vector<char>& rawEnabled, std::vector<char>& desired) {
+			std::vector<Resolver::Candidate> candidates(records.size());
+			for (size_t i = 0; i < records.size(); ++i) {
+				candidates[i].id = records[i].mod->Id();
+				candidates[i].priority = records[i].mod->Priority();
+				candidates[i].enabled = rawEnabled[i] && IsActivatable(records[i].state);
+				candidates[i].resources = &modResources[i];
+			}
+
+			Resolver::Resolve(candidates, desired);
+		}
+
 		std::vector<Record> records;
 		ModContext ctx;
 		std::mutex settingsMutex;
 		std::vector<std::function<void()>> pendingSettings;
+		bool resolverDirty = false;
+		std::vector<std::vector<std::string>> modResources;
 	};
 
 	ModRegistry::ModRegistry() : impl(std::make_unique<Impl>()) {}
@@ -180,7 +200,7 @@ namespace Framework {
 
 	void ModRegistry::Register(std::unique_ptr<IMod> mod) {
 		const std::string_view id = mod->Id();
-		
+
 		for (const auto& record : impl->records) {
 			if (record.mod->Id() == id) {
 				LOG_ERROR("[Framework] Duplicate mod Id '" << id << "' — registration rejected" << std::endl);
@@ -190,6 +210,7 @@ namespace Framework {
 
 		LOG_INFO("[Framework] Registered mod: " << id << std::endl);
 		impl->records.push_back(Impl::Record{ std::move(mod) });
+		impl->resolverDirty = true;
 	}
 
 	void ModRegistry::DispatchInitialize() {
@@ -214,9 +235,31 @@ namespace Framework {
 		impl->ctx.loop = &loop;
 
 		impl->DrainSettings();
+		impl->BuildResolverIfNeeded();
 
-		for (auto& record : impl->records)
-			impl->ProcessRecord(record, phase);
+		std::vector<char> rawEnabled;
+		std::vector<char> desired;
+		impl->ComputeRawEnabled(rawEnabled);
+		impl->ResolveDesired(rawEnabled, desired);
+
+		// Pass 1: deactivate losers before activating winners, so a loser's OnDisabled reverts
+		// its game state (and frees its exclusive resources) before the winner's OnEnabled.
+		for (size_t i = 0; i < impl->records.size(); ++i) {
+			auto& record = impl->records[i];
+			if (record.state == ModState::Active && !desired[i])
+				impl->Deactivate(record, /*suppressed=*/rawEnabled[i] != 0);
+		}
+
+		// Pass 2: activate winners and tick them.
+		for (size_t i = 0; i < impl->records.size(); ++i) {
+			auto& record = impl->records[i];
+			if (!desired[i])
+				continue;
+			if (record.state != ModState::Active)
+				impl->Activate(record);
+			if (record.state == ModState::Active)
+				impl->ReconcileSongAndTick(record, phase);
+		}
 	}
 
 	void ModRegistry::Shutdown() {
@@ -224,8 +267,8 @@ namespace Framework {
 			if (record.state == ModState::Registered)
 				continue;
 
-			if (record.state == ModState::Active) impl->Revert(record);
-
+			if (record.state == ModState::Active)
+				impl->Revert(record);
 			impl->Invoke(record, &IMod::OnShutdown, "OnShutdown");
 		}
 

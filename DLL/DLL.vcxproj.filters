@@ -593,6 +593,9 @@
     <ClInclude Include="Framework\GamePhase.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="Framework\ConflictResolver.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
     <ClInclude Include="Framework\IMod.hpp">
       <Filter>Framework</Filter>
     </ClInclude>

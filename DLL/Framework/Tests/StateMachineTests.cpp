@@ -69,12 +69,19 @@ namespace {
 		std::string id;
 		std::string tag;
 		bool enabled = true;
+		int prio = 0;
+		std::vector<std::string> claimStrings;
 		std::string throwOn;
 
 		explicit TestMod(std::string i) : id(std::move(i)), tag(id) {}
 
 		std::string_view Id() const override { return id; }
 		bool IsEnabled(const Framework::ModContext&) const override { return enabled; }
+		int Priority() const override { return prio; }
+
+		std::vector<std::string_view> ClaimsExclusive() const override {
+			std::vector<std::string_view> v; for (auto& s : claimStrings) v.push_back(s); return v;
+		}
 
 		void OnInitialize(Framework::ModContext&) override { Rec("OnInitialize"); }
 		void OnShutdown(Framework::ModContext&) override { Rec("OnShutdown"); }
@@ -94,9 +101,10 @@ namespace {
 		}
 	};
 
-	TestMod* Add(ModRegistry& reg, const std::string& id, bool enabled = true) {
+	TestMod* Add(ModRegistry& reg, const std::string& id, bool enabled = true, int prio = 0) {
 		auto m = std::make_unique<TestMod>(id);
 		m->enabled = enabled;
+		m->prio = prio;
 		TestMod* raw = m.get();
 		reg.Register(std::move(m));
 		return raw;
@@ -252,8 +260,27 @@ static void Test_DuplicateIdRejected() {
 	reg.Shutdown();
 }
 
+static void Test_ConflictSuppressionOrder() {
+	ClearEvents();
+	ModRegistry reg;
+	TestMod* a = Add(reg, "A", true, 1);
+	TestMod* b = Add(reg, "B", false, 2);
+	a->claimStrings = { "R" };
+	b->claimStrings = { "R" };
+	reg.DispatchInitialize();
+	reg.Tick(GamePhase::Menu, g_gls);
+	Expect(Has("A:OnEnabled") && !Has("B:OnEnabled"), "A active alone");
+	ClearEvents();
+	b->enabled = true;
+	reg.Tick(GamePhase::Menu, g_gls);
+	Expect(Has("A:OnDisabled"), "loser A gets OnDisabled on suppression");
+	Expect(Has("B:OnEnabled"), "winner B activates");
+	Expect(IndexOf("A:OnDisabled") < IndexOf("B:OnEnabled"), "deactivation precedes activation (resource handoff)");
+	reg.Shutdown();
+}
+
 int main() {
-	std::cout << "ModRegistry state-machine tests (minimal core)\n";
+	std::cout << "ModRegistry state-machine tests (+ conflicts)\n";
 
 	Test_InitializeFaultIsIsolated();
 	Test_ActivateInMenu();
@@ -261,6 +288,7 @@ int main() {
 	Test_DisableMidSong();
 	Test_ReenableAfterDisable();
 	Test_DisabledSameTickAsSongExit();
+	Test_ConflictSuppressionOrder();
 	Test_OnEnabledThrowsFaults();
 	Test_OnSongEnterThrowsShortCircuits();
 	Test_TickFailureFaultsImmediately();

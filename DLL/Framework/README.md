@@ -3,9 +3,8 @@
 Generalizes the `CCEffect` pattern to *all* mods so that a mod owns its own state, activation, and lifecycle 
 instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather than editing the orchestrator.
 
-> **Scope of this commit: the minimal core.** Just enough to own a mod's lifecycle and drive
-> it from the game loop. The render-callback subsystem (D3D `EndScene` hooks + cross-thread
-> quiesce) and the conflict/resource resolver are a **follow-up**.
+> **Scope: lifecycle + conflict arbitration.** The render-callback subsystem (D3D `EndScene`
+> hooks + cross-thread quiesce) is still a **follow-up**; teardown here is synchronous.
 
 ## Design boundaries (read first)
 
@@ -50,9 +49,11 @@ Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active
               OnEnabled or tick hook throws
 ```
 
-- **Inactive** means initialized but not effectively enabled. It covers both a mod that has
-  never activated and one that was subsequently disabled; their next valid transition is the same.
-- **Effective activation** = `IsEnabled()`. Only `Active` mods get tick hooks.
+- **Inactive** means initialized but not effectively active. It covers a mod that never activated,
+  one the user disabled, and one **suppressed** by losing a resource conflict; their next valid
+  transition is identical (the suppressed-vs-disabled distinction survives only in the log line).
+- **Effective activation** = `IsEnabled()` **and** winning every resource it contends for. Only
+  `Active` mods get tick hooks.
 - **Ordering guarantees** (edges are per-mod, not global phase edges):
   - Activate in a song: `OnEnabled → OnSongEnter → OnTick → OnSongTick`
   - Deactivate in a song: `OnSongExit → OnDisabled`
@@ -65,6 +66,23 @@ Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active
     immediately and receives a best-effort `OnDisabled` revert.
 - **Shutdown**: `OnSongExit`(if in song) → `OnDisabled`(if active) → `OnShutdown`, then the
   registry destroys the mod objects.
+
+## Conflicts & resources
+
+Some mods can't run together — e.g. **DropPedal** and **MIDI auto-tune** both drive tuning. They
+express that by claiming the same named exclusive resource:
+
+```cpp
+std::vector<std::string_view> ClaimsExclusive() const override { return { "tuning-controller" }; }
+int Priority() const override { return 10; }   // one GLOBAL priority per mod
+```
+
+Among all *enabled* mods claiming a resource the highest-`Priority()` one wins it; a mod that loses
+any resource it claims is suppressed (its `OnDisabled` reverts its game state). The resolver
+(`ConflictResolver.hpp`, pure and unit-tested) is deterministic greedy: order enabled mods by
+`(Priority desc, Id asc)`, activate each iff none of its resources are already reserved by an
+already-activated mod. `Tick` deactivates losers before activating winners, so a handoff of a
+shared resource reverts the loser before the winner acquires.
 
 ## Settings
 
