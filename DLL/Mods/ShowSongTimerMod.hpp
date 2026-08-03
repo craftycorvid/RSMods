@@ -1,0 +1,12 @@
+#pragma once
+
+#include "../Framework/Framework.hpp"
+
+class ShowSongTimerMod : public Framework::IMod {
+public:
+	std::string_view Id() const override;
+	bool IsEnabled(const Framework::ModContext& c) const override;
+
+	void OnSongEnter(Framework::ModContext& c) override;
+	void OnSongExit(Framework::ModContext& c) override;
+};

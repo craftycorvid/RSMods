@@ -1,0 +1,25 @@
+#include "../stdafx.h"
+#include "ShowSongTimerMod.hpp"
+
+using Framework::ModContext;
+using Settings::When;
+
+std::string_view ShowSongTimerMod::Id() const {
+	return "ShowSongTimer";
+}
+
+// This mod owns only the automatic mode; manual show/hide is driven by the ShowSongTimerKey keybinding,
+// which stays independent of the mod. The timer only renders in a song (see GameOverlay::DisplaySongTimer).
+bool ShowSongTimerMod::IsEnabled(const ModContext& c) const {
+	return c.IsOn("ShowSongTimerEnabled") && c.WhenSetting("ShowSongTimerWhen") == When::Automatic;
+}
+
+void ShowSongTimerMod::OnSongEnter(ModContext& c) {
+	D3DHooks::showSongTimerOnScreen = true;
+}
+
+void ShowSongTimerMod::OnSongExit(ModContext& c) {
+	D3DHooks::showSongTimerOnScreen = false;
+}
+
+static Framework::ModRegistrar<ShowSongTimerMod> _showSongTimerReg;

@@ -318,13 +318,6 @@ namespace ModManager {
 			RiffRepeater::DisableTimeStretch();
 		}
 
-		if (state.automatedSongTimer &&
-			Settings::IsOn("ShowSongTimerEnabled") &&
-			Settings::GetWhen("ShowSongTimerWhen") == When::Automatic) {
-			state.automatedSongTimer = false;
-			D3DHooks::showSongTimerOnScreen = false;
-		}
-
 		if ((Midi::alreadyAutomatedTuningInThisSong || Midi::alreadyAttemptedTuningInTuner) &&
 			!GameState::Menus::IsInPreSongTuner()) {
 			Midi::RevertAutomatedTuning();
@@ -466,7 +459,6 @@ namespace ModManager {
 		LogSongIDForRiffRepeater();
 		EnableRiffRepeaterFeatures();
 		HandleMidiAutoTuningInSong();
-		HandleSongTimerDisplay(state);
 	}
 
 	/// <summary>
@@ -547,13 +539,4 @@ namespace ModManager {
 	/// <summary>
 	/// Shows or hides the song timer based on settings.
 	/// </summary>
-	void HandleSongTimerDisplay(GameLoopState& state) {
-		if (!state.automatedSongTimer &&
-			Settings::IsOn("ShowSongTimerEnabled") &&
-			Settings::GetWhen("ShowSongTimerWhen") == When::Automatic) {
-			state.automatedSongTimer = true;
-			D3DHooks::showSongTimerOnScreen = true;
-		}
-	}
-
 }
