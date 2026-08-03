@@ -4,7 +4,6 @@
 #include "Mods/VolumeControl.hpp"
 #include "Mods/AudioDevices.hpp"
 #include "Mods/BugPrevention.hpp"
-#include "Mods/LaunchOnExternalMonitor.hpp"
 #include "Keyboard.hpp"
 #include "Mods/Loft.hpp"
 #include "Keybindings.hpp"
@@ -14,7 +13,6 @@
 #include <string>
 
 struct GameLoopState {
-    bool movedToExternalDisplay = false; // User wants to move the display to a specific location on boot.
     bool skipERSleep = false; // If using RR past 100%, remove the 1.5s sleep on ER mode, to stop flickering colors.
     bool forkInToasterNewProfile = false; // If Auto Load Profile has a specified profile, and we can't find it, then this will be true.
     bool automatedSongTimer = false; // If true, we will always show the song timer.
@@ -46,7 +44,6 @@ namespace ModManager {
     void HandleNonStopPlayTimer();
     void HandleLinearRiffRepeaterToggle();
     void HandleMidiDeviceScanning();
-    void HandleExternalMonitor(GameLoopState& state);
     void HandleMenuVisualMods(GameLoopState& state);
     void HandleMenuFeatures(GameLoopState& state);
     void HandleHeadstockCacheReset(GameLoopState& state);

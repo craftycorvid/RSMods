@@ -201,9 +201,6 @@
     <ClCompile Include="CC\Effects\RainbowStringsEffect.cpp">
       <Filter>CrowdControl\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="Mods\LaunchOnExternalMonitor.cpp">
-      <Filter>Mods</Filter>
-    </ClCompile>
     <ClCompile Include="Mods\VoiceOverControl.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
@@ -289,6 +286,9 @@
       <Filter>Mods</Filter>
     </ClCompile>
     <ClCompile Include="Mods\ExtendedRangeMod.cpp">
+      <Filter>Mods</Filter>
+    </ClCompile>
+    <ClCompile Include="Mods\LaunchOnExternalMonitor.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
     <ClCompile Include="Menu.cpp">
@@ -488,9 +488,6 @@
     <ClInclude Include="CC\Effects\RainbowStringsEffect.hpp">
       <Filter>CrowdControl\Effects\EffectHeaders</Filter>
     </ClInclude>
-    <ClInclude Include="Mods\LaunchOnExternalMonitor.hpp">
-      <Filter>Mods\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Mods\VoiceOverControl.hpp">
       <Filter>Mods\Headers</Filter>
     </ClInclude>
@@ -591,6 +588,9 @@
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\ExtendedRangeMod.hpp">
+      <Filter>Mods\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mods\LaunchOnExternalMonitor.hpp">
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Framework\GamePhase.hpp">

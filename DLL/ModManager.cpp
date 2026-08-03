@@ -290,7 +290,6 @@ namespace ModManager {
 	{
 		GameState::currentMenu = GameState::GetCurrentMenu(); // This loads without checking if memory is safe... This can cause crashes if used when GameLoaded is false.
 
-		HandleExternalMonitor(state);
 		HandleMicrophoneVolumeOverride();
 		HandleAudioBackgroundToggle();
 		HandleTwoRTCBypassToggle();
@@ -415,20 +414,6 @@ namespace ModManager {
 		}
 	}
 
-
-	/// <summary>
-	/// Handles moving the game window to an external monitor.
-	/// </summary>
-	void HandleExternalMonitor(GameLoopState& state) 
-	{
-		if (!state.movedToExternalDisplay && Settings::IsOn("SecondaryMonitor")) {
-			LaunchOnExternalMonitor::SendRocksmithToScreen(
-				Settings::GetModSetting("SecondaryMonitorXPosition"),
-				Settings::GetModSetting("SecondaryMonitorYPosition")
-			);
-			state.movedToExternalDisplay = true;
-		}
-	}
 
 	/// <summary>
 	/// Manages microphone volume override settings.
