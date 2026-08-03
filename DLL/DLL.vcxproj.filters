@@ -306,6 +306,9 @@
     <ClCompile Include="ModManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Framework\HostHooks.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
     <ClCompile Include="Framework\ModRegistry.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
@@ -594,6 +597,9 @@
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\ConflictResolver.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\HostHooks.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\IMod.hpp">

@@ -113,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="ModManager.cpp" />
+    <ClCompile Include="Framework\HostHooks.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Framework\ModRegistry.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -303,6 +306,7 @@
     <ClInclude Include="Mods\ExtendedRangeMod.hpp" />
     <ClInclude Include="Framework\GamePhase.hpp" />
     <ClInclude Include="Framework\ConflictResolver.hpp" />
+    <ClInclude Include="Framework\HostHooks.hpp" />
     <ClInclude Include="Framework\IMod.hpp" />
     <ClInclude Include="Framework\ModContext.hpp" />
     <ClInclude Include="Framework\ModRegistry.hpp" />

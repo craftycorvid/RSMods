@@ -1,17 +1,19 @@
-# Mod Framework (core)
+# Mod Framework
 
 Generalizes the `CCEffect` pattern to *all* mods so that a mod owns its own state, activation, and lifecycle 
 instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather than editing the orchestrator.
 
-> **Scope: lifecycle + conflict arbitration.** The render-callback subsystem (D3D `EndScene`
-> hooks + cross-thread quiesce) is still a **follow-up**; teardown here is synchronous.
+> **Status: proof-of-concept integration.** `LoftMod` and `ExtendedRangeMod` are registered and their
+> logic is removed from `ModManager`, so a build runs both through the framework. A full mod-suite
+> migration is deliberately *not* done yet.
 
 ## Design boundaries (read first)
 
 - **Two layers, kept separate.** `IMod`/`ModContext` are an **internal C++ API** for built-in
   mods. They are **not** the third-party plugin boundary and must not be used as an ABI. 
-- **Activation ownership lives in the framework, not in each mod.** A mod says *what* it wants
-  (enabled? render callback?); the registry decides *whether* and *when* it runs.
+- **Activation and threading ownership live in the framework, not in each mod.** A mod says *what*
+  it wants (enabled? which resources? render callback?); the registry decides *whether*, *when*,
+  and on *which thread* it runs.
 - **No input/WndProc surface.** `Keybindings` already owns input, and a consumable message hook
   risks swallowing host-critical messages (`WM_CLOSE`, `WM_COPYDATA`).
 
@@ -41,12 +43,11 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
 ## Lifecycle state machine
 
 ```
-Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active
-     │                          │  ▲                    │
-     │ OnInitialize throws     │  └────OnDisabled──────┘
-     ▼                          │                       │
-  Faulted ◀─────────────────────┴───────────────────────┘
-              OnEnabled or tick hook throws
+Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active ──▶ Deactivating
+     │                          ▲                       │             │
+     │ OnInitialize throws      └───────OnDisabled──────┴─────────────┘
+     ▼                                                  (once render callbacks quiesce)
+  Faulted ◀──────────── OnEnabled / tick / render hook throws
 ```
 
 - **Inactive** means initialized but not effectively active. It covers a mod that never activated,
@@ -54,6 +55,9 @@ Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active
   transition is identical (the suppressed-vs-disabled distinction survives only in the log line).
 - **Effective activation** = `IsEnabled()` **and** winning every resource it contends for. Only
   `Active` mods get tick hooks.
+- **Deactivating** - a mod leaving `Active` that still has render callbacks in flight parks here:
+  inactive and no longer ticking, but its `OnDisabled` revert is **deferred** to a later tick until
+  the render hooks report it quiescent, so a callback can never touch state `OnDisabled` is freeing.
 - **Ordering guarantees** (edges are per-mod, not global phase edges):
   - Activate in a song: `OnEnabled → OnSongEnter → OnTick → OnSongTick`
   - Deactivate in a song: `OnSongExit → OnDisabled`
@@ -64,12 +68,14 @@ Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active
     strongly exception-safe, as `OnDisabled` is *not* called on a failed enable.
   - A tick hook (`OnTick`/`OnMenuTick`/`OnSongTick`/`OnSongEnter`) throws → the mod is faulted
     immediately and receives a best-effort `OnDisabled` revert.
+  - A **render callback** that throws is caught (never crosses the D3D hook); the next tick the
+    registry tears that mod down and drops its subscriptions, so it disables itself instead of spamming.
 - **Shutdown**: `OnSongExit`(if in song) → `OnDisabled`(if active) → `OnShutdown`, then the
-  registry destroys the mod objects.
+  registry destroys the mod objects, waiting first for every in-flight render callback to finish.
 
 ## Conflicts & resources
 
-Some mods can't run together — e.g. **DropPedal** and **MIDI auto-tune** both drive tuning. They
+Some mods can't run together (e.g. **DropPedal** and **MIDI auto-tune**) both drive tuning. They
 express that by claiming the same named exclusive resource:
 
 ```cpp
@@ -81,8 +87,16 @@ Among all *enabled* mods claiming a resource the highest-`Priority()` one wins i
 any resource it claims is suppressed (its `OnDisabled` reverts its game state). The resolver
 (`ConflictResolver.hpp`, pure and unit-tested) is deterministic greedy: order enabled mods by
 `(Priority desc, Id asc)`, activate each iff none of its resources are already reserved by an
-already-activated mod. `Tick` deactivates losers before activating winners, so a handoff of a
-shared resource reverts the loser before the winner acquires.
+already-activated mod. `Tick` deactivates losers before activating winners, and a `Deactivating`
+mod keeps reserving its resources, so a contested handoff can't double-acquire.
+
+## Render callbacks & threading
+
+`ctx.Render().OnEndScene(fn)` subscribes a per-frame callback (subscribe in `OnInitialize`). It is
+**owner-scoped** (only invoked while that mod is effective-active, dropped on shutdown) and
+**snapshot-dispatched** (no lock held across mod code). `DispatchEndScene` runs on the **render
+thread**, tick hooks on **MainThread**, so state shared between them must be `std::atomic` or a
+published immutable snapshot, a plain `bool` is a data race.
 
 ## Settings
 

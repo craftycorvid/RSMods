@@ -2,17 +2,29 @@
 
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "GamePhase.hpp"
+#include "HostHooks.hpp"
 #include "../Settings.hpp"
 
 struct GameLoopState;
 
 namespace Framework {
+	struct RenderBinder {
+		Hooks::RenderHooks& hooks;
+		const IMod* mod;
+
+		void OnEndScene(Hooks::EndSceneFn fn) const { hooks.Subscribe(mod, std::move(fn)); }
+	};
+
 	// Internal per-hook context
 	struct ModContext {
 		GamePhase phase = GamePhase::Loading;
 		GameLoopState* loop = nullptr;   // Transitional: fields migrate into the mods that own them.
+		const IMod* currentMod = nullptr; // Set by the registry before each hook call.
+
+		RenderBinder Render() const { return { Hooks::Render(), currentMod }; } // Subscribe per-frame draw callbacks.
 
 		bool IsOn(std::string_view key) const { return Settings::IsOn(std::string(key)); }
 		bool IsOff(std::string_view key) const { return Settings::IsOff(std::string(key)); }

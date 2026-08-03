@@ -204,6 +204,8 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 	GameOverlay::RenderOverlay(pDevice);
 	D3DHooks::RegenerateTwitchNoteColors(pDevice);
 
+	Framework::Hooks::DispatchEndScene(pDevice);
+
 	return originalReturn;
 }
 

@@ -4,13 +4,17 @@
 #include "ModRegistry.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <functional>
 #include <mutex>
 #include <string>
 #include <string_view>
+#include <thread>
+#include <unordered_set>
 #include <vector>
 
 #include "ConflictResolver.hpp"
+#include "HostHooks.hpp"
 #include "ModContext.hpp"
 #include "../Log.hpp"
 
@@ -19,8 +23,9 @@ namespace Framework {
 
 	enum class ModState {
 		Registered,
-		Inactive,   // Initialized but not effectively active: never-activated, user-disabled, or conflict-suppressed.
+		Inactive,      // Initialized but not effectively active: never-activated, user-disabled, or conflict-suppressed.
 		Active,
+		Deactivating,  // Leaving Active but render callbacks still in flight; teardown deferred until quiescent.
 		Faulted,
 	};
 
@@ -31,9 +36,13 @@ namespace Framework {
 			std::unique_ptr<IMod> mod;
 			ModState state = ModState::Registered;
 			bool inSong = false;
+			ModState pendingTarget = ModState::Inactive; // Resting state once a deferred teardown completes.
+			bool pendingSuppressed = false;              // When resting Inactive: suppressed-by-conflict vs user-disabled (log only).
 		};
 
 		bool Invoke(Record& record, Hook hook, const char* where) {
+			ctx.currentMod = record.mod.get();
+
 			try {
 				(record.mod.get()->*hook)(ctx);
 				return true;
@@ -49,6 +58,8 @@ namespace Framework {
 		}
 
 		bool EnabledSafe(Record& record) {
+			ctx.currentMod = record.mod.get();
+
 			try {
 				return record.mod->IsEnabled(ctx);
 			}
@@ -60,7 +71,9 @@ namespace Framework {
 
 		void Fault(Record& record, const char* reason) {
 			LOG_ERROR("[Framework] " << record.mod->Id() << " faulted (" << reason << "); it will no longer run" << std::endl);
+
 			record.state = ModState::Faulted;
+			Hooks::Render().RemoveMod(record.mod.get());
 		}
 
 		// Best-effort revert of live game state before a mod leaves Active.
@@ -69,14 +82,69 @@ namespace Framework {
 				Invoke(record, &IMod::OnSongExit, "OnSongExit");
 				record.inSong = false;
 			}
+
 			Invoke(record, &IMod::OnDisabled, "OnDisabled");
 		}
 
-		void Deactivate(Record& record, bool suppressed) {
+		void FinishTeardown(Record& record) {
 			Revert(record);
-			record.state = ModState::Inactive;
-			LOG_INFO("[Framework] " << record.mod->Id()
-				<< (suppressed ? " suppressed by a higher-priority conflicting mod" : " disabled") << std::endl);
+			if (record.pendingTarget == ModState::Faulted) {
+				Hooks::Render().RemoveMod(record.mod.get());
+			}
+
+			record.state = record.pendingTarget;
+
+			const char* outcome = record.pendingTarget == ModState::Faulted ? " faulted"
+				: record.pendingSuppressed ? " suppressed by a higher-priority conflicting mod" : " disabled";
+			LOG_INFO("[Framework] " << record.mod->Id() << outcome << std::endl);
+		}
+
+		// Leaves Active. If render callbacks are still in flight, parks in Deactivating and
+		// defers the OnDisabled revert to a later tick (never frees state under a live callback).
+		void BeginTeardown(Record& record, ModState target, bool suppressed) {
+			Hooks::Render().SetModActive(record.mod.get(), false);
+			record.pendingTarget = target;
+			record.pendingSuppressed = suppressed;
+
+			if (Hooks::Render().IsModQuiescent(record.mod.get())) {
+				FinishTeardown(record);
+			}
+			else {
+				record.state = ModState::Deactivating;
+				LOG_INFO("[Framework] " << record.mod->Id() << " deactivating; deferring teardown until render callbacks quiesce" << std::endl);
+			}
+		}
+
+		void RetryPendingDeactivations() {
+			for (auto& record : records) {
+				if (record.state == ModState::Deactivating && Hooks::Render().IsModQuiescent(record.mod.get())) {
+					FinishTeardown(record);
+				}
+			}
+		}
+
+		void HandleRenderFaults() {
+			for (const IMod* mod : Hooks::Render().TakeFaultedMods()) {
+				Record* record = FindByMod(mod);
+
+				if (!record) continue;
+
+				if (record->state == ModState::Active) {
+					BeginTeardown(*record, ModState::Faulted, false);
+				}
+				else if (record->state == ModState::Deactivating) {
+					record->pendingTarget = ModState::Faulted;
+				}
+			}
+		}
+
+		Record* FindByMod(const IMod* mod) {
+			for (auto& record : records) {
+				if (record.mod.get() == mod) {
+					return &record;
+				}
+			}
+			return nullptr;
 		}
 
 		void Activate(Record& record) {
@@ -86,17 +154,18 @@ namespace Framework {
 			}
 
 			record.state = ModState::Active;
+			Hooks::Render().SetModActive(record.mod.get(), true);
+
 			LOG_INFO("[Framework] " << record.mod->Id() << " activated" << std::endl);
 		}
 
-		// Runs an active-only hook; on throw, best-effort revert then fault immediately.
+		// Runs an active-only hook; on throw, tear down (best-effort revert) and fault immediately.
 		bool InvokeActive(Record& record, Hook hook, const char* where) {
 			if (Invoke(record, hook, where)) {
 				return true;
 			}
 
-			Revert(record);
-			Fault(record, "threw in a tick hook");
+			BeginTeardown(record, ModState::Faulted, false);
 			return false;
 		}
 
@@ -123,8 +192,7 @@ namespace Framework {
 				std::lock_guard<std::mutex> lock(settingsMutex);
 				batch.swap(pendingSettings);
 			}
-			if (batch.empty())
-				return;
+			if (batch.empty())return;
 
 			for (auto& apply : batch) {
 				try {
@@ -145,16 +213,18 @@ namespace Framework {
 		}
 
 		void BuildResolverIfNeeded() {
-			if (!resolverDirty)
-				return;
+			if (!resolverDirty) return;
 
 			modResources.assign(records.size(), {});
+
 			for (size_t i = 0; i < records.size(); ++i) {
 				for (std::string_view resource : records[i].mod->ClaimsExclusive()) {
 					auto& resources = modResources[i];
 					const std::string owned(resource);
-					if (std::find(resources.begin(), resources.end(), owned) == resources.end())
+
+					if (std::find(resources.begin(), resources.end(), owned) == resources.end()) {
 						resources.push_back(owned);
+					}
 				}
 			}
 			resolverDirty = false;
@@ -162,19 +232,40 @@ namespace Framework {
 
 		void ComputeRawEnabled(std::vector<char>& rawEnabled) {
 			rawEnabled.assign(records.size(), 0);
+
 			for (size_t i = 0; i < records.size(); ++i) {
-				if (IsActivatable(records[i].state))
+				if (IsActivatable(records[i].state)) {
 					rawEnabled[i] = EnabledSafe(records[i]);
+				}
 			}
 		}
 
 		void ResolveDesired(const std::vector<char>& rawEnabled, std::vector<char>& desired) {
+			std::unordered_set<std::string_view> reservedByDeactivating;
+
+			for (size_t i = 0; i < records.size(); ++i) {
+				if (records[i].state == ModState::Deactivating) {
+					for (const std::string& resource : modResources[i]) {
+						reservedByDeactivating.insert(resource);
+					}
+				}
+			}
+
 			std::vector<Resolver::Candidate> candidates(records.size());
 			for (size_t i = 0; i < records.size(); ++i) {
 				candidates[i].id = records[i].mod->Id();
 				candidates[i].priority = records[i].mod->Priority();
 				candidates[i].enabled = rawEnabled[i] && IsActivatable(records[i].state);
 				candidates[i].resources = &modResources[i];
+
+				if (candidates[i].enabled) {
+					for (const std::string& resource : modResources[i]) {
+						if (reservedByDeactivating.count(resource)) {
+							candidates[i].enabled = false;
+							break;
+						}
+					}
+				}
 			}
 
 			Resolver::Resolve(candidates, desired);
@@ -193,8 +284,9 @@ namespace Framework {
 
 	void ModRegistry::InstantiatePending() {
 		for (PendingRegistration* pending = g_modPendingHead; pending; pending = pending->next) {
-			if (pending->factory)
+			if (pending->factory) {
 				Register(pending->factory());
+			}
 		}
 	}
 
@@ -216,6 +308,7 @@ namespace Framework {
 	void ModRegistry::DispatchInitialize() {
 		for (auto& record : impl->records) {
 			if (record.state != ModState::Registered) continue;
+
 			if (impl->Invoke(record, &IMod::OnInitialize, "OnInitialize")) {
 				record.state = ModState::Inactive;
 			}
@@ -234,6 +327,8 @@ namespace Framework {
 		impl->ctx.phase = phase;
 		impl->ctx.loop = &loop;
 
+		impl->HandleRenderFaults();
+		impl->RetryPendingDeactivations();
 		impl->DrainSettings();
 		impl->BuildResolverIfNeeded();
 
@@ -242,23 +337,29 @@ namespace Framework {
 		impl->ComputeRawEnabled(rawEnabled);
 		impl->ResolveDesired(rawEnabled, desired);
 
-		// Pass 1: deactivate losers before activating winners, so a loser's OnDisabled reverts
-		// its game state (and frees its exclusive resources) before the winner's OnEnabled.
+		// Pass 1: outgoing transitions begin before new activations, so a replacement cannot
+		// acquire an exclusive resource the outgoing (still-reserving) mod hasn't released.
+		bool teardownDeferred = false;
 		for (size_t i = 0; i < impl->records.size(); ++i) {
 			auto& record = impl->records[i];
-			if (record.state == ModState::Active && !desired[i])
-				impl->Deactivate(record, /*suppressed=*/rawEnabled[i] != 0);
+
+			if (record.state == ModState::Active && !desired[i]) {
+				impl->BeginTeardown(record, ModState::Inactive, /*suppressed=*/rawEnabled[i] != 0);
+				teardownDeferred |= record.state == ModState::Deactivating;
+			}
 		}
+
+		if (teardownDeferred) impl->ResolveDesired(rawEnabled, desired);
 
 		// Pass 2: activate winners and tick them.
 		for (size_t i = 0; i < impl->records.size(); ++i) {
 			auto& record = impl->records[i];
+
 			if (!desired[i])
 				continue;
-			if (record.state != ModState::Active)
-				impl->Activate(record);
-			if (record.state == ModState::Active)
-				impl->ReconcileSongAndTick(record, phase);
+
+			if (record.state != ModState::Active) impl->Activate(record);
+			if (record.state == ModState::Active) impl->ReconcileSongAndTick(record, phase);
 		}
 	}
 
@@ -267,9 +368,18 @@ namespace Framework {
 			if (record.state == ModState::Registered)
 				continue;
 
-			if (record.state == ModState::Active)
+			if (record.state == ModState::Active || record.state == ModState::Deactivating) {
+				Hooks::Render().SetModActive(record.mod.get(), false);
+
+				while (!Hooks::Render().IsModQuiescent(record.mod.get())) {
+					std::this_thread::sleep_for(std::chrono::milliseconds(5));
+				}
+
 				impl->Revert(record);
+			}
+
 			impl->Invoke(record, &IMod::OnShutdown, "OnShutdown");
+			Hooks::Render().RemoveMod(record.mod.get());
 		}
 
 		impl->records.clear();
