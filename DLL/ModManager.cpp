@@ -300,7 +300,7 @@ namespace ModManager {
 	void HandleInMenuState(GameLoopState& state) {
 		CleanupSongSpecificStates(state);
 		HandleMenuFeatures(state);
-		HandleHeadstockCacheReset(state);
+		D3DHooks::UpdateHeadstockCacheForMenu();
 
 		GameState::previousMenu = GameState::currentMenu;
 	}
@@ -359,25 +359,6 @@ namespace ModManager {
 		}
 		else {
 			Keyboard::takenScreenshotOfThisScreen = false;
-		}
-	}
-
-	/// <summary>
-	/// Resets the headstock texture cache when appropriate.
-	/// So we aren't running the same textures over and over again.
-	/// </summary>
-	void HandleHeadstockCacheReset(GameLoopState& state) {
-		if (Settings::IsOn("RemoveHeadstockEnabled") &&
-			!GameState::Menus::IsInTuningMenus() ||
-			GameState::currentMenu == "MissionMenu") {
-			D3DHooks::resetHeadstockCache = true;
-		}
-
-		// If the current menu is not the same as the previous menu and if it's one of menus where you tune your guitar (i.e. headstock is shown), reset the cache because user may want to change the headstock style
-		if (GameState::previousMenu != GameState::currentMenu &&
-			GameState::Menus::IsInTuningMenus()) {
-			D3DHooks::resetHeadstockCache = true;
-			headstockTexturePointers.clear();
 		}
 	}
 

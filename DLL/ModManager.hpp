@@ -44,7 +44,6 @@ namespace ModManager {
     void HandleLinearRiffRepeaterToggle();
     void HandleMidiDeviceScanning();
     void HandleMenuFeatures(GameLoopState& state);
-    void HandleHeadstockCacheReset(GameLoopState& state);
     void CleanupSongSpecificStates(GameLoopState& state);
     void ConfigureAlternativeSampleRate();
     void CheckIfGameHasLoaded();

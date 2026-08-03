@@ -81,6 +81,9 @@ namespace D3DHooks {
 	std::string ConvertFloatTimeToStringTime(float timeInSeconds);
 	void RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice);
 
+	// Refreshes the headstock texture cache based on the current/previous menu. Call once per menu tick.
+	void UpdateHeadstockCacheForMenu();
+
 	inline HWND cachedGameHwnd = nullptr;
 	inline HWND GetGameWindow() {
 		if (cachedGameHwnd) {

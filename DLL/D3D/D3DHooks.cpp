@@ -715,7 +715,23 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	return SHOW_TEXTURE; // KEEP THIS LINE. This translates to "Display Graphics".
 }
 
-std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds) 
+// Resets the headstock texture cache when appropriate, so we aren't re-running the same textures over and over again.
+void D3DHooks::UpdateHeadstockCacheForMenu() {
+	if (Settings::IsOn("RemoveHeadstockEnabled") &&
+		!GameState::Menus::IsInTuningMenus() ||
+		GameState::currentMenu == "MissionMenu") {
+		resetHeadstockCache = true;
+	}
+
+	// If the current menu is not the same as the previous menu and if it's one of menus where you tune your guitar (i.e. headstock is shown), reset the cache because user may want to change the headstock style
+	if (GameState::previousMenu != GameState::currentMenu &&
+		GameState::Menus::IsInTuningMenus()) {
+		resetHeadstockCache = true;
+		headstockTexturePointers.clear();
+	}
+}
+
+std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds)
 {
 	int seconds = 0, minutes = 0, hours = 0;
 
