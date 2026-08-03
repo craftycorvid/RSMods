@@ -297,6 +297,9 @@
     <ClCompile Include="Mods\ShowSongTimerMod.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
+    <ClCompile Include="Mods\NonStopPlayTimerMod.cpp">
+      <Filter>Mods</Filter>
+    </ClCompile>
     <ClCompile Include="Mods\ExtendedRangeMod.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
@@ -609,6 +612,9 @@
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\ShowSongTimerMod.hpp">
+      <Filter>Mods\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mods\NonStopPlayTimerMod.hpp">
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\ExtendedRangeMod.hpp">

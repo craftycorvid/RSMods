@@ -278,7 +278,6 @@ namespace ModManager {
 		HandleMicrophoneVolumeOverride();
 		HandleAudioBackgroundToggle();
 		HandleTwoRTCBypassToggle();
-		HandleNonStopPlayTimer();
 		HandleLinearRiffRepeaterToggle();
 		HandleMidiDeviceScanning();
 
@@ -395,24 +394,6 @@ namespace ModManager {
 		SetTwoRTCBypass(Settings::IsOn("BypassTwoRTCMessageBox"));
 	}
 
-
-	/// <summary>
-	/// Manages custom non-stop play timer settings.
-	/// </summary>
-	void HandleNonStopPlayTimer() {
-		const bool useCustom = Settings::IsOn("UseCustomNSPTimer");
-		const double desired = useCustom
-			? Settings::GetModSetting("CustomNSPTimeLimit") / 1000.0
-			: DefaultNSPTimeLimit;
-
-		const double current = SongTimer::GetNonStopPlayTimer();
-
-		const double eps = std::numeric_limits<double>::epsilon() * std::max(1.0, std::max(std::abs(desired), std::abs(current))) * 4;
-		if (std::abs(current - desired) > eps) {
-			LOG_INFO("Updating NSP timer...");
-			SongTimer::SetNonStopPlayTimer(desired);
-		}
-	}
 
 	/// <summary>
 	/// Handles updates while the game is still loading.

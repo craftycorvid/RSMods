@@ -20,7 +20,6 @@ struct GameLoopState {
 };
 
 namespace ModManager {
-    inline const double DefaultNSPTimeLimit = 10.9899997711182; // The default time for NSP.
 
     void InitializeConfiguration();
     void InitializeMods(bool debug);
@@ -38,7 +37,6 @@ namespace ModManager {
     void HandleInMenuState(GameLoopState& state);
     void HandleInSongState(GameLoopState& state);
     void HandleTwoRTCBypassToggle();
-    void HandleNonStopPlayTimer();
     void HandleLinearRiffRepeaterToggle();
     void HandleMidiDeviceScanning();
     void HandleMenuFeatures(GameLoopState& state);
