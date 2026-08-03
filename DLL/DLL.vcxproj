@@ -113,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="ModManager.cpp" />
+    <ClCompile Include="Framework\ModRegistry.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Mods\AudioDevices.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug with Wwise Logging|Win32'">../stdafx.h</PrecompiledHeaderFile>
@@ -286,6 +289,11 @@
     <ClInclude Include="Mods\DisableControllers.hpp" />
     <ClInclude Include="Mods\LaunchOnExternalMonitor.hpp" />
     <ClInclude Include="Mods\Loft.hpp" />
+    <ClInclude Include="Framework\GamePhase.hpp" />
+    <ClInclude Include="Framework\IMod.hpp" />
+    <ClInclude Include="Framework\ModContext.hpp" />
+    <ClInclude Include="Framework\ModRegistry.hpp" />
+    <ClInclude Include="Framework\Framework.hpp" />
     <ClInclude Include="Mods\Midi.hpp" />
     <ClInclude Include="Mods\RiffRepeater.hpp" />
     <ClInclude Include="Mods\TrueTuning.hpp" />

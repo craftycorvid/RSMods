@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Main.hpp"
+#include "Framework/Framework.hpp"
 
 #include <io.h>
 #include <share.h>
@@ -202,7 +203,7 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 	UpdateGameWindowStacking();
 	GameOverlay::RenderOverlay(pDevice);
 	D3DHooks::RegenerateTwitchNoteColors(pDevice);
-	
+
 	return originalReturn;
 }
 
@@ -233,18 +234,26 @@ unsigned WINAPI MainThread() {
 	Keybindings::InitializeCommands();
 	ModManager::InitializeConfiguration();
 	ModManager::InitializeMods(debug);
+	Framework::Registry().InstantiatePending();
 	ModManager::ApplyStartupMods();
+	Framework::Registry().DispatchInitialize();
 
 	while (!GameState::GameClosing) {
 		Sleep(250);
 
 		if (GameState::GameLoaded) {
 			ModManager::HandlePostGameLoadedMods(loopState);
+			Framework::Registry().Tick(
+				GameState::IsInSong() ? Framework::GamePhase::Song : Framework::GamePhase::Menu,
+				loopState);
 		}
 		else {
 			ModManager::UpdateGameLoadingState(loopState);
+			Framework::Registry().Tick(Framework::GamePhase::Loading, loopState);
 		}
 	}
+
+	Framework::Registry().Shutdown();
 
 	return 0;
 }

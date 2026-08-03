@@ -12,6 +12,9 @@
     <Filter Include="Mods">
       <UniqueIdentifier>{c3164239-7db1-4636-8512-4903a737ec2e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{b1f2a3c4-5d6e-4f70-8a91-2b3c4d5e6f70}</UniqueIdentifier>
+    </Filter>
     <Filter Include="D3D">
       <UniqueIdentifier>{210476c1-0572-493c-a9ca-1205a492f02b}</UniqueIdentifier>
     </Filter>
@@ -297,6 +300,9 @@
     <ClCompile Include="ModManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Framework\ModRegistry.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
     <ClCompile Include="Keyboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -571,6 +577,21 @@
     </ClInclude>
     <ClInclude Include="Mods\Loft.hpp">
       <Filter>Mods\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\GamePhase.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\IMod.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\ModContext.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\ModRegistry.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\Framework.hpp">
+      <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Resolution.h">
       <Filter>Main Headers\Structs</Filter>
