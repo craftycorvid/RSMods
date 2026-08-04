@@ -36,7 +36,6 @@ namespace ModManager {
     void HandleAlwaysOnMods(GameLoopState& state);
     void HandleInMenuState(GameLoopState& state);
     void HandleInSongState(GameLoopState& state);
-    void HandleTwoRTCBypassToggle();
     void HandleLinearRiffRepeaterToggle();
     void HandleMidiDeviceScanning();
     void HandleMenuFeatures(GameLoopState& state);
@@ -46,5 +45,4 @@ namespace ModManager {
     void ApplyAudioDeviceConfiguration();
     void HandleMicrophoneVolumeOverride();
     void HandleAudioBackgroundToggle();
-    void HandleTwoRTCBypassToggle();
 }

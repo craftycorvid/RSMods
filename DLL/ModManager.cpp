@@ -277,7 +277,6 @@ namespace ModManager {
 
 		HandleMicrophoneVolumeOverride();
 		HandleAudioBackgroundToggle();
-		HandleTwoRTCBypassToggle();
 		HandleLinearRiffRepeaterToggle();
 		HandleMidiDeviceScanning();
 
