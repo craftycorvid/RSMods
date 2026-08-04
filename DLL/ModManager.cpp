@@ -119,10 +119,42 @@ namespace ModManager {
 		CrowdControl::StartServer();
 	}
 
+	// PatchTwoRTC overwrites 25 bytes of the connection check, so restoring it
+	// needs the 25 bytes that were actually there, captured from the live
+	// process before the first patch. The previous restore wrote 6 bytes from a
+	// 3-byte string literal, stamping 2 out-of-bounds bytes into game code.
+	static unsigned char twoRTCBypassOriginalBytes[25];
+	static bool hasCapturedTwoRTCBypassOriginal = false;
+
+	static void SetTwoRTCBypass(bool enable)
+	{
+		const bool isPatched =
+			*(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_patch_call[0];
+		if (enable == isPatched) return;
+
+		if (enable) {
+			if (!hasCapturedTwoRTCBypassOriginal) {
+				memcpy(
+					twoRTCBypassOriginalBytes,
+					(const void*)Offsets::ptr_twoRTCBypass.Get(),
+					sizeof(twoRTCBypassOriginalBytes));
+				hasCapturedTwoRTCBypassOriginal = true;
+			}
+
+			QualityOfLife::PatchTwoRTC();
+		}
+		else if (hasCapturedTwoRTCBypassOriginal) {
+			MemUtil::PatchAdr(
+				(LPVOID)Offsets::ptr_twoRTCBypass.Get(),
+				twoRTCBypassOriginalBytes,
+				sizeof(twoRTCBypassOriginalBytes));
+		}
+	}
+
 	/// <summary>
 	/// Applies all mods and fixes that must run at startup.
 	/// </summary>
-	void ApplyStartupMods() 
+	void ApplyStartupMods()
 	{
 		AudioDevices::SetupMicrophones();
 		ApplyBugPrevention();
@@ -138,7 +170,7 @@ namespace ModManager {
 		LOG_INFO("RS_ASIO Bypass2RTC: " << std::boolalpha << rsAsioBypassTwoRTC << std::endl);
 
 		if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on") {
-			QualityOfLife::PatchTwoRTC();
+			SetTwoRTCBypass(true);
 		}
 
 		// Patch x86 assembly for Riff Repeater speed logic to make it linear.
@@ -497,18 +529,13 @@ namespace ModManager {
 	/// <summary>
 	/// Handles dynamic toggling of the two RTC message box bypass.
 	/// </summary>
-	void HandleTwoRTCBypassToggle() 
+	void HandleTwoRTCBypassToggle()
 	{
 		static bool rsAsioBypassTwoRTC = false;
 
 		if (rsAsioBypassTwoRTC) return;
 
-		if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "off" && *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_patch_call[0]) {
-			MemUtil::PatchAdr((LPVOID)Offsets::ptr_twoRTCBypass.Get(), (LPVOID)Offsets::ptr_twoRTCBypass_original, 6);
-		}
-		else if (Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on" && *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_original[0]) {
-			QualityOfLife::PatchTwoRTC();
-		}
+		SetTwoRTCBypass(Settings::ReturnSettingValue("BypassTwoRTCMessageBox") == "on");
 	}
 
 
