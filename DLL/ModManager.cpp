@@ -276,7 +276,6 @@ namespace ModManager {
 		GameState::currentMenu = GameState::GetCurrentMenu(); // This loads without checking if memory is safe... This can cause crashes if used when GameLoaded is false.
 
 		HandleMicrophoneVolumeOverride();
-		HandleAudioBackgroundToggle();
 		HandleLinearRiffRepeaterToggle();
 		HandleMidiDeviceScanning();
 
@@ -381,18 +380,6 @@ namespace ModManager {
 			VolumeControl::DisableAltTabbingWithAudio(); // User originally wanted to NOT allow audio in the background, but they changed their mind, so we have to turn it on/
 		}
 	}
-
-	/// <summary>
-	/// Handles dynamic toggling of the two RTC message box bypass.
-	/// </summary>
-	void HandleTwoRTCBypassToggle()
-	{
-		static bool rsAsioBypassTwoRTC = false;
-		if (rsAsioBypassTwoRTC) return;
-
-		SetTwoRTCBypass(Settings::IsOn("BypassTwoRTCMessageBox"));
-	}
-
 
 	/// <summary>
 	/// Handles updates while the game is still loading.

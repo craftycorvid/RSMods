@@ -44,5 +44,4 @@ namespace ModManager {
     void CheckIfGameHasLoaded();
     void ApplyAudioDeviceConfiguration();
     void HandleMicrophoneVolumeOverride();
-    void HandleAudioBackgroundToggle();
 }

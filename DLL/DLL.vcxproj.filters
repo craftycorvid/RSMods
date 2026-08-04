@@ -300,6 +300,9 @@
     <ClCompile Include="Mods\NonStopPlayTimerMod.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
+    <ClCompile Include="Mods\AllowAudioInBackgroundMod.cpp">
+      <Filter>Mods</Filter>
+    </ClCompile>
     <ClCompile Include="Mods\TwoRTCBypassMod.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
@@ -618,6 +621,9 @@
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\NonStopPlayTimerMod.hpp">
+      <Filter>Mods\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mods\AllowAudioInBackgroundMod.hpp">
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\TwoRTCBypassMod.hpp">
