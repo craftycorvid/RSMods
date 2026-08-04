@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "Main.hpp"
 
+#include <io.h>
+#include <share.h>
+
 #if defined(_DEBUG) || defined(_WWISE_LOGS)
 bool debug = true;
 #else
@@ -262,16 +265,15 @@ void Initialize() {
 }
 
 void SetupLogging() {
-	bool debugLogPresent = std::ifstream("RSMods_debug.txt").good();
-	auto clearDebugLog = std::ofstream("RSMods_debug.txt");
-
-	FILE* streamRead;
-	FILE* streamConsole;
+	// Opt-in: only log to file if RSMods_debug.txt already exists (same as before).
+	const bool debugLogPresent = std::ifstream("RSMods_debug.txt").good();
 
 	if (debug) {
 		AllocConsole();
 
 		// Connect stdin, stdout to the debug console.
+		FILE* streamRead = nullptr;
+		FILE* streamConsole = nullptr;
 		freopen_s(&streamRead, "CONIN$", "r", stdin);
 		freopen_s(&streamConsole, "CONOUT$", "w", stdout);
 	}
@@ -279,12 +281,19 @@ void SetupLogging() {
 	// Create log file to both help with debugging release builds,
 	// and allow the user to examine their debug logs after a crash.
 	if (debugLogPresent) {
-		// Clear log so it isn't full of junk from the last launch
-		clearDebugLog.open("RSMods_debug.txt", std::ofstream::out | std::ofstream::trunc);
-		clearDebugLog.close();
-
-		FILE* debugLog;
-		freopen_s(&debugLog, "RSMods_debug.txt", "w", stderr);
+		// freopen_s / fopen_s open with exclusive (no share) mode, which blocks
+		// external tools from reading the log while the game is running.
+		// Open with _SH_DENYWR so others can read; deny concurrent writers.
+		// Mode "w" truncates so we start clean each launch (same as before).
+		FILE* debugLog = _fsopen("RSMods_debug.txt", "w", _SH_DENYWR);
+		if (debugLog) {
+			// Point stderr's fd at the share-read handle. Logger writes via std::cerr.
+			if (_dup2(_fileno(debugLog), _fileno(stderr)) == 0) {
+				// Unbuffered so external readers see new lines promptly.
+				setvbuf(stderr, nullptr, _IONBF, 0);
+			}
+			// Keep debugLog open for process lifetime (handle must stay valid).
+		}
 	}
 }
 
