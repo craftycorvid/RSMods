@@ -14,8 +14,6 @@
 
 struct GameLoopState {
     bool skipERSleep = false; // If using RR past 100%, remove the 1.5s sleep on ER mode, to stop flickering colors.
-    bool forkInToasterNewProfile = false; // If Auto Load Profile has a specified profile, and we can't find it, then this will be true.
-    std::string selectedUser;
 };
 
 namespace ModManager {
@@ -27,8 +25,6 @@ namespace ModManager {
     void UpdateGameLoadingState(GameLoopState& state);
 
     void HandleMidiAutoTuningInSong();
-    void HandleAutoLoadProfile(GameLoopState& state);
-    void HandleSpecificProfileLoad(GameLoopState& state);
     void HandleAlwaysOnMods(GameLoopState& state);
     void HandleInMenuState(GameLoopState& state);
     void HandleInSongState(GameLoopState& state);

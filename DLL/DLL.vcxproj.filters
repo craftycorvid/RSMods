@@ -306,6 +306,9 @@
     <ClCompile Include="Mods\RiffRepeaterMod.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
+    <ClCompile Include="Mods\AutoLoadProfileMod.cpp">
+      <Filter>Mods</Filter>
+    </ClCompile>
     <ClCompile Include="Mods\GuitarSpeakMod.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
@@ -645,6 +648,9 @@
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\RiffRepeaterMod.hpp">
+      <Filter>Mods\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mods\AutoLoadProfileMod.hpp">
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\GuitarSpeakMod.hpp">

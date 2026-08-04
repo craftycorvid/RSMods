@@ -289,7 +289,6 @@ namespace ModManager {
 
 		CheckIfGameHasLoaded();
 		ConfigureAlternativeSampleRate();
-		HandleAutoLoadProfile(state);
 	}
 
 	/// <summary>
@@ -322,49 +321,6 @@ namespace ModManager {
 	/// </summary>
 	void HandleInSongState(GameLoopState& state) {
 		HandleMidiAutoTuningInSong();
-	}
-
-	/// <summary>
-	/// Handles automatic profile loading (AKA "Fork in the toaster" mod).
-	/// </summary>
-	void HandleAutoLoadProfile(GameLoopState& state) {
-		if (!Settings::IsOn("ForceProfileEnabled") ||
-			GameState::Menus::IsInMenusWithDisallowedAutoEnter() ||
-			state.forkInToasterNewProfile) {
-			return;
-		}
-
-		// Skip UPlay login dialog - depending on the menu it might be necessary to press either ESC or Enter, so just spam both
-		if (GameState::currentMenu == "SelectionListDialog" ||
-			GameState::currentMenu == "UplayLoginDialog") {
-			Keyboard::SendEscapeKey();
-			Keyboard::AutoEnterGame();
-		}
-		else if (Settings::ReturnSettingValue("ProfileToLoad") != "" &&
-			GameState::currentMenu == "ProfileSelect") { // If the user user says "I want to always load this profile"
-			HandleSpecificProfileLoad(state);
-		}
-		else { 	// User doesn't care what profile we select, just select the first / top one.
-			Keyboard::AutoEnterGame();
-		}
-	}
-
-	/// <summary>
-	/// Loads a specific user profile by name.
-	/// </summary>
-	void HandleSpecificProfileLoad(GameLoopState& state) {
-		state.selectedUser = GameState::CurrentSelectedUser();
-
-		if (state.selectedUser == Settings::ReturnSettingValue("ProfileToLoad")) {
-			Keyboard::AutoEnterGame();
-		}
-		else if (state.selectedUser == "New profile") {
-			LOG_ERROR("(Auto Load) Invalid Profile Name" << std::endl); // Yeah, the profile they're looking for doesn't exist :(
-			state.forkInToasterNewProfile = true;
-		}
-		else { // Not the profile we're looking for. Move down 1.
-			Keyboard::PressDownArrowKey();
-		}
 	}
 
 	/// <summary>
