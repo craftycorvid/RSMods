@@ -43,5 +43,4 @@ namespace ModManager {
     void ConfigureAlternativeSampleRate();
     void CheckIfGameHasLoaded();
     void ApplyAudioDeviceConfiguration();
-    void HandleMicrophoneVolumeOverride();
 }

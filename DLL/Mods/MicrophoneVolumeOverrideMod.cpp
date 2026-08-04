@@ -1,0 +1,36 @@
+#include "../stdafx.h"
+#include "MicrophoneVolumeOverrideMod.hpp"
+#include "AudioDevices.hpp"
+
+using Framework::ModContext;
+
+std::string_view MicrophoneVolumeOverrideMod::Id() const {
+	return "OverrideInputVolume";
+}
+
+bool MicrophoneVolumeOverrideMod::IsEnabled(const ModContext& c) const {
+	return c.IsOn("OverrideInputVolumeEnabled");
+}
+
+void MicrophoneVolumeOverrideMod::OnMenuTick(ModContext& c) {
+	SyncVolume(c);
+}
+
+void MicrophoneVolumeOverrideMod::OnSongTick(ModContext& c) {
+	SyncVolume(c);
+}
+
+// Forces the configured input device to the desired volume. Idempotent: only writes when the
+// device's current level differs, so it can run every tick without fighting the user's own changes.
+void MicrophoneVolumeOverrideMod::SyncVolume(ModContext& c) {
+	const std::string device = c.Value("OverrideInputVolumeDevice");
+	if (device.empty())
+		return;
+
+	const int desired = c.Int("OverrideInputVolume");
+	if (AudioDevices::GetMicrophoneVolume(device) != desired) {
+		AudioDevices::SetMicrophoneVolume(device, desired);
+	}
+}
+
+static Framework::ModRegistrar<MicrophoneVolumeOverrideMod> _micVolumeOverrideReg;

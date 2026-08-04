@@ -275,7 +275,6 @@ namespace ModManager {
 	{
 		GameState::currentMenu = GameState::GetCurrentMenu(); // This loads without checking if memory is safe... This can cause crashes if used when GameLoaded is false.
 
-		HandleMicrophoneVolumeOverride();
 		HandleLinearRiffRepeaterToggle();
 		HandleMidiDeviceScanning();
 
@@ -352,34 +351,6 @@ namespace ModManager {
 		}
 	}
 
-
-	/// <summary>
-	/// Manages microphone volume override settings.
-	/// </summary>
-	void HandleMicrophoneVolumeOverride() {
-		if (Settings::IsOn("OverrideInputVolumeEnabled") &&
-			Settings::ReturnSettingValue("OverrideInputVolumeDevice") != "" &&
-			AudioDevices::GetMicrophoneVolume(Settings::ReturnSettingValue("OverrideInputVolumeDevice")) !=
-			Settings::GetModSetting("OverrideInputVolume")) 
-		{
-			AudioDevices::SetMicrophoneVolume(
-				Settings::ReturnSettingValue("OverrideInputVolumeDevice"),
-				Settings::GetModSetting("OverrideInputVolume")
-			);
-		}
-	}
-
-	/// <summary>
-	/// Handles dynamic toggling of audio-in-background feature.
-	/// </summary>
-	void HandleAudioBackgroundToggle() 
-	{
-		if (Settings::IsOn("AllowAudioInBackground") && !VolumeControl::allowedAltTabbingWithAudio) {
-			VolumeControl::AllowAltTabbingWithAudio();
-		} else if (Settings::IsOff("AllowAudioInBackground") && VolumeControl::allowedAltTabbingWithAudio) {
-			VolumeControl::DisableAltTabbingWithAudio(); // User originally wanted to NOT allow audio in the background, but they changed their mind, so we have to turn it on/
-		}
-	}
 
 	/// <summary>
 	/// Handles updates while the game is still loading.
