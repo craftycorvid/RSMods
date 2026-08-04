@@ -238,26 +238,10 @@ namespace ModManager {
 		}
 	}
 
-	bool MoreThanThreeSecondsPassed() {
-		const auto currentTime = std::chrono::steady_clock::now();
-		return currentTime - GameOverlay::displayVolumeStartTime > std::chrono::seconds(3);
-	}
-
-	/// <summary>
-	/// Manages the volume control overlay display timer.
-	/// </summary>
-	void HandleVolumeDisplay() {
-		if (Settings::IsOn("VolumeControlEnabled") && MoreThanThreeSecondsPassed()) {
-			GameOverlay::displayCurrentVolume = false;	
-		}
-	}
-
 	/// <summary>
 	/// Handles mods that run regardless of game state.
 	/// </summary>
 	void HandleAlwaysOnMods(GameLoopState& state) {
-		HandleVolumeDisplay();
-
 		if (GameState::Menus::IsInPreSongTuner() &&
 			Settings::IsOn("AutoTuneForSong") &&
 			Settings::GetWhen("AutoTuneForSongWhen") == When::Tuner &&
