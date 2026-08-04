@@ -3,9 +3,11 @@
 Generalizes the `CCEffect` pattern to *all* mods so that a mod owns its own state, activation, and lifecycle 
 instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather than editing the orchestrator.
 
-> **Status: proof-of-concept integration.** `LoftMod` and `ExtendedRangeMod` are registered and their
-> logic is removed from `ModManager`, so a build runs both through the framework. A full mod-suite
-> migration is deliberately *not* done yet.
+> **Status: mod-suite migrated.** Every built-in namespace mod now registers through the framework and its
+> logic has been removed from `ModManager` (MIDI — the last and hardest — ported the auto-tune / pedal-revert
+> cluster and retired the transitional `GameLoopState`). `ModManager` retains only host plumbing: startup/init,
+> per-tick game-state sync, and settings. The next layer — a versioned C plugin ABI over `IMod`/`ModContext`
+> for third-party mods — is deliberately *not* built yet.
 
 ## Design boundaries (read first)
 
@@ -20,7 +22,7 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
 ## Host wiring (`dllmain.cpp`)
 
 - `MainThread` - `InstantiatePending()` → `ApplyStartupMods` → `DispatchInitialize()`, then
-  `Registry().Tick(phase, loopState)` each loop, and `Registry().Shutdown()` after the loop.
+  `Registry().Tick(phase)` each loop, and `Registry().Shutdown()` after the loop.
 - `WndProc` `WM_COPYDATA` - `Keybindings::UpdateSettingsOnGUIChange`, which *queues* the
   settings mutation onto the registry instead of applying it on the message thread.
 

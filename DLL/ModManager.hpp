@@ -20,8 +20,6 @@ namespace ModManager {
     void HandlePostGameLoadedMods();
     void UpdateGameLoadingState();
 
-    void HandleInMenuState();
-    void CleanupSongSpecificStates();
     void CheckIfGameHasLoaded();
     void ApplyAudioDeviceConfiguration();
 }

@@ -196,38 +196,25 @@ namespace ModManager {
 	}
 
 	/// <summary>
-	/// Main update loop when the game has finished loading. Runs host-side game-state upkeep before the mod
-	/// registry ticks; the MIDI auto-tuning cluster it used to drive now lives in MidiMod.
+	/// Per-tick host game-state upkeep once the game has loaded, run before the mod registry ticks. All the
+	/// song-side work this used to fan out to now lives in mods; only menu-side host upkeep remains here.
 	/// </summary>
 	void HandlePostGameLoadedMods()
 	{
 		GameState::currentMenu = GameState::GetCurrentMenu(); // This loads without checking if memory is safe... This can cause crashes if used when GameLoaded is false.
-
 		GameState::LessonMode = GameState::Menus::IsInLessonModes();
 
-		if (!GameState::IsInSong()) {
-			HandleInMenuState();
-		}
-	}
+		if (GameState::IsInSong())
+			return;
 
-	/// <summary>
-	/// Handles all state updates when the player is in menus.
-	/// </summary>
-	void HandleInMenuState() {
-		CleanupSongSpecificStates();
-		D3DHooks::UpdateHeadstockCacheForMenu();
-
-		GameState::previousMenu = GameState::currentMenu;
-	}
-
-	/// <summary>
-	/// Cleans up states that are only active during songs.
-	/// </summary>
-	void CleanupSongSpecificStates() {
+		// Returning to a menu ends the song: drop the A/B loop markers so the next song starts fresh.
 		if (Settings::IsOn("AllowLooping")) {
 			Keybindings::loopStart = NULL;
 			Keybindings::loopEnd = NULL;
 		}
+
+		D3DHooks::UpdateHeadstockCacheForMenu();
+		GameState::previousMenu = GameState::currentMenu;
 	}
 
 	/// <summary>
