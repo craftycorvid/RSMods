@@ -282,26 +282,12 @@ namespace ModManager {
 	}
 
 	/// <summary>
-	/// Handles updates while the game is still loading.
+	/// Refreshes host game state while the game is still loading, before the mod registry ticks.
 	/// </summary>
 	void UpdateGameLoadingState(GameLoopState& state) {
 		GameState::currentMenu = GameState::GetCurrentMenu(true); 	// This is the safe version of checking the current menu. It is only used while the game boots, else the game may crash.
 
 		CheckIfGameHasLoaded();
-		ConfigureAlternativeSampleRate();
-	}
-
-	/// <summary>
-	/// Configures buffer settings for alternative sample rates.
-	/// </summary>
-	void ConfigureAlternativeSampleRate() {
-		if (Settings::IsOn("AltOutputSampleRate") &&
-			Settings::GetModSetting("AlternativeOutputSampleRate") != 48000 &&
-			*(int*)Offsets::ptr_sampleRateBuffer.Get() != 5 &&
-			*(int*)Offsets::ptr_sampleRateBuffer.Get() != 2) {
-			*(int*)Offsets::ptr_sampleRateSize.Get() = 2;
-			*(int*)Offsets::ptr_sampleRateBuffer.Get() = 128;
-		}
 	}
 
 	/// <summary>

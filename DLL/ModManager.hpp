@@ -30,7 +30,6 @@ namespace ModManager {
     void HandleInSongState(GameLoopState& state);
     void HandleMidiDeviceScanning();
     void CleanupSongSpecificStates(GameLoopState& state);
-    void ConfigureAlternativeSampleRate();
     void CheckIfGameHasLoaded();
     void ApplyAudioDeviceConfiguration();
 }
