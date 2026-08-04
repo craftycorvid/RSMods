@@ -15,7 +15,6 @@
 struct GameLoopState {
     bool skipERSleep = false; // If using RR past 100%, remove the 1.5s sleep on ER mode, to stop flickering colors.
     bool forkInToasterNewProfile = false; // If Auto Load Profile has a specified profile, and we can't find it, then this will be true.
-    bool guitarSpeakPresent = false; // If true, read the notes inputted and press the key combo provided. (True - On, False - Off)
     std::string selectedUser;
 };
 
@@ -38,7 +37,6 @@ namespace ModManager {
     void HandleInSongState(GameLoopState& state);
     void HandleLinearRiffRepeaterToggle();
     void HandleMidiDeviceScanning();
-    void HandleMenuFeatures(GameLoopState& state);
     void CleanupSongSpecificStates(GameLoopState& state);
     void ConfigureAlternativeSampleRate();
     void CheckIfGameHasLoaded();

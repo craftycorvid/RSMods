@@ -295,7 +295,6 @@ namespace ModManager {
 	/// </summary>
 	void HandleInMenuState(GameLoopState& state) {
 		CleanupSongSpecificStates(state);
-		HandleMenuFeatures(state);
 		D3DHooks::UpdateHeadstockCacheForMenu();
 
 		GameState::previousMenu = GameState::currentMenu;
@@ -321,36 +320,6 @@ namespace ModManager {
 			Midi::userWantsToUseAutoTuning = false;
 		}
 	}
-
-	/// <summary>
-	/// Handles menu-specific features like Guitar Speak and song previews.
-	/// </summary>
-	void HandleMenuFeatures(GameLoopState& state) {
-		if (!state.guitarSpeakPresent && Settings::IsOn("GuitarSpeak")) {
-			state.guitarSpeakPresent = true;
-			if (!GuitarSpeak::RunGuitarSpeak()) { // If we are in a menu where we don't want to read bad values
-				state.guitarSpeakPresent = false;
-			}
-		}
-
-		if (Settings::IsOn("SongPreviews")) {
-			if (!VolumeControl::disabledSongPreviewAudio) {
-				VolumeControl::DisableSongPreviewAudio();
-			}
-		}
-		else if (VolumeControl::disabledSongPreviewAudio) { // User originally wanted song previews off, but now wants them on.
-			VolumeControl::EnableSongPreviewAudio();
-		}
-
-		if (Settings::IsOn("ScreenShotScores") &&
-			GameState::Menus::IsInScoreMenus()) {
-			Keyboard::TakeScreenshot();
-		}
-		else {
-			Keyboard::takenScreenshotOfThisScreen = false;
-		}
-	}
-
 
 	/// <summary>
 	/// Handles updates while the game is still loading.
@@ -392,8 +361,6 @@ namespace ModManager {
 	/// Handles all state updates when the player is in a song.
 	/// </summary>
 	void HandleInSongState(GameLoopState& state) {
-		state.guitarSpeakPresent = false;
-
 		LogSongIDForRiffRepeater();
 		EnableRiffRepeaterFeatures();
 		HandleMidiAutoTuningInSong();
