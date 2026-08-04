@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "ModManager.hpp"
 
-using Settings::When;
-
 namespace ModManager {
 	void InitializeConfiguration() {
 		if (!(std::ifstream("RSMods.ini"))) {
@@ -197,68 +195,26 @@ namespace ModManager {
 		}
 	}
 
-
 	/// <summary>
-	/// Scans for MIDI devices when auto-tuning is enabled.
+	/// Main update loop when the game has finished loading. Runs host-side game-state upkeep before the mod
+	/// registry ticks; the MIDI auto-tuning cluster it used to drive now lives in MidiMod.
 	/// </summary>
-	void HandleMidiDeviceScanning() {
-		if (!Midi::scannedForMidiDevices && Settings::IsOn("AutoTuneForSong")) {
-			Midi::scannedForMidiDevices = true;
-			Midi::ReadMidiSettingsFromINI(
-				Settings::ReturnSettingValue("ChordsMode"),
-				Settings::GetModSetting("TuningPedal"),
-				Settings::ReturnSettingValue("AutoTuneForSongDevice"),
-				Settings::ReturnSettingValue("MidiInDevice")
-			);
-		}
-
-		if (!Midi::attemptedToDetachMidiInThread && Settings::ReturnSettingValue("MidiInDevice") != "") {
-			Midi::attemptedToDetachMidiInThread = true;
-			Midi::FindMidiInDevices(Settings::ReturnSettingValue("MidiInDevice"));
-			std::thread(Midi::ListenToMidiInThread).detach();
-		}
-	}
-
-	/// <summary>
-	/// Handles mods that run regardless of game state.
-	/// </summary>
-	void HandleAlwaysOnMods(GameLoopState& state) {
-		if (GameState::Menus::IsInPreSongTuner() &&
-			Settings::IsOn("AutoTuneForSong") &&
-			Settings::GetWhen("AutoTuneForSongWhen") == When::Tuner &&
-			!Midi::alreadyAttemptedTuningInTuner &&
-			!Midi::alreadyAutomatedTuningInThisSong) {
-			Midi::AttemptTuningInTuner();
-			state.skipERSleep = true;
-		}
-	}
-
-	/// <summary>
-	/// Main update loop when the game has finished loading.
-	/// </summary>
-	void HandlePostGameLoadedMods(GameLoopState& state) 
+	void HandlePostGameLoadedMods()
 	{
 		GameState::currentMenu = GameState::GetCurrentMenu(); // This loads without checking if memory is safe... This can cause crashes if used when GameLoaded is false.
 
-		HandleMidiDeviceScanning();
-
 		GameState::LessonMode = GameState::Menus::IsInLessonModes();
 
-		if (GameState::IsInSong()) {
-			HandleInSongState(state);
+		if (!GameState::IsInSong()) {
+			HandleInMenuState();
 		}
-		else {
-			HandleInMenuState(state);
-		}
-
-		HandleAlwaysOnMods(state);
 	}
 
 	/// <summary>
 	/// Handles all state updates when the player is in menus.
 	/// </summary>
-	void HandleInMenuState(GameLoopState& state) {
-		CleanupSongSpecificStates(state);
+	void HandleInMenuState() {
+		CleanupSongSpecificStates();
 		D3DHooks::UpdateHeadstockCacheForMenu();
 
 		GameState::previousMenu = GameState::currentMenu;
@@ -267,24 +223,17 @@ namespace ModManager {
 	/// <summary>
 	/// Cleans up states that are only active during songs.
 	/// </summary>
-	void CleanupSongSpecificStates(GameLoopState& state) {
+	void CleanupSongSpecificStates() {
 		if (Settings::IsOn("AllowLooping")) {
 			Keybindings::loopStart = NULL;
 			Keybindings::loopEnd = NULL;
-		}
-
-		if ((Midi::alreadyAutomatedTuningInThisSong || Midi::alreadyAttemptedTuningInTuner) &&
-			!GameState::Menus::IsInPreSongTuner()) {
-			Midi::RevertAutomatedTuning();
-			Midi::alreadyAttemptedTuningInTuner = false;
-			Midi::userWantsToUseAutoTuning = false;
 		}
 	}
 
 	/// <summary>
 	/// Refreshes host game state while the game is still loading, before the mod registry ticks.
 	/// </summary>
-	void UpdateGameLoadingState(GameLoopState& state) {
+	void UpdateGameLoadingState() {
 		GameState::currentMenu = GameState::GetCurrentMenu(true); 	// This is the safe version of checking the current menu. It is only used while the game boots, else the game may crash.
 
 		CheckIfGameHasLoaded();
@@ -299,25 +248,6 @@ namespace ModManager {
 			GameState::currentMenu == "PlayedRS1Select" ||
 			GameState::currentMenu == "SimpleDialog")) {
 			GameState::GameLoaded = true;
-		}
-	}
-
-	/// <summary>
-	/// Handles all state updates when the player is in a song.
-	/// </summary>
-	void HandleInSongState(GameLoopState& state) {
-		HandleMidiAutoTuningInSong();
-	}
-
-	/// <summary>
-	/// Handles MIDI auto-tuning when entering a song.
-	/// </summary>
-	void HandleMidiAutoTuningInSong() {
-		if (Settings::IsOn("AutoTuneForSong") &&
-			!Midi::alreadyAutomatedTuningInThisSong &&
-			(Settings::GetWhen("AutoTuneForSongWhen") == When::Tuner ||
-				(Settings::GetWhen("AutoTuneForSongWhen") == When::Manual && Midi::userWantsToUseAutoTuning))) {
-			Midi::AutomateTuning();
 		}
 	}
 }

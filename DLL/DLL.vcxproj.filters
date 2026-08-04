@@ -312,6 +312,9 @@
     <ClCompile Include="Mods\AlternativeSampleRateMod.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
+    <ClCompile Include="Mods\MidiMod.cpp">
+      <Filter>Mods</Filter>
+    </ClCompile>
     <ClCompile Include="Mods\GuitarSpeakMod.cpp">
       <Filter>Mods</Filter>
     </ClCompile>
@@ -657,6 +660,9 @@
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\AlternativeSampleRateMod.hpp">
+      <Filter>Mods\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mods\MidiMod.hpp">
       <Filter>Mods\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Mods\GuitarSpeakMod.hpp">

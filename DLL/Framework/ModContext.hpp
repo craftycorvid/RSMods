@@ -8,8 +8,6 @@
 #include "HostHooks.hpp"
 #include "../Settings.hpp"
 
-struct GameLoopState;
-
 namespace Framework {
 	struct RenderBinder {
 		Hooks::RenderHooks& hooks;
@@ -21,7 +19,6 @@ namespace Framework {
 	// Internal per-hook context
 	struct ModContext {
 		GamePhase phase = GamePhase::Loading;
-		GameLoopState* loop = nullptr;   // Transitional: fields migrate into the mods that own them.
 		const IMod* currentMod = nullptr; // Set by the registry before each hook call.
 
 		RenderBinder Render() const { return { Hooks::Render(), currentMod }; } // Subscribe per-frame draw callbacks.

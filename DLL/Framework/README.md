@@ -36,7 +36,9 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
    ```
    The static registrar only pushes a POD factory node at load time (loader-lock safe); the
    registry constructs the mod later from MainThread (`InstantiatePending`).
-3. If you migrated logic out of `ModManager`, delete it there and drop any `GameLoopState` field.
+3. If you migrated logic out of `ModManager`, delete it there. Cross-tick state a mod carried through the
+   game loop should become a member of the mod (or, for a signal another mod reads, a flag on the relevant
+   namespace helper).
 
 `Id()` must be **unique**; duplicates are rejected at registration.
 

@@ -1,6 +1,5 @@
 #include <iomanip>
 #include "../../RSColor.h"
-struct GameLoopState {};
 
 #include "../Framework.hpp"
 
@@ -154,8 +153,6 @@ namespace {
 		reg.Register(std::move(m));
 		return raw;
 	}
-
-	GameLoopState g_gls;
 }
 
 static void Test_InitializeFaultIsIsolated() {
@@ -167,7 +164,7 @@ static void Test_InitializeFaultIsIsolated() {
 	Expect(Has("A:OnInitialize"), "A initialization attempted");
 	Expect(Has("B:OnInitialize"), "B unaffected by A's initialization fault");
 	ClearEvents();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(!Has("A:OnEnabled") && Has("B:OnEnabled"), "initialization fault prevents only A from activating");
 	reg.Shutdown();
 }
@@ -178,7 +175,7 @@ static void Test_ActivateInMenu() {
 	Add(reg, "M");
 	reg.DispatchInitialize();
 	ClearEvents();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ExpectSeq({ "M:OnEnabled", "M:OnTick", "M:OnMenuTick" }, "activate in menu: no song edges");
 	reg.Shutdown();
 }
@@ -189,7 +186,7 @@ static void Test_EnableMidSong() {
 	Add(reg, "S");
 	reg.DispatchInitialize();
 	ClearEvents();
-	reg.Tick(GamePhase::Song, g_gls);
+	reg.Tick(GamePhase::Song);
 	ExpectSeq({ "S:OnEnabled", "S:OnSongEnter", "S:OnTick", "S:OnSongTick" }, "enable mid-song fires OnSongEnter");
 	reg.Shutdown();
 }
@@ -199,10 +196,10 @@ static void Test_DisableMidSong() {
 	ModRegistry reg;
 	TestMod* s = Add(reg, "S");
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Song, g_gls);
+	reg.Tick(GamePhase::Song);
 	ClearEvents();
 	s->enabled = false;
-	reg.Tick(GamePhase::Song, g_gls);
+	reg.Tick(GamePhase::Song);
 	ExpectSeq({ "S:OnSongExit", "S:OnDisabled" }, "disable mid-song: OnSongExit before OnDisabled");
 	reg.Shutdown();
 }
@@ -212,12 +209,12 @@ static void Test_ReenableAfterDisable() {
 	ModRegistry reg;
 	TestMod* s = Add(reg, "S");
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	s->enabled = false;
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ClearEvents();
 	s->enabled = true;
-	reg.Tick(GamePhase::Song, g_gls);
+	reg.Tick(GamePhase::Song);
 	ExpectSeq({ "S:OnEnabled", "S:OnSongEnter", "S:OnTick", "S:OnSongTick" },
 		"disabled mod reactivates through the shared inactive state");
 	reg.Shutdown();
@@ -228,10 +225,10 @@ static void Test_DisabledSameTickAsSongExit() {
 	ModRegistry reg;
 	TestMod* s = Add(reg, "S");
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Song, g_gls);
+	reg.Tick(GamePhase::Song);
 	ClearEvents();
 	s->enabled = false;
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(Has("S:OnSongExit") && Has("S:OnDisabled"), "OnSongExit not missed when disabled on song-exit tick");
 	Expect(IndexOf("S:OnSongExit") < IndexOf("S:OnDisabled"), "OnSongExit ordered before OnDisabled");
 	reg.Shutdown();
@@ -245,11 +242,11 @@ static void Test_ConflictSuppressionOrder() {
 	a->claimStrings = { "R" };
 	b->claimStrings = { "R" };
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(Has("A:OnEnabled") && !Has("B:OnEnabled"), "A active alone");
 	ClearEvents();
 	b->enabled = true;
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(Has("A:OnDisabled"), "loser A gets OnDisabled on suppression");
 	Expect(Has("B:OnEnabled"), "winner B activates");
 	Expect(IndexOf("A:OnDisabled") < IndexOf("B:OnEnabled"), "deactivation precedes activation (resource handoff)");
@@ -262,10 +259,10 @@ static void Test_OnEnabledThrowsFaults() {
 	TestMod* f = Add(reg, "F"); f->throwOn = "OnEnabled";
 	reg.DispatchInitialize();
 	ClearEvents();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ExpectSeq({ "F:OnEnabled" }, "OnEnabled throw: no tick hooks run");
 	ClearEvents();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(EventsEmpty(), "faulted mod produces no further events");
 	reg.Shutdown();
 }
@@ -276,7 +273,7 @@ static void Test_OnSongEnterThrowsShortCircuits() {
 	TestMod* s = Add(reg, "S"); s->throwOn = "OnSongEnter";
 	reg.DispatchInitialize();
 	ClearEvents();
-	reg.Tick(GamePhase::Song, g_gls);
+	reg.Tick(GamePhase::Song);
 	ExpectSeq({ "S:OnEnabled", "S:OnSongEnter", "S:OnDisabled" },
 		"OnSongEnter throw faults immediately and skips tick hooks");
 	reg.Shutdown();
@@ -288,10 +285,10 @@ static void Test_TickFailureFaultsImmediately() {
 	TestMod* t = Add(reg, "T"); t->throwOn = "OnTick";
 	reg.DispatchInitialize();
 	ClearEvents();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ExpectSeq({ "T:OnEnabled", "T:OnTick", "T:OnDisabled" }, "tick exception faults and tears down immediately");
 	ClearEvents();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(EventsEmpty(), "tick-faulted mod produces no further events");
 	reg.Shutdown();
 }
@@ -304,7 +301,7 @@ static void Test_SettingsAppliedThenNotifiedOnTick() {
 	ClearEvents();
 	reg.EnqueueSettingsUpdate([] { RecordEvent("SETTINGS:apply"); });
 	Expect(!Has("SETTINGS:apply"), "settings not applied on the message thread (before tick)");
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(Has("SETTINGS:apply") && Has("M:OnSettingsChanged"), "settings applied and mods notified on tick");
 	Expect(IndexOf("SETTINGS:apply") < IndexOf("M:OnSettingsChanged"), "apply precedes notify");
 	Expect(IndexOf("M:OnSettingsChanged") < IndexOf("M:OnEnabled"), "notify precedes activation resolve");
@@ -318,7 +315,7 @@ static void Test_DuplicateIdRejected() {
 	auto dup = std::make_unique<TestMod>("Dup"); dup->tag = "d2";
 	reg.Register(std::move(dup));
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(Has("d1:OnEnabled"), "first Dup registration active");
 	Expect(!Has("d2:OnInitialize") && !Has("d2:OnEnabled"), "duplicate Id rejected (never runs)");
 	reg.Shutdown();
@@ -335,13 +332,13 @@ static void Test_RenderModActivationGating() {
 	Framework::Hooks::Render().DispatchEndScene(dev);
 	Expect(!Has("V:render"), "callback not invoked while mod inactive");
 
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ClearEvents();
 	Framework::Hooks::Render().DispatchEndScene(dev);
 	Expect(Has("V:render"), "callback invoked once mod active");
 
 	v->enabled = false;
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ClearEvents();
 	Framework::Hooks::Render().DispatchEndScene(dev);
 	Expect(!Has("V:render"), "callback not invoked after deactivation");
@@ -377,14 +374,14 @@ static void Test_RenderCallbackThrowDisablesMod() {
 	v->subscribeRender = true;
 	v->throwInRender = true;
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 
 	IDirect3DDevice9* dev = nullptr;
 	Framework::Hooks::Render().DispatchEndScene(dev);
 	Expect(Has("V:render"), "throwing render callback still ran once");
 
 	ClearEvents();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(Has("V:OnDisabled"), "render-faulted mod is torn down (OnDisabled)");
 
 	ClearEvents();
@@ -403,7 +400,7 @@ static void Test_ResourceHandoffWaitsForRenderQuiescence() {
 	oldMod->subscribeRender = true;
 	oldMod->renderBlock = std::make_shared<RenderBlock>();
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ClearEvents();
 
 	std::thread renderThread([] {
@@ -412,14 +409,14 @@ static void Test_ResourceHandoffWaitsForRenderQuiescence() {
 	Expect(oldMod->renderBlock->WaitUntilEntered(), "old mod's render callback entered");
 
 	newMod->enabled = true;
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(!Has("Old:OnDisabled"), "old mod teardown waits for its render callback");
 	Expect(!Has("New:OnEnabled"), "replacement waits while the old mod holds the resource");
 	Expect(!Has("Old:OnTick"), "deactivating mod no longer receives tick hooks");
 
 	oldMod->renderBlock->Release();
 	renderThread.join();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(Has("Old:OnDisabled") && Has("New:OnEnabled"), "handoff completes after render quiescence");
 	Expect(IndexOf("Old:OnDisabled") < IndexOf("New:OnEnabled"), "old mod releases state before replacement activation");
 	reg.Shutdown();
@@ -433,7 +430,7 @@ static void Test_RenderFaultUpgradesDeferredTeardown() {
 	mod->throwInRender = true;
 	mod->renderBlock = std::make_shared<RenderBlock>();
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ClearEvents();
 
 	std::thread renderThread([] {
@@ -441,17 +438,17 @@ static void Test_RenderFaultUpgradesDeferredTeardown() {
 	});
 	Expect(mod->renderBlock->WaitUntilEntered(), "faulting render callback entered");
 	mod->enabled = false;
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(!Has("V:OnDisabled"), "disabled mod waits for its render callback");
 
 	mod->renderBlock->Release();
 	renderThread.join();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(Has("V:OnDisabled"), "deferred render fault completes teardown");
 
 	ClearEvents();
 	mod->enabled = true;
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	Expect(!Has("V:OnEnabled"), "render fault upgrades deferred teardown to terminal Faulted");
 	reg.Shutdown();
 }
@@ -464,7 +461,7 @@ static void Test_ShutdownWaitsForRenderQuiescence() {
 	mod->recordDestruction = true;
 	mod->renderBlock = std::make_shared<RenderBlock>();
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu, g_gls);
+	reg.Tick(GamePhase::Menu);
 	ClearEvents();
 
 	std::thread renderThread([] {

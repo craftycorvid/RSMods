@@ -33,7 +33,7 @@ namespace Framework {
 		void Register(std::unique_ptr<IMod> mod);
 		void DispatchInitialize();
 		void EnqueueSettingsUpdate(std::function<void()> apply);
-		void Tick(GamePhase phase, GameLoopState& loop);
+		void Tick(GamePhase phase);
 		void Shutdown();
 
 	private:

@@ -5,8 +5,6 @@
 
 #include "GamePhase.hpp"
 
-struct GameLoopState; // ModManager.hpp — transitional; dissolves as mods own their own state.
-
 namespace Framework {
 	struct ModContext;
 

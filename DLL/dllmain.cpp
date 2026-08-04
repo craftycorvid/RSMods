@@ -231,8 +231,6 @@ unsigned WINAPI HandleEffectQueueThread() {
 unsigned WINAPI MainThread() {
 	LOG_NOHEAD(_RSMODS_VERSION << std::endl);
 
-	GameLoopState loopState = {};
-
 	Keybindings::InitializeCommands();
 	ModManager::InitializeConfiguration();
 	ModManager::InitializeMods(debug);
@@ -244,14 +242,13 @@ unsigned WINAPI MainThread() {
 		Sleep(250);
 
 		if (GameState::GameLoaded) {
-			ModManager::HandlePostGameLoadedMods(loopState);
+			ModManager::HandlePostGameLoadedMods();
 			Framework::Registry().Tick(
-				GameState::IsInSong() ? Framework::GamePhase::Song : Framework::GamePhase::Menu,
-				loopState);
+				GameState::IsInSong() ? Framework::GamePhase::Song : Framework::GamePhase::Menu);
 		}
 		else {
-			ModManager::UpdateGameLoadingState(loopState);
-			Framework::Registry().Tick(Framework::GamePhase::Loading, loopState);
+			ModManager::UpdateGameLoadingState();
+			Framework::Registry().Tick(Framework::GamePhase::Loading);
 		}
 	}
 

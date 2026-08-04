@@ -323,9 +323,8 @@ namespace Framework {
 		impl->pendingSettings.push_back(std::move(apply));
 	}
 
-	void ModRegistry::Tick(GamePhase phase, GameLoopState& loop) {
+	void ModRegistry::Tick(GamePhase phase) {
 		impl->ctx.phase = phase;
-		impl->ctx.loop = &loop;
 
 		impl->HandleRenderFaults();
 		impl->RetryPendingDeactivations();

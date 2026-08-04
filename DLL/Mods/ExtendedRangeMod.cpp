@@ -1,6 +1,6 @@
 #include "../stdafx.h"
 #include "ExtendedRangeMod.hpp"
-#include "../ModManager.hpp"
+#include "Midi.hpp"
 #include "ExtendedRangeMode.hpp"
 
 using Framework::ModContext;
@@ -71,10 +71,10 @@ void ExtendedRangeMod::ApplyColors() {
 		ERMode::Toggle7StringMode();
 }
 
-// skipERSleep still lives in the transitional GameLoopState - it is set by the
-// MIDI auto-tune-in-tuner path, which is not ported yet.
-bool ExtendedRangeMod::SkipERSleep(const ModContext& c) {
-	return c.loop && c.loop->skipERSleep;
+// Skip the 1.5s tuning-settle sleep once MIDI has auto-tuned in the pre-song tuner: the pedal tuning is
+// already applied and the game's tuning numbers are stable. MidiMod owns and latches this flag.
+bool ExtendedRangeMod::SkipERSleep(const ModContext&) {
+	return Midi::appliedTunerAutoTune;
 }
 
 static Framework::ModRegistrar<ExtendedRangeMod> _extendedRangeReg;
