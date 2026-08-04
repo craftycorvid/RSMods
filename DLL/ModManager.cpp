@@ -175,11 +175,6 @@ namespace ModManager {
 			SetTwoRTCBypass(true);
 		}
 
-		// Patch x86 assembly for Riff Repeater speed logic to make it linear.
-		if (Settings::IsOn("LinearRiffRepeater")) {
-			RiffRepeater::EnableLinearSpeeds();
-		}
-
 		// Allow the user to have a small amount of time to Alt+Tab while the game continues playing the audio.
 		if (Settings::IsOn("AllowAudioInBackground")) {
 			VolumeControl::AllowAltTabbingWithAudio();
@@ -202,20 +197,6 @@ namespace ModManager {
 		}
 	}
 
-
-	/// <summary>
-	/// Handles dynamic toggling of linear riff repeater mode.
-	/// </summary>
-	void HandleLinearRiffRepeaterToggle() {
-		if (Settings::IsOn("LinearRiffRepeater") &&
-			!RiffRepeater::currentlyEnabled_LinearRR) {
-			RiffRepeater::EnableLinearSpeeds();
-		}
-		else if (Settings::IsOff("LinearRiffRepeater") &&
-			RiffRepeater::currentlyEnabled_LinearRR) {
-			RiffRepeater::DisableLinearSpeeds();
-		}
-	}
 
 	/// <summary>
 	/// Scans for MIDI devices when auto-tuning is enabled.
@@ -259,7 +240,6 @@ namespace ModManager {
 	{
 		GameState::currentMenu = GameState::GetCurrentMenu(); // This loads without checking if memory is safe... This can cause crashes if used when GameLoaded is false.
 
-		HandleLinearRiffRepeaterToggle();
 		HandleMidiDeviceScanning();
 
 		GameState::LessonMode = GameState::Menus::IsInLessonModes();
@@ -291,10 +271,6 @@ namespace ModManager {
 		if (Settings::IsOn("AllowLooping")) {
 			Keybindings::loopStart = NULL;
 			Keybindings::loopEnd = NULL;
-		}
-
-		if (!GameState::Menus::IsInScoreMenus() && RiffRepeater::currentlyEnabled_Above100) {
-			RiffRepeater::DisableTimeStretch();
 		}
 
 		if ((Midi::alreadyAutomatedTuningInThisSong || Midi::alreadyAttemptedTuningInTuner) &&
@@ -345,8 +321,6 @@ namespace ModManager {
 	/// Handles all state updates when the player is in a song.
 	/// </summary>
 	void HandleInSongState(GameLoopState& state) {
-		LogSongIDForRiffRepeater();
-		EnableRiffRepeaterFeatures();
 		HandleMidiAutoTuningInSong();
 	}
 
@@ -394,26 +368,6 @@ namespace ModManager {
 	}
 
 	/// <summary>
-	/// Logs song ID for Riff Repeater > 100% functionality.
-	/// We are in a song we haven't seen in this play session. Log its Id so we can prep for the Riff Repeater > 100% mod.
-	/// </summary>
-	void LogSongIDForRiffRepeater() {
-		if (RiffRepeater::readyToLogSongID && RiffRepeater::LogSongID(GameState::GetSongKey())) {	
-			RiffRepeater::readyToLogSongID = false;
-		}
-	}
-
-	/// <summary>
-	/// Enables riff repeater time stretching features.
-	/// </summary>
-	void EnableRiffRepeaterFeatures() {
-		if (Settings::IsOn("RRSpeedAboveOneHundred")) {
-			RiffRepeater::EnableTimeStretch();
-		}
-	}
-
-
-	/// <summary>
 	/// Handles MIDI auto-tuning when entering a song.
 	/// </summary>
 	void HandleMidiAutoTuningInSong() {
@@ -424,8 +378,4 @@ namespace ModManager {
 			Midi::AutomateTuning();
 		}
 	}
-
-	/// <summary>
-	/// Shows or hides the song timer based on settings.
-	/// </summary>
 }

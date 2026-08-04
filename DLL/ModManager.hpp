@@ -26,16 +26,12 @@ namespace ModManager {
     void HandlePostGameLoadedMods(GameLoopState& state);
     void UpdateGameLoadingState(GameLoopState& state);
 
-    void EnableRiffRepeaterFeatures();
-    void LogSongIDForRiffRepeater();
-    void EnableRiffRepeaterFeatures();
     void HandleMidiAutoTuningInSong();
     void HandleAutoLoadProfile(GameLoopState& state);
     void HandleSpecificProfileLoad(GameLoopState& state);
     void HandleAlwaysOnMods(GameLoopState& state);
     void HandleInMenuState(GameLoopState& state);
     void HandleInSongState(GameLoopState& state);
-    void HandleLinearRiffRepeaterToggle();
     void HandleMidiDeviceScanning();
     void CleanupSongSpecificStates(GameLoopState& state);
     void ConfigureAlternativeSampleRate();
