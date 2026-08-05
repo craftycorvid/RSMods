@@ -739,12 +739,12 @@ struct AkArrayAllocatorAlignedSimd
 {
 	AkForceInline void* Alloc(size_t in_uSize)
 	{
-		return AK::MemoryMgr::Malign(U_POOL::Get(), in_uSize, AK_SIMD_ALIGNMENT);
+		return Wwise::MemoryMgr::Malign(U_POOL::Get(), in_uSize, AK_SIMD_ALIGNMENT);
 	}
 
 	AkForceInline void Free(void* in_pAddress)
 	{
-		AK::MemoryMgr::Falign(U_POOL::Get(), in_pAddress);
+		Wwise::MemoryMgr::Falign(U_POOL::Get(), in_pAddress);
 	}
 
 	AkForceInline void TransferMem(void*& io_pDest, AkArrayAllocatorAlignedSimd<U_POOL> in_srcAlloc, void* in_pSrc)
@@ -787,7 +787,7 @@ struct AkPlacementNewKey
 
 #define AkPlacementNew(_memory) ::new( _memory, AkPlacementNewKey() )
 
-AkForceInline void* operator new(size_t /*size*/, void* memory, const AkPlacementNewKey& /*key*/) throw()
+AkForceInline void* operator new(size_t /*size*/, void* memory, const AkPlacementNewKey& /*key*/) noexcept
 {
 	return memory;
 }

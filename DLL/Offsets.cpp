@@ -157,7 +157,7 @@ namespace Offsets { // Addresses for pre-2021 patch are in the comments
 	// D3D Stuff
 	const char* d3dDevice_Pattern = "\xC7\x06\x00\x00\x00\x00\x89\x86\x00\x00\x00\x00\x89\x86";
 	uint32_t d3dDevice_SearchLen = 0x128000;
-	char* d3dDevice_Mask = "xx????xx????xx";
+	const char* d3dDevice_Mask = "xx????xx????xx";
 
 	// Multiplayer
 	std::vector<unsigned int> ptr_multiplayerOffsets{ 0x24, 0x28, 0x14, 0x90, 0xC };

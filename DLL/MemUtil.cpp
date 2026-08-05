@@ -38,12 +38,12 @@ bool MemUtil::bCompare(const BYTE* pData, const byte* bMask, const char* szMask)
 	return (*szMask) == NULL;
 }
 
-bool MemUtil::PatchAdr(uintptr_t address, LPVOID changeToMake, size_t len, bool addBaseHandle) {
+bool MemUtil::PatchAdr(uintptr_t address, LPCVOID changeToMake, size_t len, bool addBaseHandle) {
 	uintptr_t addr = address + (addBaseHandle ? Offsets::baseHandle : 0);
 	return PatchAdr((LPVOID)(addr), changeToMake, len);
 }
 
-bool MemUtil::PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake, size_t len, bool addBaseHandle) {
+bool MemUtil::PatchAdr(VersioningStruct<uintptr_t>& address, LPCVOID changeToMake, size_t len, bool addBaseHandle) {
 	uintptr_t addr = address.Get() + (addBaseHandle ? Offsets::baseHandle : 0);
 	return PatchAdr((LPVOID)(addr), changeToMake, len);
 }
@@ -55,7 +55,7 @@ bool MemUtil::PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake
 /// <param name="changeToMake"> - Edit you want to make</param>
 /// <param name="len"> - How long is the edit</param>
 /// <returns></returns>
-bool MemUtil::PatchAdr(LPVOID address, LPVOID changeToMake, size_t len) {
+bool MemUtil::PatchAdr(LPVOID address, LPCVOID changeToMake, size_t len) {
 	DWORD dwOldProt, dwDummy, ret;
 
 	clock_t before = clock();

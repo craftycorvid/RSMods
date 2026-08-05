@@ -5,9 +5,9 @@
 
 namespace MemUtil {
 	bool bCompare(const BYTE* pData, const byte* bMask, const char* szMask);
-	bool PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake, size_t len, bool addBaseHandle = false);
-	bool PatchAdr(LPVOID address, LPVOID changeToMake, size_t len);
-	bool PatchAdr(uintptr_t address, LPVOID changeToMake, size_t len, bool addBaseHandle);
+	bool PatchAdr(VersioningStruct<uintptr_t>& address, LPCVOID changeToMake, size_t len, bool addBaseHandle = false);
+	bool PatchAdr(LPVOID address, LPCVOID changeToMake, size_t len);
+	bool PatchAdr(uintptr_t address, LPCVOID changeToMake, size_t len, bool addBaseHandle);
 	bool PlaceHook(VersioningStruct<uintptr_t>& hookSpot, void* ourFunct, int len, bool addBaseHandle = false);
 	bool PlaceHook(void* hookSpot, void* ourFunct, int len);
 	PBYTE TrampHook(PBYTE src, PBYTE dst, unsigned int len);
@@ -18,7 +18,7 @@ namespace MemUtil {
 	bool SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthOfData);
 
 	template <typename T>
-	T FindPattern(uint32_t address, size_t size, PBYTE pattern, char* mask);
+	T FindPattern(uint32_t address, size_t size, PBYTE pattern, const char* mask);
 
 	template <typename T>
 	T ReadValue(uintptr_t adr, bool addBaseHandle);
@@ -41,7 +41,7 @@ template <typename T>
 /// <param name="pattern"> - Pattern to look for.</param>
 /// <param name="mask"> - Mask of what bytes we know (notated with an "x") and what bytes we don't (notated with a "?").</param>
 /// <returns>Value if found or NULL if not.</returns>
-T MemUtil::FindPattern(uint32_t address, size_t size, PBYTE pattern, char* mask) {
+T MemUtil::FindPattern(uint32_t address, size_t size, PBYTE pattern, const char* mask) {
 	for (uint32_t i = 0; i < size; i++)
 		if (bCompare((PBYTE)(address + i), pattern, mask))
 			return (T)(address + i);
