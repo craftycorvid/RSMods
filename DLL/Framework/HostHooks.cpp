@@ -17,12 +17,35 @@ namespace Framework::Hooks {
 			EndSceneFn fn;
 		};
 
+		struct DispatchBatch {
+			std::shared_ptr<const std::vector<Entry>> entries;
+			std::shared_ptr<const std::unordered_set<const IMod*>> active;
+			std::vector<const IMod*> counted;
+		};
+
 		void PublishEntries() {
 			entriesSnapshot = std::make_shared<const std::vector<Entry>>(entries);
 		}
 
 		void PublishActive() {
 			activeSnapshot = std::make_shared<const std::unordered_set<const IMod*>>(active);
+		}
+
+		DispatchBatch BeginDispatch() {
+			std::lock_guard<std::mutex> lock(mutex);
+			DispatchBatch batch{ entriesSnapshot, activeSnapshot, {} };
+
+			if (batch.entries && batch.active) {
+				for (const auto& entry : *batch.entries) {
+					if (batch.active->count(entry.mod) &&
+						std::find(batch.counted.begin(), batch.counted.end(), entry.mod) == batch.counted.end()) {
+						batch.counted.push_back(entry.mod);
+						++inFlightByMod[entry.mod];
+					}
+				}
+			}
+
+			return batch;
 		}
 
 		void EndDispatch(const std::vector<const IMod*>& counted) {
@@ -105,36 +128,18 @@ namespace Framework::Hooks {
 	}
 
 	void RenderHooks::DispatchEndScene(IDirect3DDevice9* device) {
-		std::shared_ptr<const std::vector<Impl::Entry>> entries;
-		std::shared_ptr<const std::unordered_set<const IMod*>> active;
-		std::vector<const IMod*> counted;
-		{
-			std::lock_guard<std::mutex> lock(impl->mutex);
-			entries = impl->entriesSnapshot;
-			active = impl->activeSnapshot;
-
-			if (entries && active) {
-				for (const auto& entry : *entries) {
-					if (active->count(entry.mod) &&
-						std::find(counted.begin(), counted.end(), entry.mod) == counted.end()) {
-						counted.push_back(entry.mod);
-
-						++impl->inFlightByMod[entry.mod];
-					}
-				}
-			}
-		}
+		auto batch = impl->BeginDispatch();
 
 		struct InFlightGuard {
 			Impl* impl;
-			std::vector<const IMod*>* counted;
-			~InFlightGuard() { impl->EndDispatch(*counted); }
-		} guard{ impl.get(), &counted };
+			const std::vector<const IMod*>& counted;
+			~InFlightGuard() { impl->EndDispatch(counted); }
+		} guard{ impl.get(), batch.counted };
 
-		if (counted.empty()) return;
+		if (batch.counted.empty()) return;
 
-		for (const auto& entry : *entries) {
-			if (active->find(entry.mod) == active->end()) continue;
+		for (const auto& entry : *batch.entries) {
+			if (batch.active->find(entry.mod) == batch.active->end()) continue;
 
 			try {
 				entry.fn(device);
