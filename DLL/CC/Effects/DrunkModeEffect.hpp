@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../../Mods/Loft.hpp"
 
 namespace CrowdControl::Effects {
@@ -9,8 +9,8 @@ namespace CrowdControl::Effects {
 			duration_ms = durationMilliseconds;
 		}
 
-		EffectStatus Test(const Request& request) override;
-		EffectStatus Start(const Request& request) override;
-		EffectStatus Stop() override;
+		Enums::EffectStatus Test(const Structs::Request& request) override;
+		Enums::EffectStatus Start(const Structs::Request& request) override;
+		Enums::EffectStatus Stop() override;
 	};
 }

@@ -1,41 +1,41 @@
-#include "../../stdafx.h"
+﻿#include "../../stdafx.h"
 #include "WavyNotesEffect.hpp"
 
 using namespace CrowdControl::Enums;
 
 namespace CrowdControl::Effects {
-	EffectStatus WavyNotesEffect::Test(const Request& request)
+	Enums::EffectStatus WavyNotesEffect::Test(const Structs::Request& request)
 	{
 		LOG_INFO("WavyNotesEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Enums::EffectStatus::Retry;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 
 
-	EffectStatus WavyNotesEffect::Start(const Request& request)
+	Enums::EffectStatus WavyNotesEffect::Start(const Structs::Request& request)
 	{
 		LOG_INFO("WavyNotesEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Enums::EffectStatus::Retry;
 		
 		SetDuration(request);
 		running = true;
 		wavyNotesEnabled = true;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 
-	EffectStatus WavyNotesEffect::Stop()
+	Enums::EffectStatus WavyNotesEffect::Stop()
 	{
 		LOG_INFO("WavyNotesEffect::Stop()" << std::endl);
 
 		wavyNotesEnabled = false;
 		running = false;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 }

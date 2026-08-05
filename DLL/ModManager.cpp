@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ModManager.hpp"
+#include "Mods/Midi.hpp"
 
 namespace Setting = Settings::Setting;
 

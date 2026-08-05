@@ -11,7 +11,7 @@ namespace CrowdControl::Effects {
 		}
 	}
 
-	void CCEffect::SetDuration(const Request& req) {
+	void CCEffect::SetDuration(const Structs::Request& req) {
 		if (req.duration)
 			duration_ms = req.duration;
 

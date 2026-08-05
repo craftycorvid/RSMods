@@ -1,5 +1,7 @@
 #include "../stdafx.h"
 #include "D3DHooks.hpp"
+#include "../Framework/Framework.hpp"
+#include "../D3DOverlay.hpp"
 
 using Settings::NoteColorMode;
 namespace Setting = Settings::Setting;

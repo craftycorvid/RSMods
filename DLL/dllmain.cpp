@@ -1,11 +1,13 @@
 #include "stdafx.h"
-#include "Main.hpp"
-#include "Framework/Framework.hpp"
-
-namespace Setting = Settings::Setting;
-
 #include <io.h>
 #include <share.h>
+#include "Proxy.hpp"
+#include "ModManager.hpp"
+#include "Framework/Framework.hpp"
+#include "Mods/Midi.hpp"
+#include "D3DOverlay.hpp"
+
+namespace Setting = Settings::Setting;
 
 #if defined(_DEBUG) || defined(_WWISE_LOGS)
 bool debug = true;

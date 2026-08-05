@@ -16,6 +16,7 @@
 using namespace CrowdControl::Effects;
 using namespace CrowdControl::EffectList;
 using namespace CrowdControl::Enums;
+using namespace CrowdControl::Structs;
 using nlohmann::json;
 
 namespace CrowdControl {

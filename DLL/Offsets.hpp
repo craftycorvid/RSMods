@@ -2,6 +2,7 @@
 
 #include "VersioningStruct.h"
 #include <vector>
+#include <cstddef>
 
 namespace Offsets {
 	extern uintptr_t baseHandle; // Beginning of Rocksmith

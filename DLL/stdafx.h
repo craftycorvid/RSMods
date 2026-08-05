@@ -4,7 +4,6 @@
 // STL
 #include <chrono>
 #include <cmath>
-#include <codecvt>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
@@ -65,7 +64,6 @@
 #include "D3D/D3D.hpp"
 #include "D3D/D3DHooks.hpp"
 #include "Log.hpp"
-#include "MemHelpers.hpp"
 #include "MemUtil.hpp"
 #include "Offsets.hpp"
 #include "Settings.hpp"
@@ -76,7 +74,6 @@
 #include "SongTuning.hpp"
 #include "GameState.hpp"
 #include "SongTimer.hpp"
-#include "D3DOverlay.hpp"
 
 /// <param name="valueToCheckIfInsideArray"> - Input</param>
 /// <param name="vec"> - Is input in list | VECTOR? (NULLABLE)</param>

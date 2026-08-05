@@ -1,6 +1,12 @@
 #pragma once
 
-#include "stdafx.h"
+#include <array>
+#include <atomic>
+#include <concepts>
+#include <ranges>
+#include <string>
+#include <string_view>
+#include <vector>
 
 /// <param name="valueToCheckIfInsideArray"> - Input</param>
 /// <param name="vec"> - Is input in list | VECTOR? (NULLABLE)</param>

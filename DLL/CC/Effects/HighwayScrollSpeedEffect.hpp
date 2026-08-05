@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace CrowdControl::Effects {
 	class HighwayScrollSpeedEffect : public CCEffect
@@ -13,13 +13,11 @@ namespace CrowdControl::Effects {
 			incompatibleEffects = { "halfscrollspeed", "doublescrollspeed", "triplescrollspeed" };
 		}
 
-		EffectStatus Test(const Request& request);
-		EffectStatus Start(const Request& request);
-		EffectStatus Stop();
+		Enums::EffectStatus Test(const Structs::Request& request);
+		Enums::EffectStatus Start(const Structs::Request& request);
+		Enums::EffectStatus Stop();
 
 	private:
 		static void WriteScrollSpeedMultiplier(double val);
 	};
 }
-
-#pragma once

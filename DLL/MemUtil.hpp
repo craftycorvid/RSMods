@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Offsets.hpp"
 #include "winternl.h"
 
 namespace MemUtil {

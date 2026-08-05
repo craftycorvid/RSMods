@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../../Mods/ExtendedRangeMode.hpp"
 
 namespace CrowdControl::Effects {
@@ -11,9 +11,9 @@ namespace CrowdControl::Effects {
 			incompatibleEffects = { "removeinstrument" };
 		}
 
-		EffectStatus Test(const Request& request) override;
-		EffectStatus Start(const Request& request) override;
-		EffectStatus Stop() override;
+		Enums::EffectStatus Test(const Structs::Request& request) override;
+		Enums::EffectStatus Start(const Structs::Request& request) override;
+		Enums::EffectStatus Stop() override;
 
 		/**
 		 * \brief Can this effect start? By default checks that a song is being played, no incompatible effects are running, and this effect is not running

@@ -1,8 +1,12 @@
 #pragma once
+
 #include <atomic>
 #include <functional>
 #include <map>
+#include <string>
+#include <string_view>
 #include <vector>
+
 #include "RSColor.h"
 
 namespace Settings {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace CrowdControl::Effects {
 	class RemoveInstrumentEffect : public CCEffect
@@ -10,9 +10,9 @@ namespace CrowdControl::Effects {
 			incompatibleEffects = { "invertedstrings", "rainbowstrings" };
 		}
 
-		EffectStatus Test(const Request& request) override;
-		EffectStatus Start(const Request& request) override;
-		EffectStatus Stop() override;
+		Enums::EffectStatus Test(const Structs::Request& request) override;
+		Enums::EffectStatus Start(const Structs::Request& request) override;
+		Enums::EffectStatus Stop() override;
 
 	private:
 		static void SetInstrumentScale(float scale);

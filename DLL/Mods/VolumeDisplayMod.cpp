@@ -1,6 +1,7 @@
 #include "../stdafx.h"
 #include "VolumeDisplayMod.hpp"
 #include "VolumeControl.hpp"
+#include "../D3DOverlay.hpp"
 
 using Framework::ModContext;
 using Framework::KeyEdge;
