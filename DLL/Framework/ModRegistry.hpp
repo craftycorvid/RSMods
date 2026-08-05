@@ -32,6 +32,7 @@ namespace Framework {
 		void InstantiatePending();
 		void Register(std::unique_ptr<IMod> mod);
 		void DispatchInitialize();
+		void DispatchCommands(GamePhase phase, bool gameLoaded);
 		void EnqueueSettingsUpdate(std::function<void()> apply);
 		void Tick(GamePhase phase);
 		void Shutdown();

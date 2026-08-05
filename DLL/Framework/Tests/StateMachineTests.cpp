@@ -97,6 +97,10 @@ namespace {
 		bool throwInRender = false;
 		bool recordDestruction = false;
 		std::shared_ptr<RenderBlock> renderBlock;
+		std::string commandSetting;
+		Framework::Availability availability = Framework::Availability::Active;
+		int commandCalls = 0;
+		bool lastCommandControl = false;
 
 		explicit TestMod(std::string i) : id(std::move(i)), tag(id) {}
 		~TestMod() override {
@@ -114,6 +118,13 @@ namespace {
 
 		void OnInitialize(Framework::ModContext& c) override {
 			Rec("OnInitialize");
+			if (!commandSetting.empty()) {
+				c.Commands().BindSetting(commandSetting, Framework::KeyEdge::Up, availability,
+					[this](Framework::ModContext&, const Framework::KeyEvent& event) {
+						++commandCalls;
+						lastCommandControl = event.control;
+					});
+			}
 			if (subscribeRender)
 				c.Render().OnEndScene([this](IDirect3DDevice9*) {
 					RecordEvent(tag + ":render");
@@ -299,12 +310,81 @@ static void Test_SettingsAppliedThenNotifiedOnTick() {
 	Add(reg, "M");
 	reg.DispatchInitialize();
 	ClearEvents();
-	reg.EnqueueSettingsUpdate([] { RecordEvent("SETTINGS:apply"); });
-	Expect(!Has("SETTINGS:apply"), "settings not applied on the message thread (before tick)");
+	reg.EnqueueSettingsUpdate([] { RecordEvent("SETTINGS:apply-1"); });
+	reg.EnqueueSettingsUpdate([] { RecordEvent("SETTINGS:apply-2"); });
+	Expect(!Has("SETTINGS:apply-1") && !Has("SETTINGS:apply-2"),
+		"settings not applied on the message thread (before tick)");
 	reg.Tick(GamePhase::Menu);
-	Expect(Has("SETTINGS:apply") && Has("M:OnSettingsChanged"), "settings applied and mods notified on tick");
-	Expect(IndexOf("SETTINGS:apply") < IndexOf("M:OnSettingsChanged"), "apply precedes notify");
+	Expect(Has("SETTINGS:apply-1") && Has("SETTINGS:apply-2") && Has("M:OnSettingsChanged"),
+		"settings batch applied and mods notified on tick");
+	Expect(IndexOf("SETTINGS:apply-1") < IndexOf("SETTINGS:apply-2"),
+		"settings closures preserve FIFO order within a batch");
+	Expect(IndexOf("SETTINGS:apply-2") < IndexOf("M:OnSettingsChanged"),
+		"complete settings batch precedes notification");
 	Expect(IndexOf("M:OnSettingsChanged") < IndexOf("M:OnEnabled"), "notify precedes activation resolve");
+	reg.Shutdown();
+}
+
+static Framework::KeyEvent TestKeyEvent(unsigned int key, bool control = false) {
+	Framework::KeyEvent event;
+	event.virtualKey = key;
+	event.edge = Framework::KeyEdge::Up;
+	event.control = control;
+	return event;
+}
+
+static void Test_KeyAvailabilityTracksRegistryLifecycle() {
+	Framework::Commands().SetKeyResolver([](std::string_view setting) {
+		return setting == "TestEffectiveCommand" ? 80u : setting == "TestInitializedCommand" ? 81u : 0u;
+	});
+
+	ModRegistry reg;
+	TestMod* effective = Add(reg, "CommandEffective", false);
+	effective->commandSetting = "TestEffectiveCommand";
+	TestMod* initialized = Add(reg, "CommandInitialized", false);
+	initialized->commandSetting = "TestInitializedCommand";
+	initialized->availability = Framework::Availability::Initialized;
+	reg.DispatchInitialize();
+
+	Framework::Commands().Enqueue(TestKeyEvent(80, true));
+	Framework::Commands().Enqueue(TestKeyEvent(81, true));
+	reg.DispatchCommands(GamePhase::Menu, true);
+	Expect(effective->commandCalls == 0 && initialized->commandCalls == 1 && initialized->lastCommandControl,
+		"registry exposes initialized binding but gates inactive active-only binding");
+
+	effective->enabled = true;
+	reg.Tick(GamePhase::Menu);
+	Framework::Commands().Enqueue(TestKeyEvent(80, true));
+	reg.DispatchCommands(GamePhase::Menu, true);
+	Expect(effective->commandCalls == 1 && effective->lastCommandControl,
+		"registry activation enables command with captured modifier state");
+
+	effective->enabled = false;
+	reg.Tick(GamePhase::Menu);
+	Framework::Commands().Enqueue(TestKeyEvent(80));
+	reg.DispatchCommands(GamePhase::Menu, true);
+	Expect(effective->commandCalls == 1, "registry deactivation disables effective command before delivery");
+	reg.Shutdown();
+}
+
+static void Test_ConflictSuppressionGatesEffectiveCommand() {
+	Framework::Commands().SetKeyResolver([](std::string_view setting) {
+		return setting == "SuppressedCommand" ? 82u : 0u;
+	});
+
+	ModRegistry reg;
+	TestMod* suppressed = Add(reg, "Suppressed", true, 0);
+	suppressed->claimStrings = { "R" };
+	suppressed->commandSetting = "SuppressedCommand";
+	TestMod* winner = Add(reg, "Winner", true, 10);
+	winner->claimStrings = { "R" };
+	reg.DispatchInitialize();
+	reg.Tick(GamePhase::Menu);
+
+	Framework::Commands().Enqueue(TestKeyEvent(82));
+	reg.DispatchCommands(GamePhase::Menu, true);
+	Expect(suppressed->commandCalls == 0,
+		"conflict-suppressed mod cannot bypass exclusive resource through effective command");
 	reg.Shutdown();
 }
 
@@ -507,6 +587,8 @@ int main() {
 	Test_OnSongEnterThrowsShortCircuits();
 	Test_TickFailureFaultsImmediately();
 	Test_SettingsAppliedThenNotifiedOnTick();
+	Test_KeyAvailabilityTracksRegistryLifecycle();
+	Test_ConflictSuppressionGatesEffectiveCommand();
 	Test_DuplicateIdRejected();
 	Test_RenderModActivationGating();
 	Test_RemoveModDropsPublishedCallbacks();

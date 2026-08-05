@@ -74,6 +74,7 @@ namespace Framework {
 
 			record.state = ModState::Faulted;
 			Hooks::Render().RemoveMod(record.mod.get());
+			Commands().RemoveMod(record.mod.get());
 		}
 
 		// Best-effort revert of live game state before a mod leaves Active.
@@ -90,6 +91,7 @@ namespace Framework {
 			Revert(record);
 			if (record.pendingTarget == ModState::Faulted) {
 				Hooks::Render().RemoveMod(record.mod.get());
+				Commands().RemoveMod(record.mod.get());
 			}
 
 			record.state = record.pendingTarget;
@@ -103,6 +105,8 @@ namespace Framework {
 		// defers the OnDisabled revert to a later tick (never frees state under a live callback).
 		void BeginTeardown(Record& record, ModState target, bool suppressed) {
 			Hooks::Render().SetModActive(record.mod.get(), false);
+			Commands().SetModActive(record.mod.get(), false);
+			if (target == ModState::Faulted) Commands().SetModInitialized(record.mod.get(), false);
 			record.pendingTarget = target;
 			record.pendingSuppressed = suppressed;
 
@@ -134,6 +138,25 @@ namespace Framework {
 				}
 				else if (record->state == ModState::Deactivating) {
 					record->pendingTarget = ModState::Faulted;
+					Commands().SetModInitialized(record->mod.get(), false);
+				}
+			}
+		}
+
+		void HandleCommandFaults() {
+			for (const IMod* mod : Commands().TakeFaultedMods()) {
+				Record* record = FindByMod(mod);
+				if (!record) continue;
+
+				if (record->state == ModState::Active) {
+					BeginTeardown(*record, ModState::Faulted, false);
+				}
+				else if (record->state == ModState::Deactivating) {
+					record->pendingTarget = ModState::Faulted;
+					Commands().SetModInitialized(record->mod.get(), false);
+				}
+				else if (record->state == ModState::Inactive) {
+					Fault(*record, "threw in a command");
 				}
 			}
 		}
@@ -155,6 +178,7 @@ namespace Framework {
 
 			record.state = ModState::Active;
 			Hooks::Render().SetModActive(record.mod.get(), true);
+			Commands().SetModActive(record.mod.get(), true);
 
 			LOG_INFO("[Framework] " << record.mod->Id() << " activated" << std::endl);
 		}
@@ -186,12 +210,20 @@ namespace Framework {
 			if (phase == GamePhase::Song) InvokeActive(record, &IMod::OnSongTick, "OnSongTick");
 		}
 
-		void DrainSettings() {
+		void QueueSettingsUpdate(std::function<void()> apply) {
+			std::lock_guard<std::mutex> lock(settingsMutex);
+			pendingSettings.push_back(std::move(apply));
+		}
+
+		std::vector<std::function<void()>> TakePendingSettings() {
 			std::vector<std::function<void()>> batch;
-			{
-				std::lock_guard<std::mutex> lock(settingsMutex);
-				batch.swap(pendingSettings);
-			}
+			std::lock_guard<std::mutex> lock(settingsMutex);
+			batch.swap(pendingSettings);
+			return batch;
+		}
+
+		void DrainSettings() {
+			auto batch = TakePendingSettings();
 			if (batch.empty())return;
 
 			for (auto& apply : batch) {
@@ -206,6 +238,7 @@ namespace Framework {
 				if (record.state != ModState::Registered && record.state != ModState::Faulted)
 					Invoke(record, &IMod::OnSettingsChanged, "OnSettingsChanged");
 			}
+			Commands().RefreshDiagnostics();
 		}
 
 		bool IsActivatable(ModState state) const {
@@ -311,22 +344,31 @@ namespace Framework {
 
 			if (impl->Invoke(record, &IMod::OnInitialize, "OnInitialize")) {
 				record.state = ModState::Inactive;
+				Commands().SetModInitialized(record.mod.get(), true);
 			}
 			else {
 				impl->Fault(record, "threw in OnInitialize");
 			}
 		}
+		Commands().RefreshDiagnostics();
+	}
+
+	void ModRegistry::DispatchCommands(GamePhase phase, bool gameLoaded) {
+		impl->ctx.phase = phase;
+		Commands().DispatchPending(impl->ctx, gameLoaded);
+		impl->HandleCommandFaults();
 	}
 
 	void ModRegistry::EnqueueSettingsUpdate(std::function<void()> apply) {
-		std::lock_guard<std::mutex> lock(impl->settingsMutex);
-		impl->pendingSettings.push_back(std::move(apply));
+		impl->QueueSettingsUpdate(std::move(apply));
+		Commands().Wake();
 	}
 
 	void ModRegistry::Tick(GamePhase phase) {
 		impl->ctx.phase = phase;
 
 		impl->HandleRenderFaults();
+		impl->HandleCommandFaults();
 		impl->RetryPendingDeactivations();
 		impl->DrainSettings();
 		impl->BuildResolverIfNeeded();
@@ -369,6 +411,7 @@ namespace Framework {
 
 			if (record.state == ModState::Active || record.state == ModState::Deactivating) {
 				Hooks::Render().SetModActive(record.mod.get(), false);
+				Commands().SetModActive(record.mod.get(), false);
 
 				while (!Hooks::Render().IsModQuiescent(record.mod.get())) {
 					std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -379,6 +422,7 @@ namespace Framework {
 
 			impl->Invoke(record, &IMod::OnShutdown, "OnShutdown");
 			Hooks::Render().RemoveMod(record.mod.get());
+			Commands().RemoveMod(record.mod.get());
 		}
 
 		impl->records.clear();

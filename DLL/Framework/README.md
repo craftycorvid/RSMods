@@ -16,8 +16,9 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
 - **Activation and threading ownership live in the framework, not in each mod.** A mod says *what*
   it wants (enabled? which resources? render callback?); the registry decides *whether*, *when*,
   and on *which thread* it runs.
-- **No input/WndProc surface.** `Keybindings` already owns input, and a consumable message hook
-  risks swallowing host-critical messages (`WM_CLOSE`, `WM_COPYDATA`).
+- **No raw input/WndProc surface.** `Keybindings` remains the Win32 adapter and never exposes
+  consumable window messages to mods. It snapshots key events into non-consumable `KeyEvent`s;
+  mods register named commands through `ModContext`.
 
 ## Host wiring (`dllmain.cpp`)
 
@@ -25,6 +26,9 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
   `Registry().Tick(phase)` each loop, and `Registry().Shutdown()` after the loop.
 - `WndProc` `WM_COPYDATA` - `Keybindings::UpdateSettingsOnGUIChange`, which *queues* the
   settings mutation onto the registry instead of applying it on the message thread.
+- `WndProc` key messages - snapshot modifiers/repeat state and enqueue a `KeyEvent`. A wakeable
+  FIFO delivers commands promptly on `MainThread`; the 250 ms maintenance tick is not accelerated
+  and missed deadlines are not replayed as catch-up bursts.
 
 ## Adding a mod
 
@@ -102,14 +106,43 @@ mod keeps reserving its resources, so a contested handoff can't double-acquire.
 thread**, tick hooks on **MainThread**, so state shared between them must be `std::atomic` or a
 published immutable snapshot, a plain `bool` is a data race.
 
+## Commands & keybindings
+
+`ctx.Commands().BindSetting(...)` attaches a settings-named keybinding to its owning mod;
+`BindKey(...)` does the same for a fixed Win32 virtual key. `Keybindings`
+still captures Win32 input, but actions and predicates execute on `MainThread`, serialized with mod
+lifecycle and tick hooks. `KeyEvent` contains the virtual key, edge, modifier snapshot, and repeat
+bit. Modifier-sensitive actions must use the event snapshot; they must not
+poll `GetAsyncKeyState` after delivery.
+
+Every command keeps its own predicate. Owner availability is an additional lifecycle gate:
+
+- `Availability::Active` means **strictly `ModState::Active`**. It becomes unavailable as soon as
+  deactivation starts, before render callbacks quiesce and `OnDisabled` runs.
+- `Availability::Initialized` remains available after successful initialization while the mod is normally
+  inactive or conflict-suppressed, and disappears on fault/shutdown. It is only for uncontended state.
+- **A command that mutates any resource returned by its owner's `ClaimsExclusive()` must use
+  `Availability::Active`.** Otherwise conflict suppression could be bypassed through input. MIDI
+  tuning commands therefore disappear while `tuning-controller` is owned by another mod.
+
+Physical-key collisions are resolved deterministically. Within the normal setting pass, setting
+name order matches the old `std::map`; the first physical match owns the event even when its predicate
+is false (no fall-through). Volume adjustments are ordinary setting bindings and follow the same
+rule. Fixed-key commands use a final internal pass matching the old inline-host-shortcut behavior.
+These passes are router implementation details; binding refreshes log physical collisions rather
+than rejecting user configuration.
+
+Force Enumeration is owned by `EnumerationMod`, while the fixed Delete auto-tune intent is owned by
+`MidiMod`. Only the Ctrl+A settings reload and Backspace debug-menu shortcuts remain host-owned in
+`Keybindings`. Input received before `GameLoaded` is discarded at dispatch and is never replayed afterward.
+
 ## Settings
 
-`WM_COPYDATA` runs on the message thread. The **GUI settings path** is queued (as a closure)
-onto the registry instead of applied there; on the next `Tick` (MainThread) the registry
-applies it, then notifies mods via `OnSettingsChanged`, so `IsEnabled`/`OnSettingsChanged` and
-the legacy `ModManager` reads never race *that* writer. Non-settings GUI commands (Wwise,
-Twitch, CrowdControl) still run immediately.
+All settings writes are serialized onto `MainThread`. GUI/`WM_COPYDATA`, Twitch, CrowdControl,
+and render-thread reload requests enqueue closures through `EnqueueSettingsUpdate`; the next
+registry `Tick` drains the complete FIFO batch, then notifies mods via `OnSettingsChanged` before
+resolving activation. Non-settings GUI and effect work still runs on its originating thread.
 
-> The `Settings` maps are **not** globally thread-safe. Only the GUI/`WM_COPYDATA` writer was
-> moved onto MainThread. Other legacy writers (CrowdControl, Twitch) still mutate settings from
-> their own threads.
+> The `Settings` maps are not yet globally thread-safe: CrowdControl, Twitch, and render workers
+> still read them without a lock while `MainThread` may apply a queued write. Snapshot the values
+> needed by a worker before removing this remaining read-side race.
