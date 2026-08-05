@@ -1,4 +1,4 @@
-﻿namespace RSMods
+namespace RSMods
 {
     partial class MainForm
     {
@@ -4469,7 +4469,7 @@
             // 
             this.nUpDown_ASIO_InputMic_Channel.Location = new System.Drawing.Point(338, 28);
             this.nUpDown_ASIO_InputMic_Channel.Maximum = new decimal(new int[] {
-            64,
+            255,
             0,
             0,
             0});
@@ -4545,7 +4545,7 @@
             // 
             this.nUpDown_ASIO_Output_AltBaseChannel.Location = new System.Drawing.Point(338, 52);
             this.nUpDown_ASIO_Output_AltBaseChannel.Maximum = new decimal(new int[] {
-            64,
+            255,
             0,
             0,
             0});
@@ -4636,7 +4636,7 @@
             // 
             this.nUpDown_ASIO_Output_BaseChannel.Location = new System.Drawing.Point(338, 28);
             this.nUpDown_ASIO_Output_BaseChannel.Maximum = new decimal(new int[] {
-            64,
+            255,
             0,
             0,
             0});
@@ -4767,7 +4767,7 @@
             // 
             this.nUpDown_ASIO_Input1_Channel.Location = new System.Drawing.Point(338, 28);
             this.nUpDown_ASIO_Input1_Channel.Maximum = new decimal(new int[] {
-            64,
+            255,
             0,
             0,
             0});
@@ -4898,7 +4898,7 @@
             // 
             this.nUpDown_ASIO_Input0_Channel.Location = new System.Drawing.Point(338, 28);
             this.nUpDown_ASIO_Input0_Channel.Maximum = new decimal(new int[] {
-            64,
+            255,
             0,
             0,
             0});
@@ -4972,8 +4972,9 @@
             this.checkBox_ASIO_WASAPI_Output.Size = new System.Drawing.Size(125, 17);
             this.checkBox_ASIO_WASAPI_Output.TabIndex = 0;
             this.checkBox_ASIO_WASAPI_Output.Text = "Use WASAPI Output";
+            this.checkBox_ASIO_WASAPI_Output.ThreeState = true;
             this.checkBox_ASIO_WASAPI_Output.UseVisualStyleBackColor = true;
-            this.checkBox_ASIO_WASAPI_Output.CheckedChanged += new System.EventHandler(this.ASIO_WASAPI_Output);
+            this.checkBox_ASIO_WASAPI_Output.CheckStateChanged += new System.EventHandler(this.ASIO_WASAPI_Output);
             this.checkBox_ASIO_WASAPI_Output.MouseHover += new System.EventHandler(this.ToolTips_Show);
             // 
             // groupBox_ASIO_BufferSize
@@ -5011,12 +5012,12 @@
             0});
             this.nUpDown_ASIO_CustomBufferSize.Location = new System.Drawing.Point(20, 129);
             this.nUpDown_ASIO_CustomBufferSize.Maximum = new decimal(new int[] {
-            4096,
+            65536,
             0,
             0,
             0});
             this.nUpDown_ASIO_CustomBufferSize.Minimum = new decimal(new int[] {
-            16,
+            1,
             0,
             0,
             0});
@@ -5024,7 +5025,7 @@
             this.nUpDown_ASIO_CustomBufferSize.Size = new System.Drawing.Size(120, 20);
             this.nUpDown_ASIO_CustomBufferSize.TabIndex = 3;
             this.nUpDown_ASIO_CustomBufferSize.Value = new decimal(new int[] {
-            16,
+            48,
             0,
             0,
             0});

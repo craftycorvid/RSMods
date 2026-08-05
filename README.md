@@ -153,130 +153,196 @@ Feel free to try the 1.2.8.0 version if you are on the Learn & Play version.
 * DirectX 9 SDK, ImGUI, GDI+, Detours, RtMidi - all of which are included in the project folder and should require no additional installations to compile and use the project
 * Setup as C++17 / VS2019 project
 
-## Settings:
-If you want to manually create the settings file for the DLL, download the template from [here](https://pastebin.com/raw/f6hf990R):
+## Settings (`RSMods.ini`)
 
-And the general file structure should be as follows:
+The DLL (`DLL/Settings.cpp`) and GUI both read/write the same `RSMods.ini` in the Rocksmith install folder. Prefer the GUI, but you can edit by hand. Keys and defaults below match the DLL parser (`Settings::ReadKeyBinds` / `ReadModSettings` / `ReadStringColors` / `ReadNotewayColors`) and the GUI first-run writer (`WriteSettings.LoadSettingsFromINI`).
 
-Section        | Entry             | Possible values | Info   |
--------------- | ----------------- | --------------- | ------ |
-**SongListTitles** | &nbsp; | &nbsp; | &nbsp; |
- &nbsp; | SongListTitles_1  | _user defined string_ | Songlist 1's name |
- &nbsp; | ... | &nbsp; | &nbsp; |
- &nbsp; | SongListTitles_6 |  _user defined string_ | Songlist 6's name |       
- **Keybinds** | &nbsp; | &nbsp; | &nbsp; |
-&nbsp; | ToggleLoftKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Toggle the background of the game when this key is pressed. Only usable when Toggle Switches > ToggleLoft is on. |
-&nbsp; | ShowSongTimerKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Shows the current time of the song being played. Only usable when Toggle Switches > ShowSongTimer is on.|
-&nbsp; | ForceReEnumerationKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Force the game to check for new songs added to your DLC folder. Only usable when Toggle Switches > ForceReEnumeration is on. | 
-&nbsp; | RainbowStringsKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Make your strings scroll through colors. Only usable when Toggle Switches > RainbowStrings is on. |
-&nbsp; | RainbowNotesKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Make your notes scroll through colors. Only usable when Toggle Switches > RainbowNotes is on. |
-&nbsp; | RemoveLyricsKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Toggle the lyrics when in a song. Only usable when Toggle Switches > Lyrics is on. |
-&nbsp; | RRSpeedKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Makes Riff Repeater go past 100%. Press this key to go up by the number in Mod Settings > RRSpeedInterval, and hold shift while pressing this key to make it go down by the number in Mod Settings > RRSpeedInterval. Only usable when Toggle Switches > RRSpeedAboveOneHundred is on. |
- **Audio Keybindings** | &nbsp; | &nbsp; | &nbsp;
-&nbsp; | MasterVolumeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Makes the Master Volume go up by the number in Mod Settings > VolumeControlInterval. Press Control at the same time as pressing this key to make the volume go down by the number in Mod Settings > VolumeControlInterval. Only usable when Toggle Switches > VolumeControl is on. These values are not reflected in the Mixer menu. This is a value left in by Ubisoft, but never used in the Mixer menu.
-&nbsp; | SongVolumeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Makes the Master Volume go up by the number in Mod Settings > VolumeControlInterval. Press Control at the same time as pressing this key to make the volume go down by the number in Mod Settings > VolumeControlInterval. Only usable when Toggle Switches > VolumeControl is on. These values are not reflected in the Mixer menu.
-&nbsp; | Player1VolumeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Makes the volume of Player 1 go up by the number in Mod Settings > VolumeControlInterval. Press Control at the same time as pressing this key to make the volume go down by the number in Mod Settings > VolumeControlInterval. Only usable when Toggle Switches > VolumeControl is on. These values are not reflected in the Mixer menu.
-&nbsp; | Player2VolumeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Makes the volume of Player 2 go up by the number in Mod Settings > VolumeControlInterval. Press Control at the same time as pressing this key to make the volume go down by the number in Mod Settings > VolumeControlInterval. Only usable when Toggle Switches > VolumeControl is on. These values are not reflected in the Mixer menu.
-&nbsp; | MicrophoneVolumeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Makes your Microphone Volume go up by the number in Mod Settings > VolumeControlInterval. Press Control at the same time as pressing this key to make the volume go down by the number in Mod Settings > VolumeControlInterval. Only usable when Toggle Switches > VolumeControl is on. These values are not reflected in the Mixer menu.
-&nbsp; | VoiceOverVolumeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Makes the Voice-Over (Rocksmith Dad) Volume go up by the number in Mod Settings > VolumeControlInterval. Press Control at the same time as pressing this key to make the volume go down by the number in Mod Settings > VolumeControlInterval. Only usable when Toggle Switches > VolumeControl is on. These values are not reflected in the Mixer menu.
-&nbsp; | SFXVolumeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Makes the Sound Effects Volume go up by the number in Mod Settings > VolumeControlInterval. Press Control at the same time as pressing this key to make the volume go down by the number in Mod Settings > VolumeControlInterval. Only usable when Toggle Switches > VolumeControl is on. These values are not reflected in the Mixer menu.
-&nbsp; | ChangedSelectedVolumeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format.| Shows you the selected volume's current value.
-&nbsp; | ToggleExtendedRangeKey | Function keys (F1, F10) / Media Keys (Play/Pause, Stop, NextTrack, PreviousTrack) in Virtual Key format. | Toggles extended range mode.
-**Toggle Switches** | &nbsp; | &nbsp;
-&nbsp; | ToggleLoft | on/off | Turns off the background of the game. This will make the background black. |
-&nbsp; | VolumeControl | on/off | Allows you to change volumes by pressing a keybinding. |
-&nbsp; | ShowSongTimer | on/off | Shows the time of the song you are playing. |
-&nbsp; | ForceReEnumeration | automatic/manual | Forces the game to look for new songs added to your DLC folder. |
-&nbsp; | RainbowStrings | on/off | Makes your strings cycle through a color wheel. |
-&nbsp; | RainbowNotes | on/off | Makes your notes cycle through a color wheel. |
-&nbsp; | ExtendedRange | on/off | Change your string colors based on the tuning of the song. This is helpful for people who play low-tuned songs with a 7-string guitar or 5-string bass. |
-&nbsp; | ExtendedRangeDropTuning | on/off | An extension of ExtendedRange that will make drop tunings also trigger the color change. |
-&nbsp; | CustomStringColors | 0/1/2 | 0 = default colors, 1 = ZZ's color set, 2 = Color specified in the String Colors section |
-&nbsp; | Headstock | on/off | Removes the headstock to give the "headless guitar" look. |
-&nbsp; | Skyline | on/off | Removes the purple and orange Dynamic Difficulty bars from the top of the screen for a cleaner-looking UI. |
-&nbsp; | GreenScreenWall | on/off | Removes the wall texture of the loft if you want to have the "ToggleLoft" mode look but still want the amps / background elements to show up. |
-&nbsp; | ForceProfileLoad | on/off | Spam enter when the game starts so you can go grab some coffee and come back in the main menu. |
-&nbsp; | Fretless | on/off | Removes the fret wire from the guitar / bass model. |
-&nbsp; | Inlays | on/off | Removes the inlays from the guitar / bass. **ONLY WORKS WITH THE STANDARD DOT INLAY** |
-&nbsp; | ToggleLoftWhen | startup/song/manual | When do you want "ToggleLoft" to take effect? |
-&nbsp; | LaneMarkers | on/off | Removes the excessive lines going down the noteway for the lanes you aren't currently using. |
-&nbsp; | ToggleSkylineWhen | startup/song | When do you want the "Skyline" to be removed? |
-&nbsp; | Lyrics | on/off | Removes the lyrics from the game for a cleaner UI. |
-&nbsp; | RemoveLyricsWhen | startup/manual | When do you want the "Lyrics" to be removed? |
-&nbsp; | GuitarSpeak | on/off | Allows notes being played to trigger a keypress, so you can put the keyboard away and only use your guitar / bass to control the UI. The notes that trigger keypresses are defined in the "Guitar Speak" section. |
-&nbsp; | RemoveHeadstockWhen | startup/song | When do you want the "Headstock" to be removed? |
-&nbsp; | ScreenShotScores | on/off | Takes a steam screenshot when you finish a song. Requires Steam's screenshot button to be set to F12. |
-&nbsp; | RRSpeedAboveOneHundred | on/off | Remove the 100% speed limit from Riff Repeater to play the songs faster than intended. |
-&nbsp; | AutoTuneForSong | on/off | If you have one of a few pedals we can send the pedal a signal to enable drop tuning to reduce the amount of time between playing songs. We use MIDI to send the signal. The pedals that are supported can be seen in the Q/A at the bottom of this page. |
-&nbsp; | ChordsMode | on/off | Extension of "AutoTuneForSong" where some pedals have two separate modes they can be played in. This allows us to send the correct signals according to the setting you have on the pedal. |
-&nbsp; | ShowCurrentNoteOnScreen | on/off | Reads the current note being played and displays it on screen. This only works for single notes so chords will **NOT** work properly. |
-&nbsp; | OnScreenFont | _font_name_ | Name of the font you want us to use when we need to show you text on screen. Default is Arial if we can't find the font you specify. |
-&nbsp; | ProfileToLoad | _profile_name_ | An extension of "ForceProfileLoad" where we will look for the profile you specify in the list of all profiles. This is helpful if you have multiple profiles, or multiple users who play on the same computer. |
-&nbsp; | ShowSongTimerWhen | automatic/manual | When do you want the "SongTimer" to be shown? |
-&nbsp; | SecondaryMonitor | on/off | Launch Rocksmith and move it to another monitor automatically. |
-**String Colors** | &nbsp; | hex defined color (eg. FF0000) | &nbsp; |
-&nbsp; | string0_N | &nbsp; | Colors for strings to be used in non-ER songs |
-&nbsp; | ... | &nbsp; | &nbsp; |
-&nbsp; | string5_N | &nbsp; | &nbsp; |
-&nbsp; | string0_CB | &nbsp; | Colors for strings to be used in ER songs |
-&nbsp; | ... | &nbsp; | &nbsp; |
-&nbsp; | string5_CB | &nbsp; | &nbsp; |
-&nbsp; | note0_N | &nbsp; | Colors for notes to be used in non-ER songs |
-&nbsp; | ... | &nbsp; | &nbsp; |
-&nbsp; | note5_N | &nbsp; | &nbsp; |
-&nbsp; | note0_CB | &nbsp; | Colors for notes to be used in ER songs |
-&nbsp; | ... | &nbsp; | &nbsp; |
-&nbsp; | note5_CB | &nbsp; | &nbsp; |
-**Mod Settings** | &nbsp; | &nbsp; | &nbsp; |
-&nbsp; | ExtendedRangeModeAt | numerical value | Offset to E Standard (-1 = Eb, -5 = B) |
-&nbsp; | CheckForNewSongsInterval | interval in milliseconds | Time between each Enumeration check |
-&nbsp; | RRSpeedInterval | numerical value | % of speed to go up / down when pressing your RRSpeedKey |
-&nbsp; | TuningPedal | numerical value | The number of the pedal you have. 0 = off, 1 = Whammy DT, 2 = Bass Whammy, 3 = Whammy |
-&nbsp; | TuningOffset | numerical value | Offset for "ExtendedRangeModeAt" that shows how far your guitar is TUNED from E. (-1 = Eb, -5 = B) |
-&nbsp; | VolumeControlInterval | numerical value | % of volume to go up / down when you press an audio keybinding. |
-&nbsp; | SecondaryMonitorXPosition | numerical value | X position of the top-left corner of the Secondary Monitor (Virtual Screen) |
-&nbsp; | SecondaryMonitorYPosition | numerical value | Y position of the top-left corner of the Secondary Monitor (Virtual Screen) |
-&nbsp; | SeparateNoteColors | numerical value | 0 = Use same color as strings, 1 = Normal RS Colors, 2 = Custom Note Colors |
-**Guitar Speak** | &nbsp; | &nbsp; | &nbsp; |
-&nbsp; | GuitarSpeakDeleteWhen | numerical value | Midi note that will trigger Delete to be pressed. |
-&nbsp; | GuitarSpeakSpaceWhen | numerical value | Midi note that will trigger Space to be pressed. |
-&nbsp; | GuitarSpeakEnterWhen | numerical value | Midi note that will trigger Enter / Return to be pressed. |
-&nbsp; | GuitarSpeakTabWhen | numerical value | Midi note that will trigger Tab to be pressed. |
-&nbsp; | GuitarSpeakPGUPWhen | numerical value | Midi note that will trigger Page Up to be pressed. |
-&nbsp; | GuitarSpeakPGDNWhen | numerical value | Midi note that will trigger Page Down to be pressed. |
-&nbsp; | GuitarSpeakUPWhen | numerical value | Midi note that will trigger Up Arrow to be pressed. |
-&nbsp; | GuitarSpeanDNWhen | numerical value | Midi note that will trigger Down Arrow to be pressed. |
-&nbsp; | GuitarSpeakESCWhen | numerical value | Midi note that will trigger Escape to be pressed. |
-&nbsp; | GuitarSpeakCloseWhen | numerical value | Midi note that will trigger Guitar Speak to stop. |
-&nbsp; | GuitarSpeakOBracketWhen | numerical value | Midi note that will trigger Open Bracket [ to be pressed. |
-&nbsp; | GuitarSpeakCBracketWhen | numerical value | Midi note that will trigger Close Bracket ] to be pressed. |
-&nbsp; | GuitarSpeakTildeaWhen | numerical value | Midi note that will trigger Tilda / Tilde to be pressed. |
-&nbsp; | GuitarSpeakForSlashWhen | numerical value | Midi note that will trigger Forward Slash to be pressed. |
-&nbsp; | GuitarSpeakAltWhen | numerical value | Midi note that will trigger Alt to be pressed. |
-&nbsp; | GuitarSpeakWhileTuning | on/off | Is GuitarSpeak enabled while tuning (ONLY FOR ADVANCED USERS) |
-**Highway Colors** | &nbsp; | &nbsp; | &nbsp; |
-&nbsp; | CustomHighwayColors | on/off | Should we use a custom note highway? |
-&nbsp; | CustomHighwayNumbered | hex defined color (eg. FF0000) | &nbsp; |
-&nbsp; | CustomHighwayUnNumbered | hex defined color (eg. FF0000) | &nbsp; |
-&nbsp; | CustomHighwayGutter | hex defined color (eg. FF0000) | &nbsp; |
-&nbsp; | CustomFretNubmers | hex defined color (eg. FF0000) | &nbsp; |
-**GUI Settings** | &nbsp; | &nbsp; | &nbsp;
-&nbsp; | CustomTheme | on/off | Custom Colors for GUI |
-&nbsp; | ThemeBackgroundColor | hex defined color (eg. FF0000) | Background Color |
-&nbsp; | ThemeTextColor | hex defined color (eg. FF0000) | Text Color |
-&nbsp; | ThemeButtonColor | hex defined color (eg. FF0000) | Button Color |
-&nbsp; | BackupProfile | on/off | Create backups of your Rocksmith profile / save just in-case it gets corrupted. |
-&nbsp; | NumberOfBackups | numerical value | How many backups should we store? |
+Format is standard INI: `[Section]` then `Key = Value` (spaces around `=` are fine).
 
-* The available keys for the keybinding section can be seen here: ![Visual Representation](https://i.imgur.com/lpNv3yG.png) You must follow the V-Key format available here: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes (yes that includes the VK_ part). Ex. F3 would be VK_F3, and the music play/ pause button would be VK_MEDIA_PLAY_PAUSE. We understand that us locking down the amount of keys may aggrevate some of you but we want to allow you to search for songs without turning on/ off your mods when you search for "Slipknot". **If you are a streamer and have an Elgato Stream Deck** set your keybinds to the F13-F24 keys as most keyboards don't have those keys but we allow them to be used for keybinds.
+### `[SongListTitles]`
+| Key | Default | Values | Info |
+| --- | ------- | ------ | ---- |
+| `SongListTitle_1` … `SongListTitle_20` | `SONG LIST` (GUI first-run uses `Define Song List N Here`) | string | Custom names for the 6 stock song lists plus 14 extra lists (profile-modified). Keep under ~25 characters. |
 
-* String Numbers go from 0-5 as this is zero-index, or how computers normally work. A translation of this is: 0. low E, 1. A, 2. D, 3. G, 4. B, 5. high E.
+### `[Keybinds]`
+All keybinds use [Virtual-Key names](https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes) (include the `VK_` prefix), e.g. `VK_F3`, `VK_MEDIA_PLAY_PAUSE`. Leave empty to disable. DLL fallbacks if a key is missing are shown in parentheses.
 
-* Guitar Speak note values are measured from C-1 to C6 starting at 0 and moving up to 96. Ex. The low E string at the 12th fret is E3, and would translate to the number 52.
+| Key | DLL fallback | Info |
+| --- | ------------ | ---- |
+| `ToggleLoftKey` | `T` | Toggle loft / black background. Requires `ToggleLoft = on`. |
+| `ShowSongTimerKey` | `N` | Toggle song timer. Requires `ShowSongTimer = on`. |
+| `ForceReEnumerationKey` | `F` | Force DLC re-enumeration. Requires ForceReEnumeration not `off`. |
+| `RainbowStringsKey` | `V` | Toggle rainbow strings. Requires `RainbowStrings = on`. |
+| `RainbowNotesKey` | `N` | Toggle rainbow notes. Requires `RainbowNotes = on`. |
+| `RemoveLyricsKey` | `L` | Toggle lyrics. Requires `Lyrics = on`. |
+| `RRSpeedKey` | `R` | Adjust RR speed by `RRSpeedInterval` (hold Shift to decrease). Requires `RRSpeedAboveOneHundred = on`. |
+| `TuningOffsetKey` | `O` | Change MIDI auto-tune offset in-game. |
+| `ToggleExtendedRangeKey` | `E` | Toggle Extended Range mode on/off. |
+| `LoopStartKey` | `Y` | Mark loop start. Requires `AllowLooping = on`. |
+| `LoopEndKey` | `U` | Mark loop end. Requires `AllowLooping = on`. |
+| `RewindKey` | `Z` | Rewind by `RewindBy` ms. Requires `AllowRewind = on`. |
 
-* GuitarSpeakWhileTuning is only for advanced users because if it is on and you have one of your GuitarSpeak values set wrong it can prevent you from tuning or playing this game. This decision was made to prevent people from uninstalling the mod because GuitarSpeak stops them from rocking out.
+Visual key reference: ![Virtual keys](https://i.imgur.com/lpNv3yG.png). Stream Deck users often use `VK_F13`–`VK_F24`.
 
-* Song list names should be below 25 characters (including spaces) because the text streches out and gets hard to read.
+### `[Audio Keybindings]`
+Same VKey format. Require `VolumeControl = on`. Use Control with the key to decrease volume. Step size is `VolumeControlInterval`.
+
+| Key | DLL fallback | Info |
+| --- | ------------ | ---- |
+| `MasterVolumeKey` | `5` | Master volume (not shown in in-game mixer). |
+| `SongVolumeKey` | `6` | Song / music volume. |
+| `Player1VolumeKey` | `7` | Player 1 instrument volume. |
+| `Player2VolumeKey` | `8` | Player 2 instrument volume. |
+| `MicrophoneVolumeKey` | `9` | Microphone volume. |
+| `VoiceOverVolumeKey` | `0` | Voice-over volume. |
+| `SFXVolumeKey` | `S` | SFX volume. |
+| `DisplayMixerKey` | `P` | Show selected volume / mixer display. |
+| `MutePlayer1Key` | `X` | Mute / unmute player 1. |
+| `MutePlayer2Key` | `C` | Mute / unmute player 2. |
+
+### `[Toggle Switches]`
+| Key | Default | Values | Info |
+| --- | ------- | ------ | ---- |
+| `ToggleLoft` | `off` | on/off | Black out venue loft / background. |
+| `VolumeControl` | `off` | on/off | Enable audio keybinds. |
+| `ShowSongTimer` | `off` | on/off | Enable song timer. |
+| `ForceReEnumeration` | `off` | `off` / `manual` / `automatic` | Re-scan DLC for new songs. |
+| `RainbowStrings` | `off` | on/off | Rainbow string colors. |
+| `RainbowNotes` | `off` | on/off | Rainbow note colors. |
+| `ExtendedRange` | `off` | on/off | ER color remap for low tunings. |
+| `ExtendedRangeDropTuning` | `off` | on/off | Also trigger ER on drop tunings. |
+| `ExtendedRangeFixBassTuning` | `off` | on/off | Fix bad bass string 4/5 tuning on some charts. |
+| `CustomStringColors` | `0` | `0` / `1` / `2` | `0` = stock colors, `1` = ZZ set, `2` = `[String Colors]`. |
+| `SeparateNoteColors` | `off` | on/off | Use separate note colors (see `SeparateNoteColorsMode`). |
+| `DiscoMode` | `off` | on/off | Deprecated / unused in current GUI. |
+| `Headstock` | `off` | on/off | Remove headstock. |
+| `Skyline` | `off` | on/off | Remove DD skyline bars. |
+| `GreenScreenWall` | `off` | on/off | Remove back wall only (keep amps). |
+| `ForceProfileLoad` | `off` | on/off | Auto-spam Enter at boot to load profile. |
+| `Fretless` | `off` | on/off | Remove fret wire. |
+| `Inlays` | `off` | on/off | Remove inlays (stock dots only). |
+| `RemoveFingerprints` | `off` | on/off | Remove fingerprint / hand indicators. |
+| `ToggleLoftWhen` | `manual` | `startup` / `song` / `manual` | When loft toggles. |
+| `ToggleSkylineWhen` | `song` | `startup` / `song` | When skyline is removed. |
+| `LaneMarkers` | `off` | on/off | Remove unused lane markers. |
+| `Lyrics` | `off` | on/off | Remove lyrics. |
+| `RemoveLyricsWhen` | `manual` | `startup` / `manual` | When lyrics are removed. |
+| `GuitarSpeak` | `off` | on/off | Guitar notes as key presses (see Guitar Speak). |
+| `RemoveHeadstockWhen` | `song` | `startup` / `song` | When headstock is removed. |
+| `ScreenShotScores` | `off` | on/off | Steam screenshot on song end (Steam screenshot key = F12). |
+| `RRSpeedAboveOneHundred` | `off` | on/off | Allow Riff Repeater speed above 100%. |
+| `AutoTuneForSong` | `off` | on/off | MIDI auto-tune for supported pedals. |
+| `AutoTuneForSongDevice` | _(empty)_ | string | MIDI out device name. |
+| `MidiInDevice` | _(empty)_ | string | MIDI in device name. |
+| `AutoTuneForSongWhen` | `manual` | `manual` / `tuner` | When auto-tune fires. |
+| `AutoTuneForSoftwareSemitoneSettings` | _(empty)_ | string | Software pedal drop-tune config. Format: `OffChannel, PC\|CC, CC Channel`. |
+| `AutoTuneForSoftwareSemitoneTriggers` | _(empty)_ | string | Semitone ↔ PC/CC map, e.g. `0 66, 1 77, -2 22`. |
+| `AutoTuneForSoftwareTrueTuningSettings` | _(empty)_ | string | Software pedal true-tuning config. |
+| `AutoTuneForSoftwareTrueTuningTriggers` | _(empty)_ | string | True tuning ↔ PC/CC map, e.g. `432 32, 455 2`. |
+| `ChordsMode` | `off` | on/off | Pedal chords mode (with AutoTuneForSong). |
+| `ShowCurrentNoteOnScreen` | `off` | on/off | Show current note name (single notes only). |
+| `OnScreenFont` | `Arial` | font name | Font for on-screen text. |
+| `ProfileToLoad` | _(empty)_ | profile name | Profile for ForceProfileLoad. |
+| `ShowSongTimerWhen` | `manual` | `automatic` / `manual` | When song timer is shown. |
+| `ShowSelectedVolumeWhen` | `manual` | `automatic` / `manual` | When selected volume is shown. |
+| `SecondaryMonitor` | `off` | on/off | Launch Rocksmith on secondary monitor. |
+| `SongPreviews` | `off` | on/off | Disable song previews in the song list. |
+| `OverrideInputVolumeEnabled` | `off` | on/off | Override RealTone / input volume. |
+| `OverrideInputVolumeDevice` | _(empty)_ | device name | Input device for volume override. |
+| `AllowAudioInBackground` | `off` | on/off | Keep audio when alt-tabbed. |
+| `BypassTwoRTCMessageBox` | `off` | on/off | Allow two RTCs in singleplayer without popup. |
+| `LinearRiffRepeater` | `off` | on/off | Linear RR speed (68% UI = 68% real). |
+| `AltOutputSampleRate` | `off` | on/off | Use non-48 kHz output sample rate. |
+| `AllowLooping` | `off` | on/off | Custom loop markers (LoopStart/End keys). |
+| `AllowRewind` | `off` | on/off | Rewind key. |
+| `FixOculusCrash` | `off` | on/off | Mitigate crash with Oculus/Meta headsets. |
+| `FixBrokenTones` | `off` | on/off | Try to recover dead tone system. |
+| `UseCustomNSPTimer` | `off` | on/off | Custom Non-stop Play inter-song timer. |
+| `DisplayCurrentAccuracy` | `off` | on/off | Show current accuracy on screen. |
+| `PreventMidSongPause` | `off` | on/off | Prevent accidental mid-song pause. |
+
+### `[String Colors]`
+Hex colors without `#` (e.g. `FF4F5A`). Indices `0`–`5` = low E … high E. `_N` = normal songs; `_CB` = Extended Range / colorblind palette (DLL defaults below).
+
+| Key | Default (N) | Default (CB / ER, DLL) |
+| --- | ----------- | ---------------------- |
+| `string0_N` / `string0_CB` | `FF4F5A` | `C12A2A` |
+| `string1_N` / `string1_CB` | `E2C102` | `A3F400` |
+| `string2_N` / `string2_CB` | `1DACF9` | `1DACF9` |
+| `string3_N` / `string3_CB` | `FF9216` | `DB7F41` |
+| `string4_N` / `string4_CB` | `3FCC0C` | `00C68E` |
+| `string5_N` / `string5_CB` | `C825ED` | `7648A8` |
+| `note0_N` … `note5_N` | same as strings_N | |
+| `note0_CB` … `note5_CB` | same as strings_CB | |
+
+### `[Mod Settings]`
+Numeric values used by the DLL (`customSettings`). Times are **milliseconds** unless noted.
+
+| Key | Default | Values / range | Info |
+| --- | ------- | -------------- | ---- |
+| `ExtendedRangeModeAt` | `-5` | `-12` … `-2` | Semitones below E Standard when ER triggers (`-2` = D, `-5` = B, `-12` = octave down). |
+| `CheckForNewSongsInterval` | `5000` | ms | Poll interval for automatic re-enumeration. |
+| `RRSpeedInterval` | `2` | e.g. `-50` … `50` | % change per RRSpeedKey press. |
+| `TuningPedal` | `0` | `0`–`4` | `0` = none, `1` = Whammy DT, `2` = Bass Whammy, `3` = Whammy, `4` = software pedal. |
+| `TuningOffset` | `0` | `-3` … `12` | MIDI auto-tune offset from E Standard (not ER threshold). |
+| `VolumeControlInterval` | `5` | e.g. `1`–`100` | % step for volume keys. |
+| `SecondaryMonitorXPosition` | `0` | int | Virtual desktop X of secondary monitor top-left. |
+| `SecondaryMonitorYPosition` | `0` | int | Virtual desktop Y of secondary monitor top-left. |
+| `SeparateNoteColorsMode` | `0` | `0` / `1` / `2` | `0` = same as strings, `1` = stock note colors, `2` = custom note colors. |
+| `OverrideInputVolume` | `17` | `0`–`100` | Input volume override (Rocksmith’s stock “default” is 17). |
+| `AlternativeOutputSampleRate` | `48000` | e.g. `44100`, `48000` | Used when `AltOutputSampleRate = on`. |
+| `LoopingLeadUp` | `0` | ms | Lead-in before custom loops. |
+| `RewindBy` | `5000` | ms | How far rewind jumps. |
+| `RewindLeadup` | `2000` | ms | Grey note / lead-up adjust after rewind. |
+| `CustomNSPTimeLimit` | `10000` | ms | Non-stop Play wait between songs (UI min ~2 s). |
+| `OnScreenFontSize` | `24` | e.g. `8`–`80` | On-screen text size. |
+
+### `[Guitar Speak]`
+MIDI note numbers `0`–`96` (C-1 … C7). Example: low E 12th fret (E3) ≈ `52`.
+
+| Key | Default | Info |
+| --- | ------- | ---- |
+| `GuitarSpeakDeleteWhen` | `0` (off) | Delete |
+| `GuitarSpeakSpaceWhen` | `0` | Space |
+| `GuitarSpeakEnterWhen` | `0` | Enter |
+| `GuitarSpeakTabWhen` | `0` | Tab |
+| `GuitarSpeakPGUPWhen` | `0` | Page Up |
+| `GuitarSpeakPGDNWhen` | `0` | Page Down |
+| `GuitarSpeakUPWhen` | `0` | Up arrow |
+| `GuitarSpeakDNWhen` | `0` | Down arrow |
+| `GuitarSpeakESCWhen` | `0` | Escape |
+| `GuitarSpeakCloseWhen` | `0` | Stop GuitarSpeak |
+| `GuitarSpeakOBracketWhen` | `0` | `[` |
+| `GuitarSpeakCBracketWhen` | `0` | `]` |
+| `GuitarSpeakTildeaWhen` | `0` | `~` |
+| `GuitarSpeakForSlashWhen` | `0` | `/` |
+| `GuitarSpeakAltWhen` | `0` | Alt |
+| `GuitarSpeakWhileTuning` | `off` | on/off - **advanced only**; wrong notes can block tuning |
+
+### `[Highway Colors]`
+| Key | Default | Values | Info |
+| --- | ------- | ------ | ---- |
+| `CustomHighwayColors` | `off` | on/off | Enable custom noteway colors. |
+| `CustomHighwayNumbered` | _(empty)_ | hex | Numbered frets. |
+| `CustomHighwayUnNumbered` | _(empty)_ | hex | Unnumbered frets. |
+| `CustomHighwayGutter` | _(empty)_ | hex | Highway sides. |
+| `CustomFretNubmers` | _(empty)_ | hex | Fret number text (**spelling is intentional** - matches DLL key). |
+
+### `[GUI Settings]`
+Used by the RSMods GUI only (not read by the game DLL).
+
+| Key | Default | Values | Info |
+| --- | ------- | ------ | ---- |
+| `CustomTheme` | `off` | on/off | Custom GUI colors. |
+| `ThemeBackgroundColor` | `F0FFFF` | hex | Background. |
+| `ThemeTextColor` | `000000` | hex | Text. |
+| `ThemeButtonColor` | `E3E3E3` | hex | Buttons. |
+| `BackupProfile` | `on` | on/off | Profile backups. |
+| `NumberOfBackups` | `50` | int | Max backups to keep. |
+
+### Notes
+* Prefer saving from the GUI so key names and defaults stay consistent with the DLL.
+
 ## FAQ
 
 * Q: How do I setup my stream so it is transparent / black / etc?

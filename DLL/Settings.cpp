@@ -34,14 +34,13 @@ void Settings::Initialize()
 		{"MutePlayer1Key", "X"},
 		{"MutePlayer2Key", "C"},
 
-		{"ForceReEnumerationEnabled", "automatic"},
+		{"ForceReEnumerationEnabled", "off"},
 
 		{"ToggleLoftEnabled", "off"},
 		{"VolumeControlEnabled", "off"},
-		{"ShowSongTimerEnabled", "on"},
-		{"ForceReEnumerationEnabled", "off"},
+		{"ShowSongTimerEnabled", "off"},
 		{"RainbowStringsEnabled", "off"},
-		{"ExtendedRangeEnabled", "on"},
+		{"ExtendedRangeEnabled", "off"},
 		{"ExtendedRangeDropTuning", "off"},
 		{"ExtendedRangeFixBassTuning", "off"},
 		{"SeparateNoteColors", "off"},
@@ -97,7 +96,7 @@ void Settings::Initialize()
 	customSettings = {
 		{"ExtendedRangeMode", -5},
 		{"CheckForNewSongsInterval", 5000},
-		{"RRSpeedInterval", 0},
+		{"RRSpeedInterval", 2},
 		{"TuningPedal", 0},
 		{"TuningOffset", 0},
 		{"VolumeControlInterval", 5},
@@ -108,8 +107,8 @@ void Settings::Initialize()
 		{"CustomStringColors", 0},
 		{"AlternativeOutputSampleRate", 48000},
 		{"LoopingLeadUp", 0},
-		{"RewindBy", 0},
-		{"RewindLeadup", 0},
+		{"RewindBy", 5000},
+		{"RewindLeadup", 2000},
 		{"CustomNSPTimeLimit", 10000},
 		{"OnScreenFontSize", 24},
 
@@ -213,7 +212,7 @@ void Settings::ReadModSettings() {
 	customSettings = {
 		{"ExtendedRangeMode", reader.GetLongValue("Mod Settings", "ExtendedRangeModeAt", -5)},
 		{"CheckForNewSongsInterval", reader.GetLongValue("Mod Settings", "CheckForNewSongsInterval", 5000)},
-		{"RRSpeedInterval", reader.GetLongValue("Mod Settings", "RRSpeedInterval", 0)},
+		{"RRSpeedInterval", reader.GetLongValue("Mod Settings", "RRSpeedInterval", 2)},
 		{"TuningPedal", reader.GetLongValue("Mod Settings", "TuningPedal", 0)},
 		{"TuningOffset", reader.GetLongValue("Mod Settings", "TuningOffset", 0)},
 		{"VolumeControlInterval", reader.GetLongValue("Mod Settings", "VolumeControlInterval", 5)},
@@ -224,8 +223,8 @@ void Settings::ReadModSettings() {
 		{"OverrideInputVolume", reader.GetLongValue("Mod Settings", "OverrideInputVolume", 17)}, // 17 is what Rocksmith calls default.
 		{"AlternativeOutputSampleRate", reader.GetLongValue("Mod Settings", "AlternativeOutputSampleRate", 48000)},
 		{"LoopingLeadUp", reader.GetLongValue("Mod Settings", "LoopingLeadUp", 0)},
-		{"RewindBy", reader.GetLongValue("Mod Settings", "RewindBy", 0)},
-		{"RewindLeadup", reader.GetLongValue("Mod Settings", "RewindLeadup", 0)},
+		{"RewindBy", reader.GetLongValue("Mod Settings", "RewindBy", 5000)},
+		{"RewindLeadup", reader.GetLongValue("Mod Settings", "RewindLeadup", 2000)},
 		{"CustomNSPTimeLimit", reader.GetLongValue("Mod Settings", "CustomNSPTimeLimit", 10000)},
 		{"OnScreenFontSize", reader.GetLongValue("Mod Settings", "OnScreenFontSize", 24)},
 
@@ -246,11 +245,10 @@ void Settings::ReadModSettings() {
 		{"GuitarSpeakAlt", reader.GetLongValue("Guitar Speak", "GuitarSpeakAltWhen", 0)},
 	};
 
-	// Mods Enabled / Disabled
-	modSettings["ToggleLoftEnabled"] = reader.GetValue("Toggle Switches", "ToggleLoft", "on");
+	modSettings["ToggleLoftEnabled"] = reader.GetValue("Toggle Switches", "ToggleLoft", "off");
 	modSettings["VolumeControlEnabled"] = reader.GetValue("Toggle Switches", "VolumeControl", "off");
 	modSettings["ShowSongTimerEnabled"] = reader.GetValue("Toggle Switches", "ShowSongTimer", "off");
-	modSettings["ForceReEnumerationEnabled"] = reader.GetValue("Toggle Switches", "ForceReEnumeration", "automatic");
+	modSettings["ForceReEnumerationEnabled"] = reader.GetValue("Toggle Switches", "ForceReEnumeration", "off");
 	modSettings["RainbowStringsEnabled"] = reader.GetValue("Toggle Switches", "RainbowStrings", "off");
 	modSettings["RainbowNotesEnabled"] = reader.GetValue("Toggle Switches", "RainbowNotes", "off");
 	modSettings["ExtendedRangeEnabled"] = reader.GetValue("Toggle Switches", "ExtendedRange", "off");
@@ -286,7 +284,7 @@ void Settings::ReadModSettings() {
 	modSettings["ShowCurrentNoteOnScreen"] = reader.GetValue("Toggle Switches", "ShowCurrentNoteOnScreen", "off");
 	modSettings["OnScreenFont"] = reader.GetValue("Toggle Switches", "OnScreenFont", "Arial");
 	modSettings["ProfileToLoad"] = reader.GetValue("Toggle Switches", "ProfileToLoad", "");
-	modSettings["CustomHighwayColors"] = reader.GetValue("Highway Colors", "CustomHighwayColors", "");
+	modSettings["CustomHighwayColors"] = reader.GetValue("Highway Colors", "CustomHighwayColors", "off");
 	modSettings["ShowSongTimerWhen"] = reader.GetValue("Toggle Switches", "ShowSongTimerWhen", "manual");
 	modSettings["ShowSelectedVolumeWhen"] = reader.GetValue("Toggle Switches", "ShowSelectedVolumeWhen", "manual");
 	modSettings["SecondaryMonitor"] = reader.GetValue("Toggle Switches", "SecondaryMonitor", "off");
