@@ -6,6 +6,7 @@
 namespace CrowdControl {
 	void StartServer();
 	void StartServerLoop();
+	void StopServer();
 	Structs::Response RunCommand(const Structs::Request& request);
 
 	namespace Structs {

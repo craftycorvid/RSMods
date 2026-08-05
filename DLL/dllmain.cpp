@@ -248,6 +248,7 @@ unsigned WINAPI MainThread() {
 		nextModTick = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
 	}
 
+	CrowdControl::StopServer();
 	Framework::Registry().Shutdown();
 
 	return 0;

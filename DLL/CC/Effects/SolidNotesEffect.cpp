@@ -5,7 +5,8 @@
 namespace Setting = Settings::Setting;
 
 namespace CrowdControl::Effects {
-	
+	using enum Enums::EffectStatus;
+
 	/// <summary>
 	/// Test the twitch mod's requirements.
 	/// </summary>
@@ -16,9 +17,9 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesCustomEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return Enums::EffectStatus::Retry;
+			return Retry;
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
@@ -43,7 +44,7 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesCustomEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return Enums::EffectStatus::Retry;
+			return Retry;
 
 		running = true;
 
@@ -60,7 +61,7 @@ namespace CrowdControl::Effects {
 
 		SetDuration(request);
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
@@ -77,7 +78,7 @@ namespace CrowdControl::Effects {
 		running = false;
 		//ERMode::ResetAllStrings();
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -93,9 +94,9 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesRandomEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return Enums::EffectStatus::Retry;
+			return Retry;
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
@@ -108,7 +109,7 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesRandomEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return Enums::EffectStatus::Retry;
+			return Retry;
 
 		LOG_INFO("SolidNotesRandomEffect - Colors Saved" << std::endl);
 		
@@ -130,7 +131,7 @@ namespace CrowdControl::Effects {
 		SetDuration(request);
 		running = true;
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
@@ -147,7 +148,7 @@ namespace CrowdControl::Effects {
 		running = false;
 		//ERMode::ResetAllStrings();
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -163,9 +164,9 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesCustomRGBEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return Enums::EffectStatus::Retry;
+			return Retry;
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
@@ -178,7 +179,7 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesCustomRGBEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return Enums::EffectStatus::Retry;
+			return Retry;
 
 		//Get color from parameters
 		byte r, g, b;
@@ -204,7 +205,7 @@ namespace CrowdControl::Effects {
 		SetDuration(request);
 		running = true;
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
@@ -221,6 +222,6 @@ namespace CrowdControl::Effects {
 		running = false;
 		//ERMode::ResetAllStrings();
 
-		return Enums::EffectStatus::Success;
+		return Success;
 	}
 }

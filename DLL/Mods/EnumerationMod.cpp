@@ -22,7 +22,7 @@ void EnumerationMod::OnInitialize(ModContext& c) {
 		"Force Enumeration");
 
 	UpdateSettings(c);
-	monitorThread = std::thread(&EnumerationMod::MonitorDlcDirectory, this);
+	monitorThread = std::jthread([this](std::stop_token st) { MonitorDlcDirectory(st); });
 }
 
 void EnumerationMod::OnSettingsChanged(ModContext& c) {
@@ -37,13 +37,11 @@ void EnumerationMod::OnTick(ModContext&) {
 }
 
 void EnumerationMod::OnShutdown(ModContext&) {
-	{
-		std::lock_guard lock(waitMutex);
-		stopping = true;
-	}
+	monitorThread.request_stop();
 
-	waitCondition.notify_one();
-	if (monitorThread.joinable()) monitorThread.join();
+	if (monitorThread.joinable()) {
+		monitorThread.join();
+	}
 }
 
 void EnumerationMod::UpdateSettings(const ModContext& c) {
@@ -52,16 +50,16 @@ void EnumerationMod::UpdateSettings(const ModContext& c) {
 	intervalMs.store(c.Int(Setting::CheckForNewSongsInterval));
 }
 
-void EnumerationMod::MonitorDlcDirectory() {
+void EnumerationMod::MonitorDlcDirectory(std::stop_token st) {
 	while (!GameState::GameLoaded) {
-		if (WaitFor(std::chrono::seconds(5))) return;
+		if (WaitFor(st, std::chrono::seconds(5))) return;
 	}
 
 	int previousDlcCount = Enumeration::GetCurrentDLCCount();
 
 	while (true) {
 		const auto interval = std::chrono::milliseconds(intervalMs.load());
-		if (WaitFor(interval)) return;
+		if (WaitFor(st, interval)) return;
 		if (!automatic.load()) continue;
 
 		const int currentDlcCount = Enumeration::GetCurrentDLCCount();
@@ -70,10 +68,10 @@ void EnumerationMod::MonitorDlcDirectory() {
 	}
 }
 
-bool EnumerationMod::WaitFor(std::chrono::milliseconds duration) {
+bool EnumerationMod::WaitFor(std::stop_token st, std::chrono::milliseconds duration) {
 	std::unique_lock lock(waitMutex);
-
-	return waitCondition.wait_for(lock, duration, [this] { return stopping; });
+	waitCondition.wait_for(lock, st, duration, [] { return false; });
+	return st.stop_requested();
 }
 
 static Framework::ModRegistrar<EnumerationMod> _enumerationReg;
