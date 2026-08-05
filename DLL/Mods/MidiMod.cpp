@@ -4,6 +4,9 @@
 
 using Framework::ModContext;
 using Framework::GamePhase;
+using Framework::KeyEdge;
+using Framework::Availability;
+using Framework::KeyEvent;
 using Settings::When;
 
 std::string_view MidiMod::Id() const {
@@ -12,6 +15,36 @@ std::string_view MidiMod::Id() const {
 
 std::vector<std::string_view> MidiMod::ClaimsExclusive() const {
 	return { "tuning-controller" };
+}
+
+void MidiMod::OnInitialize(ModContext& c) {
+	// This command changes tuning-controller state, so it must never bypass conflict suppression.
+	c.Commands().BindSetting(
+		"TuningOffsetKey",
+		KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent& event) {
+			Midi::tuningOffset += event.control ? -1 : 1;
+			Midi::tuningOffset = std::clamp(Midi::tuningOffset, -3, 12);
+			LOG_INFO("Triggered Mod Setting: Tuning Offset is now set to " << Midi::tuningOffset << std::endl);
+		},
+		[](const ModContext& context, const KeyEvent&) {
+			return context.IsOn("AutoTuneForSong");
+		});
+
+	// Delete is a fixed host shortcut, but its intent belongs to this tuning-controller mod.
+	c.Commands().BindKey(
+		"ManualMidiAutoTune",
+		VK_DELETE,
+		KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) {
+			Midi::userWantsToUseAutoTuning = true;
+		},
+		[](const ModContext& context, const KeyEvent&) {
+			return context.WhenSetting("AutoTuneForSongWhen") == When::Manual &&
+				GameState::Menus::IsInTuningMenus();
+		});
 }
 
 void MidiMod::OnTick(ModContext& c) {

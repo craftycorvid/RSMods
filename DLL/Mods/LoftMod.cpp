@@ -3,6 +3,9 @@
 #include "Loft.hpp"
 
 using Framework::ModContext;
+using Framework::KeyEdge;
+using Framework::Availability;
+using Framework::KeyEvent;
 using Settings::When;
 
 std::string_view LoftMod::Id() const {
@@ -11,6 +14,18 @@ std::string_view LoftMod::Id() const {
 
 bool LoftMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn("ToggleLoftEnabled");
+}
+
+void LoftMod::OnInitialize(ModContext& c) {
+	c.Commands().BindSetting(
+		"ToggleLoftKey",
+		KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) { Loft::ToggleLoft(); },
+		[](const ModContext& context, const KeyEvent&) {
+			return context.IsOn("ToggleLoftEnabled");
+		},
+		"Toggle Loft");
 }
 
 void LoftMod::OnDisabled(ModContext&) {

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <Windows.h>
-#include "Mods/VolumeControl.hpp"
+
 #include "Framework/Framework.hpp"
 #include "Menu.hpp"
+#include "Mods/RiffRepeater.hpp"
 #include "Mods/VoiceOverControl.hpp"
 #include "Twitch.hpp"
 #include "CC/ControlServer.hpp"

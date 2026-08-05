@@ -2,6 +2,9 @@
 #include "ShowSongTimerMod.hpp"
 
 using Framework::ModContext;
+using Framework::KeyEdge;
+using Framework::Availability;
+using Framework::KeyEvent;
 using Settings::When;
 
 std::string_view ShowSongTimerMod::Id() const {
@@ -12,6 +15,20 @@ std::string_view ShowSongTimerMod::Id() const {
 // which stays independent of the mod. The timer only renders in a song (see GameOverlay::DisplaySongTimer).
 bool ShowSongTimerMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn("ShowSongTimerEnabled") && c.WhenSetting("ShowSongTimerWhen") == When::Automatic;
+}
+
+void ShowSongTimerMod::OnInitialize(ModContext& c) {
+	c.Commands().BindSetting(
+		"ShowSongTimerKey",
+		KeyEdge::Up,
+		Availability::Initialized,
+		[](ModContext&, const KeyEvent&) {
+			D3DHooks::showSongTimerOnScreen = !D3DHooks::showSongTimerOnScreen;
+		},
+		[](const ModContext& context, const KeyEvent&) {
+			return context.IsOn("ShowSongTimerEnabled");
+		},
+		"Show Song Timer");
 }
 
 void ShowSongTimerMod::OnSongEnter(ModContext& c) {

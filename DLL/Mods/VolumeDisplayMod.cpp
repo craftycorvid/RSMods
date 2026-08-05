@@ -1,10 +1,85 @@
 #include "../stdafx.h"
 #include "VolumeDisplayMod.hpp"
+#include "VolumeControl.hpp"
 
 using Framework::ModContext;
+using Framework::KeyEdge;
+using Framework::Availability;
+using Framework::KeyEvent;
 
 std::string_view VolumeDisplayMod::Id() const {
 	return "VolumeControlEnabled";
+}
+
+void VolumeDisplayMod::OnInitialize(ModContext& c) {
+	auto commands = c.Commands();
+	const auto volumeEnabled = [](const ModContext& context, const KeyEvent&) { return context.IsOn("VolumeControlEnabled"); };
+
+	commands.BindSetting("MutePlayer1Key", KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) { ToggleMute(false); }, {}, "Mute Player 1");
+
+	commands.BindSetting("MutePlayer2Key", KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) { ToggleMute(true); }, {}, "Mute Player 2");
+
+	commands.BindSetting("DisplayMixerKey", KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) { GameOverlay::displayMixer = false; });
+
+	commands.BindSetting("ChangedSelectedVolumeKey", KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) {
+			++GameOverlay::currentVolumeIndex;
+			
+			if (GameOverlay::currentVolumeIndex > GameOverlay::mixerInternalNames.size() - 1) {
+				GameOverlay::currentVolumeIndex = 0;
+			}
+		}, volumeEnabled);
+
+	commands.BindSetting("DisplayMixerKey", KeyEdge::Down,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) { GameOverlay::displayMixer = true; },
+		volumeEnabled, "Display Mixer");
+
+	for (const auto& binding : volumeBindings) {
+		commands.BindSetting(binding.key, KeyEdge::Down,
+			Availability::Active,
+			[channel = std::string(binding.channel), overlayIndex = binding.overlayIndex]
+			(ModContext& context, const KeyEvent& event) {
+				ChangeVolume(context, event, channel, overlayIndex);
+			}, volumeEnabled);
+	}
+}
+
+void VolumeDisplayMod::ToggleMute(bool player2) {
+	bool& muted = player2 ? VolumeControl::player2Muted : VolumeControl::player1Muted;
+
+	if (muted) {
+		VolumeControl::UnmutePlayer(player2);
+	}
+	else {
+		VolumeControl::MutePlayer(player2);
+	}
+
+	GameOverlay::displayCurrentVolume = true;
+	GameOverlay::displayVolumeStartTime = std::chrono::steady_clock::now();
+	GameOverlay::currentVolumeIndex = player2 ? 3 : 2;
+}
+
+void VolumeDisplayMod::ChangeVolume(const ModContext& c, const KeyEvent& event, std::string_view channel, int overlayIndex) {
+	const int interval = c.Int("VolumeControlInterval");
+
+	if (event.control) {
+		VolumeControl::DecreaseVolume(interval, std::string(channel));
+	}
+	else {
+		VolumeControl::IncreaseVolume(interval, std::string(channel));
+	}
+
+	GameOverlay::displayCurrentVolume = true;
+	GameOverlay::displayVolumeStartTime = std::chrono::steady_clock::now();
+	GameOverlay::currentVolumeIndex = overlayIndex;
 }
 
 void VolumeDisplayMod::OnMenuTick(ModContext& c) {
@@ -24,6 +99,7 @@ void VolumeDisplayMod::SyncDisplay(ModContext& c) {
 
 bool VolumeDisplayMod::MoreThanThreeSecondsPassed() const {
 	const auto currentTime = std::chrono::steady_clock::now();
+
 	return currentTime - GameOverlay::displayVolumeStartTime > std::chrono::seconds(3);
 }
 

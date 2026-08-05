@@ -7,6 +7,7 @@ public:
 	std::string_view Id() const override;
 	bool IsEnabled(const Framework::ModContext& c) const override;
 
+	void OnInitialize(Framework::ModContext& c) override;
 	void OnSongEnter(Framework::ModContext& c) override;
 	void OnSongExit(Framework::ModContext& c) override;
 };

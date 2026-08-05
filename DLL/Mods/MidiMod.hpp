@@ -18,6 +18,7 @@ public:
 	// same resource, which suppresses this mod.
 	std::vector<std::string_view> ClaimsExclusive() const override;
 
+	void OnInitialize(Framework::ModContext& c) override;
 	void OnTick(Framework::ModContext& c) override;     // Device scanning (post-load only).
 	void OnMenuTick(Framework::ModContext& c) override; // Pedal revert + tuner auto-tune.
 	void OnSongTick(Framework::ModContext& c) override; // In-song auto-tune.

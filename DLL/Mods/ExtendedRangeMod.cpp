@@ -4,11 +4,40 @@
 #include "ExtendedRangeMode.hpp"
 
 using Framework::ModContext;
+using Framework::KeyEdge;
+using Framework::Availability;
+using Framework::KeyEvent;
 using Settings::StringColorMode;
 using Settings::NoteColorMode;
 
 std::string_view ExtendedRangeMod::Id() const {
 	return "ExtendedRange";
+}
+
+void ExtendedRangeMod::OnInitialize(ModContext& c) {
+	c.Commands().BindSetting(
+		"RainbowStringsKey",
+		KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) {
+			ERMode::ToggleRainbowMode();
+			if (!ERMode::RainbowEnabled) ERMode::ResetAllStrings();
+		},
+		[](const ModContext& context, const KeyEvent&) {
+			return context.IsOn("RainbowStringsEnabled");
+		},
+		"Rainbow Strings");
+
+	c.Commands().BindSetting(
+		"ToggleExtendedRangeKey",
+		KeyEdge::Up,
+		Availability::Active,
+		[](ModContext&, const KeyEvent&) {
+			ERMode::UseERExclusivelyInThisSong = !ERMode::UseERExclusivelyInThisSong;
+			GameState::ToggleCB(ERMode::UseERExclusivelyInThisSong);
+		},
+		{},
+		"Toggle Extended Range");
 }
 
 // Edge: this mod became active in a song.
