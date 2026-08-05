@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <map>
+#include <span>
 #include <tuple>
 #include <utility>
 
@@ -33,10 +34,10 @@ namespace Framework::Detail {
 			if (labels.size() < 2) continue;
 
 			collisions.push_back({
-				std::get<0>(key),
-				std::get<2>(key),
-				std::get<1>(key),
-				std::move(labels),
+				.edge       = std::get<0>(key),
+				.virtualKey = std::get<2>(key),
+				.kind       = std::get<1>(key),
+				.labels     = std::move(labels),
 			});
 		}
 
@@ -44,12 +45,11 @@ namespace Framework::Detail {
 	}
 
 	void CommandCollisionDiagnostics::LogNewCollisions(
-		const std::vector<Collision>& collisions,
-		const std::vector<Collision>& previousCollisions) {
+		std::span<const Collision> collisions,
+		std::span<const Collision> previousCollisions) {
 
 		for (const Collision& collision : collisions) {
-			if (std::find(previousCollisions.begin(), previousCollisions.end(), collision) !=
-				previousCollisions.end()) {
+			if (std::ranges::find(previousCollisions, collision) != previousCollisions.end()) {
 				continue;
 			}
 
@@ -66,7 +66,7 @@ namespace Framework::Detail {
 	void CommandCollisionDiagnostics::Refresh(std::vector<ResolvedCommandBinding> bindings) {
 		auto collisions = CollectCollisions(std::move(bindings));
 
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard lock(mutex);
 		LogNewCollisions(collisions, previousCollisions);
 		previousCollisions = std::move(collisions);
 	}

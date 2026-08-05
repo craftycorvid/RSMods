@@ -27,12 +27,12 @@ namespace Framework::Resolver {
 	// One win/lose flag per candidate, positionally indexed alongside `candidates`.
 	using SelectionMask = std::vector<char>;
 
-	inline SelectionMask Resolve(const std::vector<Candidate>& candidates) {
+	[[nodiscard]] inline SelectionMask Resolve(const std::vector<Candidate>& candidates) {
 		SelectionMask selected(candidates.size(), 0);
 
 		std::vector<std::size_t> priorityOrder(candidates.size());
 		std::iota(priorityOrder.begin(), priorityOrder.end(), std::size_t{ 0 });
-		std::sort(priorityOrder.begin(), priorityOrder.end(), [&](std::size_t leftIndex, std::size_t rightIndex) {
+		std::ranges::sort(priorityOrder, [&](std::size_t leftIndex, std::size_t rightIndex) {
 			const Candidate& left = candidates[leftIndex];
 			const Candidate& right = candidates[rightIndex];
 
@@ -49,9 +49,9 @@ namespace Framework::Resolver {
 			if (!candidate.requested) continue;
 
 			const auto& resources = candidate.Resources();
-			const bool blocked = std::any_of(resources.begin(), resources.end(),
+			const bool blocked = std::ranges::any_of(resources,
 				[&](const std::string& resource) {
-					return reservedResources.count(resource) > 0;
+					return reservedResources.contains(resource);
 				});
 			if (blocked) continue;
 
