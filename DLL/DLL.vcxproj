@@ -113,6 +113,12 @@
     </ClCompile>
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="ModManager.cpp" />
+    <ClCompile Include="Framework\CommandCollisionDiagnostics.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Framework\CommandRouter.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Framework\HostHooks.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -401,6 +407,8 @@
     <ClInclude Include="Mods\ExtendedRangeMod.hpp" />
     <ClInclude Include="Mods\LaunchOnExternalMonitor.hpp" />
     <ClInclude Include="Framework\GamePhase.hpp" />
+    <ClInclude Include="Framework\CommandCollisionDiagnostics.hpp" />
+    <ClInclude Include="Framework\CommandRouter.hpp" />
     <ClInclude Include="Framework\ConflictResolver.hpp" />
     <ClInclude Include="Framework\HostHooks.hpp" />
     <ClInclude Include="Framework\IMod.hpp" />

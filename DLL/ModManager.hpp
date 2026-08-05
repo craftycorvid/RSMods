@@ -9,6 +9,8 @@
 #include "Keybindings.hpp"
 #include "Mods/ExtendedRangeMode.hpp"
 #include "Mods/CustomSongTitles.hpp"
+#include "Mods/Enumeration.hpp"
+#include "CC/ControlServer.hpp"
 #include "D3DInfo.h"
 #include <string>
 

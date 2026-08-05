@@ -143,13 +143,14 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 
 			break;
 		case WM_KEYUP:
-			Keybindings::HandleKeyUp(keyPressed);
+			Keybindings::HandleKeyUp(keyPressed, lParam);
 			break;
 		case WM_KEYDOWN:
-			Keybindings::HandleKeyDown(keyPressed);
+			Keybindings::HandleKeyDown(keyPressed, lParam);
 			break;
 		case WM_CLOSE:
 			GameState::GameClosing = true;
+			Framework::Commands().Wake();
 			break;
 		case WM_COPYDATA:
 			Keybindings::UpdateSettingsOnGUIChange(lParam);
@@ -238,8 +239,20 @@ unsigned WINAPI MainThread() {
 	ModManager::ApplyStartupMods();
 	Framework::Registry().DispatchInitialize();
 
+	auto nextModTick = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
 	while (!GameState::GameClosing) {
-		Sleep(250);
+		Framework::Commands().WaitUntil(nextModTick);
+		if (GameState::GameClosing) break;
+
+		// Commands are drained independently of the maintenance tick. Both paths run on this
+		// thread, so command actions and mod lifecycle/tick callbacks cannot race one another.
+		const Framework::GamePhase commandPhase = !GameState::GameLoaded
+			? Framework::GamePhase::Loading
+			: GameState::IsInSong() ? Framework::GamePhase::Song : Framework::GamePhase::Menu;
+		Framework::Registry().DispatchCommands(commandPhase, GameState::GameLoaded);
+
+		const auto now = std::chrono::steady_clock::now();
+		if (now < nextModTick) continue;
 
 		if (GameState::GameLoaded) {
 			ModManager::HandlePostGameLoadedMods();
@@ -250,6 +263,9 @@ unsigned WINAPI MainThread() {
 			ModManager::UpdateGameLoadingState();
 			Framework::Registry().Tick(Framework::GamePhase::Loading);
 		}
+
+		// Missed maintenance deadlines are not replayed as a burst of catch-up ticks.
+		nextModTick = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
 	}
 
 	Framework::Registry().Shutdown();
