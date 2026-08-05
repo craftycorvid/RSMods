@@ -1,5 +1,6 @@
 #include "../stdafx.h"
 #include "D3DHooks.hpp"
+#include "../Framework/Framework.hpp"
 
 using Settings::NoteColorMode;
 
@@ -188,11 +189,14 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 
 	// This could potentially lead to game locking up (because DIP is called multiple times per frame) if that value is not filled, but generally it should work 
 	if (Settings::ReturnSettingValue("ExtendedRangeEnabled").length() < 2) { // Due to some weird reasons, sometimes settings decide to go missing - this may solve the problem
-		Settings::UpdateSettings();
-		D3D::GenerateTextures(pDevice, D3D::Strings);
-		D3D::GenerateTextures(pDevice, D3D::Notes);
-		D3D::GenerateTextures(pDevice, D3D::Rainbow);
-		LOG_INFO("Reloaded settings" << std::endl);
+		static std::atomic_bool reloadQueued = false;
+		if (!reloadQueued.exchange(true)) {
+			Framework::Registry().EnqueueSettingsUpdate([] {
+				Settings::UpdateSettings();
+				reloadQueued.store(false);
+				LOG_INFO("Reloaded settings" << std::endl);
+			});
+		}
 	}
 
 	if (setAllToNoteGradientTexture) {
@@ -754,7 +758,7 @@ std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds)
 }
 
 void D3DHooks::RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice) {
-	if (regenerateUserDefinedTexture) {
+	if (regenerateUserDefinedTexture.exchange(false)) {
 		RSColor userDefColor = Settings::ConvertHexToColor(Settings::ReturnSettingValue("SolidNoteColor"));
 
 		ColorList customColorList(16, userDefColor);
@@ -764,6 +768,5 @@ void D3DHooks::RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice) {
 		for (int str = 0; str < 6;str++)
 			ERMode::customSolidColor.push_back(userDefColor);
 
-		regenerateUserDefinedTexture = false;
 	}
 }

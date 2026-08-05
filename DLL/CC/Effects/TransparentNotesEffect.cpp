@@ -1,5 +1,6 @@
 #include "../../stdafx.h"
 #include "TransparentNotesEffect.hpp"
+#include "../../Framework/Framework.hpp"
 
 using namespace CrowdControl::Enums;
 
@@ -32,7 +33,9 @@ namespace CrowdControl::Effects { // Changes textures for noteheads to a nonexis
 		if (!CanStart())
 			return EffectStatus::Retry;
 
-		Settings::UpdateTwitchSetting("TransparentNotes", "on");
+		Framework::Registry().EnqueueSettingsUpdate([] {
+			Settings::UpdateTwitchSetting("TransparentNotes", "on");
+		});
 		
 		SetDuration(request);
 		running = true;
@@ -48,7 +51,9 @@ namespace CrowdControl::Effects { // Changes textures for noteheads to a nonexis
 	{
 		LOG_INFO("TransparentNotesEffect::Stop()" << std::endl);
 
-		Settings::UpdateTwitchSetting("TransparentNotes", "off");
+		Framework::Registry().EnqueueSettingsUpdate([] {
+			Settings::UpdateTwitchSetting("TransparentNotes", "off");
+		});
 		running = false;
 
 		return EffectStatus::Success;

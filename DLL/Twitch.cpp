@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Twitch.hpp"
+#include "Framework/Framework.hpp"
 
 namespace Twitch {
 	/// <summary>
@@ -17,7 +18,6 @@ namespace Twitch {
 		// Twitch wants Drunk Mode.
 		else if (Contains(currMsg, "DrunkMode")) {
 			Loft::ToggleDrunkMode(type == "enable");
-			Settings::ParseTwitchToggle(currMsg, type);
 		}
 
 		// Twitch wants Solid Note colors.
@@ -37,15 +37,21 @@ namespace Twitch {
 					twitchUserDefinedTexture = randomTextures[currentRandomTexture];
 				}
 				else {
-					Settings::ParseSolidColorsMessage(currMsg);
-					D3DHooks::regenerateUserDefinedTexture = true;
+					Framework::Registry().EnqueueSettingsUpdate([currMsg, type] {
+						Settings::ParseSolidColorsMessage(currMsg);
+						Settings::ParseTwitchToggle(currMsg, type);
+						D3DHooks::regenerateUserDefinedTexture = true;
+					});
+					return true;
 				}
 			}
 			else
 				ERMode::ResetAllStrings();
 		}
 
-		Settings::ParseTwitchToggle(currMsg, type);
+		Framework::Registry().EnqueueSettingsUpdate([currMsg, type] {
+			Settings::ParseTwitchToggle(currMsg, type);
+		});
 		return true;
 	}
 

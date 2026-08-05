@@ -1,4 +1,6 @@
 #pragma once
+#include <atomic>
+
 #include "../Mods/ExtendedRangeMode.hpp"
 
 namespace D3DHooks {
@@ -28,7 +30,7 @@ namespace D3DHooks {
 
 	inline bool debug = true;
 
-	inline bool regenerateUserDefinedTexture = false;
+	inline std::atomic_bool regenerateUserDefinedTexture = false;
 	
 	inline HWND hThisWnd = NULL;
 	inline WNDPROC oWndProc = NULL;
@@ -64,8 +66,8 @@ namespace D3DHooks {
 	inline bool RainbowNotes = false; // If true, the notes will turn rainbow along with the stems
 	inline bool AutomatedSelectedVolume = false; // If true, we will always show the selected volume.
 
-	inline bool RecreateTextures = false; // User has triggered an update, so we need to re-create textures.
-	inline bool RecreateTextureTimer = false; // If user spams recreating textures then we end up with a lot of memory usage. Limit how often we update textures.
+	inline std::atomic_bool RecreateTextures = false; // User has triggered an update, so we need to re-create textures.
+	inline std::atomic_bool RecreateTextureTimer = false; // If user spams recreating textures then we end up with a lot of memory usage. Limit how often we update textures.
 
 	// Dev Functions
 	inline bool startLogging = false; // Should we log what's happening in Hook_DIP? Logs to log.txt in your RS2014 directory

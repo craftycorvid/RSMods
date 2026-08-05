@@ -1,5 +1,6 @@
 #pragma once
-#include <functional> 
+#include <atomic>
+#include <functional>
 
 namespace Settings {
 	void Initialize(); // Default Settings
@@ -238,7 +239,7 @@ namespace Settings {
 	inline std::vector<RSColor> customNoteColorsNormal;
 	inline std::vector<RSColor> customNoteColorsCB;
 
-	inline bool async_UpdateMidiSettings = false;
+	inline std::atomic_bool async_UpdateMidiSettings = false;
 
 	const std::vector<std::string> defaultStrColors = {
 		"FF4F5A", "E2C102", "1DACF9", "FF9216", "3FCC0C", "C825ED", "0ABCB9", "909090"
