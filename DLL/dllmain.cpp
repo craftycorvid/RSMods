@@ -22,32 +22,6 @@ bool wwiseLogging = false;
 #endif
 
 /// <summary>
-/// Handle Force Enumeration
-/// </summary>
-/// <returns>NULL. Loops while game is open.</returns>
-unsigned WINAPI EnumerationThread() {
-	while (!GameState::GameLoaded)
-		Sleep(5000);
-
-	int oldDLCCount = Enumeration::GetCurrentDLCCount();
-	int newDLCCount = oldDLCCount;
-
-	while (!GameState::GameClosing) {
-		if (Settings::ReturnSettingValue("ForceReEnumerationEnabled") == "automatic") {
-			oldDLCCount = newDLCCount;
-			newDLCCount = Enumeration::GetCurrentDLCCount();
-
-			if (oldDLCCount != newDLCCount)
-				Enumeration::ForceEnumeration();
-		}
-
-		Sleep(Settings::GetModSetting("CheckForNewSongsInterval"));
-	}
-
-	return 0;
-}
-
-/// <summary>
 /// Send Midi Data Async. Only really used in debug builds to test MIDI commands.
 /// Secondary purpose of remaking D3D textures every 32 ticks (~ 1 second).
 /// </summary>
@@ -282,7 +256,6 @@ void Initialize() {
 	Wwise::Exports::Initialize();
 
 	std::thread(MainThread).detach(); // Mod Toggle based on menus
-	std::thread(EnumerationThread).detach(); // Force Enumeration
 	std::thread(HandleEffectQueueThread).detach(); // Twitch Effects
 	std::thread(MidiThread).detach(); // MIDI Auto Tuning / True Tuning
 	std::thread(RiffRepeaterThread).detach(); // RR Speed Above 100% Log
