@@ -94,7 +94,7 @@ namespace Twitch {
 
 	static bool IsCurrentEffectAlreadyAppliedOrNotInSong(const std::string& effectName)
 	{
-		return Contains(effectName, enabledEffects) && !GameState::IsInSong();
+		return Contains(effectName, enabledEffects) || !GameState::IsInSong();
 	}
 
 	void ParseEffectQueue() {
