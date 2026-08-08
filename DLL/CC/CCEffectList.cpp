@@ -79,7 +79,7 @@ namespace CrowdControl::EffectList {
 	/// <returns>True if any of the effects that are mutually incompatible with this effects are currently running</returns>
 	bool AreIncompatibleEffectsEnabled(const std::vector<std::string>& incompatibleEffects) {
 		const auto& allEffects = CrowdControl::EffectList::GetAllEffects();
-		return std::any_of(incompatibleEffects.begin(), incompatibleEffects.end(),
+		return std::ranges::any_of(incompatibleEffects,
 			[&allEffects](const std::string& effectName) {
 				auto it = allEffects.find(effectName);
 				return it != allEffects.end() && it->second->running;

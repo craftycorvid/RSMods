@@ -77,7 +77,8 @@
 
 /// <param name="valueToCheckIfInsideArray"> - Input</param>
 /// <param name="vec"> - Is input in list | VECTOR? (NULLABLE)</param>
-template <typename T>
-bool Contains(const T& valueToCheckIfInsideArray, const std::vector<T>& vec);
+template <typename T, std::ranges::input_range R>
+	requires std::convertible_to<T, std::ranges::range_value_t<R>>
+constexpr bool Contains(const T& value, const R& range);
 
 bool Contains(std::string_view text, std::string_view key);

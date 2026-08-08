@@ -42,11 +42,7 @@ struct Mesh {
 		NumVertices = n;
 	}
 
-	bool operator ==(const Mesh& meshB) const {
-		return (Stride == meshB.Stride
-			&& PrimCount == meshB.PrimCount
-			&& NumVertices == meshB.NumVertices);
-	}
+	bool operator ==(const Mesh& meshB) const = default;
 };
 
 struct ThiccMesh {
@@ -91,18 +87,13 @@ struct ThiccMesh {
 	bool operator ==(const ThiccMesh& meshB) const = default;
 };
 
-inline bool IsExtraRemoved(std::vector<ThiccMesh> list, ThiccMesh mesh) {
-	for (const auto& currentMesh : list)
-		if (currentMesh == mesh)
-			return true;
-
-	return false;
+inline bool IsExtraRemoved(std::span<const ThiccMesh> list, const ThiccMesh& mesh)
+{
+	return std::ranges::find(list, mesh) != list.end();
 }
 
-inline bool IsToBeRemoved(std::vector<Mesh> list, Mesh mesh) {
-	for (const auto& currentMesh : list)
-		if (currentMesh == mesh)
-			return true;
 
-	return false;
+inline bool IsToBeRemoved(std::span<const Mesh> list, const Mesh& mesh)
+{
+	return std::ranges::find(list, mesh) != list.end();
 }

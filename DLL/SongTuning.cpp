@@ -88,7 +88,9 @@ Tuning SongTuning::GetTuningAtTuner() {
 	}
 
 	// In the JSON, tunings have no whitespaces, so get rid of them
-	tuningText.erase(std::remove_if(tuningText.begin(), tuningText.end(), isspace), tuningText.end());
+	std::erase_if(tuningText, [](unsigned char ch) {
+		return std::isspace(ch) != 0;
+	});
 
 	// Parse RSMods unpacked tuning definition file.
 	std::ifstream jsonFile(pathToTuningList);

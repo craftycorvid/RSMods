@@ -166,8 +166,8 @@ void RiffRepeater::DisableLinearSpeeds() {
 
 void RiffRepeater::HandleSongChange(const std::string& previousSongKey) {
 	// If we have cached this event, then use the cached version, and tell the other threads to enable the Riff Repeater speed mod.
-	if (SongObjectIDs.find("Play_" + previousSongKey) != SongObjectIDs.end()) {
-		currentSongID = SongObjectIDs.find("Play_" + previousSongKey)->second;
+	if (auto it = SongObjectIDs.find("Play_" + previousSongKey); it != SongObjectIDs.end()) {
+		currentSongID = it->second;
 		readyToLogSongID = false;
 		loggedCurrentSongID = true;
 	}

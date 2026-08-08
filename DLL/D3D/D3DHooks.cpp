@@ -239,7 +239,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 			//Log("{ %d, %d, %d, %d, %d, %d, %d, %d, %d }, ", Stride, PrimCount, NumVertices, StartIndex, StartRegister, PrimType, decl->Type, VectorCount, NumElements);
 
 			if (startLogging) {
-				if (std::find(allMeshes.begin(), allMeshes.end(), currentThicc) == allMeshes.end()) // Make sure we don't log what we'd already logged
+				if (std::ranges::find(allMeshes, currentThicc) == allMeshes.end()) // Make sure we don't log what we'd already logged
 					allMeshes.push_back(currentThicc);
 				if (NOTE_STEMS) // Criteria for search
 					LOG_INFO("{ " << Stride << ", "
@@ -701,7 +701,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 
 			// We've already cached the headstocks we're using, so find the one we are working with and remove it.
 			if (calculatedHeadstocks)
-				if (std::find(std::begin(headstockTexturePointers), std::end(headstockTexturePointers), pCurrTextures[1]) != std::end(headstockTexturePointers))
+				if (std::ranges::find(headstockTexturePointers, pCurrTextures[1]) != headstockTexturePointers.end())
 					return REMOVE_TEXTURE;
 		}
 	}

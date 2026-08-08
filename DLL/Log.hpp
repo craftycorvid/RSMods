@@ -57,7 +57,7 @@ public:
     /// </summary>
     template <typename T>
     void Log(const T& message, LogLevel level = LogSettings::defaultLogLevel) {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::lock_guard lock(mutex);
 
         std::string header = GenerateHeader(level);
 
@@ -73,7 +73,7 @@ public:
     /// </summary>
     template <typename T>
     void LogNoHeader(const T& message) {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::lock_guard lock(mutex);
 
         std::cerr << message;
 

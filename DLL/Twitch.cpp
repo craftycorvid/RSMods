@@ -89,7 +89,7 @@ namespace Twitch {
 		LOG_INFO("Disabling " << effectName << std::endl);
 
 		if (Contains(effectName, enabledEffects)) // JIC
-			enabledEffects.erase(std::find(enabledEffects.begin(), enabledEffects.end(), effectName));
+			std::erase(enabledEffects, effectName);
 	}
 
 	static bool IsCurrentEffectAlreadyAppliedOrNotInSong(const std::string& effectName)

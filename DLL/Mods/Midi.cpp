@@ -3,6 +3,20 @@
 
 namespace Setting = Settings::Setting;
 
+namespace {
+	// Split a string on a delimiter, keeping the trailing piece even if the user forgot a trailing comma.
+	std::vector<std::string> SplitString(std::string str, const std::string& delim) {
+		std::vector<std::string> parts;
+		size_t position = 0;
+		while ((position = str.find(delim)) != std::string::npos) {
+			parts.push_back(str.substr(0, position));
+			str.erase(0, position + delim.length());
+		}
+		parts.push_back(str);
+		return parts;
+	}
+}
+
 // Midi codes should follow this guide: http://fmslogo.sourceforge.net/manual/midi-table.html
 namespace Midi {
 	std::vector<MIDIOUTCAPSA> midiOutDevices;
@@ -451,8 +465,8 @@ namespace Midi {
 				SendProgramChange(activeBypassMap.find(lastPC_TUNING)->second);
 
 			// Send the bypass code to revert back to normal guitar.
-			if (activeBypassMap.find(originalPC) != activeBypassMap.end())
-				SendProgramChange(activeBypassMap.find(originalPC)->second); 
+			if (auto it = activeBypassMap.find(originalPC); it != activeBypassMap.end())
+				SendProgramChange(it->second);
 
 			// Reset the expression pedal
 			if (lastCC != 0)
@@ -918,11 +932,11 @@ namespace Midi {
 			}
 
 			// Send MIDI command to pedal if we find the tuning in the INI.
-			if (semiToneMap.find(highestTuning) != semiToneMap.end()) {
+			if (auto it = semiToneMap.find(highestTuning); it != semiToneMap.end()) {
 				if (sendSemitoneCommand == programChangeStatus)
-					SendProgramChange(semiToneMap.find(highestTuning)->second);
+					SendProgramChange(it->second);
 				else if (sendSemitoneCommand == controlChangeStatus)
-					SendControlChange(semiToneMap.find(highestTuning)->second);
+					SendControlChange(it->second);
 
 				sentSemitoneInThisSong = true;
 			}
@@ -942,11 +956,11 @@ namespace Midi {
 				TrueTuning_Hertz *= 2;
 
 			// Send MIDI command to pedal if we find the true tuning in the INI.
-			if (trueTuningMap.find(TrueTuning_Hertz) != trueTuningMap.end()) {
+			if (auto it = trueTuningMap.find(TrueTuning_Hertz); it != trueTuningMap.end()) {
 				if (sendTrueTuningCommand == programChangeStatus)
-					SendProgramChange(trueTuningMap.find(TrueTuning_Hertz)->second, sendTrueTuningChannel);
+					SendProgramChange(it->second, sendTrueTuningChannel);
 				else if (sendTrueTuningCommand == controlChangeStatus)
-					SendControlChange(trueTuningMap.find(TrueTuning_Hertz)->second, trueTuningBank, sendTrueTuningChannel);
+					SendControlChange(it->second, trueTuningBank, sendTrueTuningChannel);
 
 				Midi::Software::sentTrueTuningInThisSong = true;
 			}
@@ -965,29 +979,19 @@ namespace Midi {
 		}
 
 		void FillSemitoneMap() {
-			std::string triggers = Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareSemitoneTriggers);
-			std::string delim = ", ";
-			std::vector<std::string> separated;
-			size_t position = 0;
+			std::vector<std::string> separated = SplitString(Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareSemitoneTriggers), ", ");
 
-			// String of triggers -> List of triggers
-			while ((position = triggers.find(delim)) != std::string::npos) {
-				separated.push_back(triggers.substr(0, position));
-				triggers.erase(0, position + delim.length());
-			}
-			separated.push_back(triggers); // If we don't do this, the last value won't get thrown in if the user forgot a trailing comma
-
-			delim = " ";
+			std::string delim = " ";
 
 			// List of triggers (string) -> Map of triggers (char, char)
-			for (int i = 0; i < separated.size(); i++) {
+			for (auto& entry : separated) {
 
-				std::string semiTone_string = separated[i].substr(0, separated[i].find(delim));
-				std::string command_string = separated[i].erase(0, separated[i].find(delim) + delim.length());
+				std::string semiTone_string = entry.substr(0, entry.find(delim));
+				std::string command_string = entry.erase(0, entry.find(delim) + delim.length());
 				char semiTone = std::atoi(semiTone_string.c_str());
 				char command = std::atoi(command_string.c_str());
 
-				if (semiToneMap.count(semiTone) == 0)
+				if (!semiToneMap.contains(semiTone))
 					semiToneMap[semiTone] = command;
 				else
 					LOG_ERROR("(MIDI) Software Pedal Error: Semitone Triggers for "
@@ -1002,26 +1006,16 @@ namespace Midi {
 
 			LOG_INFO("(MIDI) Software Pedal: Semitone Triggers" << std::endl);
 
-			for (std::map<char, char>::iterator it = semiToneMap.begin(); it != semiToneMap.end(); it++)
+			for (const auto& [semiTone, command] : semiToneMap)
 			{
-				LOG_NOHEAD("Semitone = " << (int)it->first << ", Value To Send = " << (int)it->second << std::endl);
+				LOG_NOHEAD("Semitone = " << (int)semiTone << ", Value To Send = " << (int)command << std::endl);
 			}
 
 			LOG_INFO("(MIDI) Software Pedal: Semitone Triggers --END" << std::endl);
 		}
 
 		void LoadSemitoneSettings() {
-			std::string settings = Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareSemitoneSettings);
-			std::string delim = ", ";
-			std::vector<std::string> separated;
-			size_t position = 0;
-
-			// String of settings -> List of settings
-			while ((position = settings.find(delim)) != std::string::npos) {
-				separated.push_back(settings.substr(0, position));
-				settings.erase(0, position + delim.length());
-			}
-			separated.push_back(settings); // If we don't do this, the last value won't get thrown in if the user forgot a trailing comma
+			std::vector<std::string> separated = SplitString(Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareSemitoneSettings), ", ");
 
 
 			// Example: 24, PC, 4
@@ -1062,29 +1056,19 @@ namespace Midi {
 		}
 
 		void FillTrueTuningMap() {
-			std::string triggers = Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareTrueTuningTriggers);
-			std::string delim = ", ";
-			std::vector<std::string> separated;
-			size_t position = 0;
+			std::vector<std::string> separated = SplitString(Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareTrueTuningTriggers), ", ");
 
-			// String of triggers -> List of triggers
-			while ((position = triggers.find(delim)) != std::string::npos) {
-				separated.push_back(triggers.substr(0, position));
-				triggers.erase(0, position + delim.length());
-			}
-			separated.push_back(triggers); // If we don't do this, the last value won't get thrown in if the user forgot a trailing comma
-
-			delim = " ";
+			std::string delim = " ";
 
 			// List of triggers (string) -> Map of triggers (int, char)
-			for (int i = 0; i < separated.size(); i++) {
+			for (auto& entry : separated) {
 
-				std::string semiTone_string = separated[i].substr(0, separated[i].find(delim));
-				std::string command_string = separated[i].erase(0, separated[i].find(delim) + delim.length());
+				std::string semiTone_string = entry.substr(0, entry.find(delim));
+				std::string command_string = entry.erase(0, entry.find(delim) + delim.length());
 				int trueTuning = std::atoi(semiTone_string.c_str());
 				char command = std::atoi(command_string.c_str());
 
-				if (trueTuningMap.count(trueTuning) == 0)
+				if (!trueTuningMap.contains(trueTuning))
 					trueTuningMap[trueTuning] = command;
 				else
 					LOG_ERROR("(MIDI) Software Pedal Error: TrueTuning Triggers for "
@@ -1099,26 +1083,16 @@ namespace Midi {
 
 			LOG_INFO("(MIDI) Software Pedal: TrueTuning Triggers" << std::endl);
 
-			for (auto it = trueTuningMap.begin(); it != trueTuningMap.end(); it++)
+			for (const auto& [trueTuning, command] : trueTuningMap)
 			{
-				LOG_NOHEAD("True Tuning = A" << it->first << ", Value To Send = " << (int)it->second << std::endl);
+				LOG_NOHEAD("True Tuning = A" << trueTuning << ", Value To Send = " << (int)command << std::endl);
 			}
 				
 			LOG_INFO("(MIDI) Software Pedal: TrueTuning Triggers --END" << std::endl);
 		}
 
 		void LoadTrueTuningSettings() {
-			std::string settings = Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareTrueTuningSettings);
-			std::string delim = ", ";
-			std::vector<std::string> separated;
-			size_t position = 0;
-
-			// String of settings -> List of settings
-			while ((position = settings.find(delim)) != std::string::npos) {
-				separated.push_back(settings.substr(0, position));
-				settings.erase(0, position + delim.length());
-			}
-			separated.push_back(settings); // If we don't do this, the last value won't get thrown in if the user forgot a trailing comma
+			std::vector<std::string> separated = SplitString(Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareTrueTuningSettings), ", ");
 
 			// Example: 24, PC, 4
 			// Send PC on channel 4 (0 indexed). When we leave a song, send 24 to PC channel 4.

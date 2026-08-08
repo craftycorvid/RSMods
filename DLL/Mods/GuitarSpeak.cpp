@@ -123,13 +123,13 @@ bool GuitarSpeak::RunGuitarSpeak() {
 				}
 
 				// Press the key the user set for this note.
-				else if(keyToVKey.find(buttonToPress) != keyToVKey.end()) {
-					PostMessage(D3DHooks::GetGameWindow(), WM_KEYDOWN, keyToVKey.find(buttonToPress)->second, 0);
+				else if (auto it = keyToVKey.find(buttonToPress); it != keyToVKey.end()) {
+					PostMessage(D3DHooks::GetGameWindow(), WM_KEYDOWN, it->second, 0);
 					Sleep(30);
-					PostMessage(D3DHooks::GetGameWindow(), WM_KEYUP, keyToVKey.find(buttonToPress)->second, 0);
+					PostMessage(D3DHooks::GetGameWindow(), WM_KEYUP, it->second, 0);
 
 					if (verbose)
-						LOG_INFO("(GS) " << keyToVKey.find(buttonToPress)->first << " was used by Guitar Speak." << std::endl);
+						LOG_INFO("(GS) " << it->first << " was used by Guitar Speak." << std::endl);
 				}
 			}
 			// We shouldn't be reading commands here
