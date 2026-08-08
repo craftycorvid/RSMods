@@ -50,7 +50,7 @@ foreach ($t in $Tests) {
     # "vswhere.exe is not recognized" to stderr while still setting up the toolset correctly.
     # cl runs as a separate `&&` command, so its diagnostics are unaffected; a genuine vcvars
     # failure still surfaces as a missing `cl` and a non-zero exit below.
-    $build = "call `"$vcvars`" >nul 2>nul && cd /d `"$OutDir`" && cl /nologo /std:c++17 /EHsc /W3 $srcArgs /Fe:`"$exe`""
+    $build = "call `"$vcvars`" >nul 2>nul && cd /d `"$OutDir`" && cl /nologo /std:c++20 /EHsc /W3 $srcArgs /Fe:`"$exe`""
     & { $ErrorActionPreference = 'Continue'; & cmd /c $build }
     if ($LASTEXITCODE -ne 0) { Write-Host "BUILD FAILED: $name" -ForegroundColor Red; $failed += "$name (build)"; continue }
 

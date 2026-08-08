@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <format>
 
 #include "../Mods/ExtendedRangeMode.hpp"
 

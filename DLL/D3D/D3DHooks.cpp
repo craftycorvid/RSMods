@@ -736,24 +736,19 @@ void D3DHooks::UpdateHeadstockCacheForMenu() {
 
 std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds)
 {
-	int seconds = 0, minutes = 0, hours = 0;
+	using namespace std::chrono;
 
-	seconds = (int)timeInSeconds % 60;
-	minutes = (int)(timeInSeconds / 60) % 60;
-	hours = timeInSeconds / 3600;
+	const auto dur = duration_cast<seconds>(duration<float>(timeInSeconds));
+	const auto h = duration_cast<hours>(dur);
+	const auto m = duration_cast<minutes>(dur % hours(1));
+	const auto s = duration_cast<seconds>(dur % minutes(1));
 
-	char buffer[64];
-
-	if (hours > 0)
+	if (h.count() > 0)
 	{
-		sprintf_s(buffer, "%02dh:%02dm:%02ds", hours, minutes, seconds);
-	}
-	else
-	{
-		sprintf_s(buffer, "%02dm:%02ds", minutes, seconds);
+		return std::format("{:02}h:{:02}m:{:02}s", h.count(), m.count(), s.count());
 	}
 
-	return std::string(buffer);
+	return std::format("{:02}m:{:02}s", m.count(), s.count());
 }
 
 void D3DHooks::RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice) {

@@ -2,14 +2,9 @@
 #include <gdiplus.h>
 
 #include "D3DHelper.hpp"
-#include "GdiplusManager.hpp"
-
-#include "../Mods/CollectColors.hpp"
-#include "../Mods/ExtendedRangeMode.hpp"
 
 // #pragma intrinsic(_ReturnAddress) Not actually declared
 #pragma comment (lib, "gdiplus.lib")
-#pragma once
 
 struct RSColor;
 typedef std::map<std::string, RSColor> ColorMap;

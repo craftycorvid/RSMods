@@ -1,4 +1,9 @@
 #pragma once
+#include <format>
+#include "GdiplusManager.hpp"
+
+#include "../Mods/CollectColors.hpp"
+#include "../Mods/ExtendedRangeMode.hpp"
 
 namespace D3DHelper {
 	inline char dlldir[320];
@@ -67,43 +72,23 @@ struct ThiccMesh {
 		NumElements = nm;
 	}
 
-	std::string ToString() {
-		std::string ret = "{ ";
-
-		ret += std::to_string(Stride);
-		ret += ",";
-		ret += std::to_string(PrimCount);
-		ret += ",";
-		ret += std::to_string(NumVertices);
-		ret += ",";
-		ret += std::to_string(StartIndex);
-		ret += ",";
-		ret += std::to_string(StartRegister);
-		ret += ",";
-		ret += std::to_string(PrimType);
-		ret += ",";
-		ret += std::to_string(DeclType);
-		ret += ",";
-		ret += std::to_string(VectorCount);
-		ret += ",";
-		ret += std::to_string(NumElements);
-
-		ret += " },";
-
-		return ret;
+	std::string ToString() const
+	{
+		return std::format(
+			"{{ {},{},{},{},{},{},{},{},{} }},",
+			Stride,
+			PrimCount,
+			NumVertices,
+			StartIndex,
+			StartRegister,
+			PrimType,
+			DeclType,
+			VectorCount,
+			NumElements
+		);
 	}
 
-	bool operator ==(const ThiccMesh& meshB) const {
-		return (Stride == meshB.Stride
-			&& PrimCount == meshB.PrimCount
-			&& NumVertices == meshB.NumVertices
-			&& StartIndex == meshB.StartIndex
-			&& StartRegister == meshB.StartRegister
-			&& PrimType == meshB.PrimType
-			&& DeclType == meshB.DeclType
-			&& VectorCount == meshB.VectorCount
-			&& NumElements == meshB.NumElements);
-	}
+	bool operator ==(const ThiccMesh& meshB) const = default;
 };
 
 inline bool IsExtraRemoved(std::vector<ThiccMesh> list, ThiccMesh mesh) {
