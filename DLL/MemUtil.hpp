@@ -2,25 +2,30 @@
 
 #include "Offsets.hpp"
 #include "winternl.h"
+#include <span>
+#include <string_view>
 
 namespace MemUtil {
 	bool bCompare(const BYTE* pData, const byte* bMask, const char* szMask);
 	bool PatchAdr(VersioningStruct<uintptr_t>& address, LPCVOID changeToMake, size_t len, bool addBaseHandle = false);
 	bool PatchAdr(LPVOID address, LPCVOID changeToMake, size_t len);
 	bool PatchAdr(uintptr_t address, LPCVOID changeToMake, size_t len, bool addBaseHandle);
+	bool PatchAdr(uintptr_t address, std::string_view data, bool addBaseHandle);
 	bool PlaceHook(VersioningStruct<uintptr_t>& hookSpot, void* ourFunct, int len, bool addBaseHandle = false);
 	bool PlaceHook(void* hookSpot, void* ourFunct, int len);
 	PBYTE TrampHook(PBYTE src, PBYTE dst, unsigned int len);
 	bool IsBadReadPtr(void* pointer);
-	uintptr_t FindDMAAddy(uintptr_t ptr, const std::vector<unsigned int>& offsets, bool safe = false);
+	uintptr_t FindDMAAddy(uintptr_t ptr, std::span<const unsigned int> offsets, bool safe = false);
 	uintptr_t ReadPtr(uintptr_t adr);
 	template <typename T>
+		requires std::is_trivially_copyable_v<T>
 	bool SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthOfData);
 
 	template <typename T>
 	T FindPattern(uint32_t address, size_t size, PBYTE pattern, const char* mask);
 
 	template <typename T>
+		requires std::is_trivially_copyable_v<T>
 	T ReadValue(uintptr_t adr, bool addBaseHandle);
 
 	NTSTATUS HookedVirtualProtect(LPVOID address, SIZE_T len, ULONG newProtection, ULONG& oldProtection);
@@ -42,14 +47,16 @@ template <typename T>
 /// <param name="mask"> - Mask of what bytes we know (notated with an "x") and what bytes we don't (notated with a "?").</param>
 /// <returns>Value if found or NULL if not.</returns>
 T MemUtil::FindPattern(uint32_t address, size_t size, PBYTE pattern, const char* mask) {
-	for (uint32_t i = 0; i < size; i++)
-		if (bCompare((PBYTE)(address + i), pattern, mask))
-			return (T)(address + i);
+	for (uint32_t i = 0; i < size; i++) {
+		if (bCompare(reinterpret_cast<PBYTE>(address + i), pattern, mask)) {
+			return T(address + i);
+		}
+	}
 
-	return NULL;
+	return T{};
 }
 
-template <typename T>
+template <typename T> requires std::is_trivially_copyable_v<T>
 /// <summary>
 /// Sets a static value in the executable, utilizing VirtualProtect.
 /// </summary>
@@ -58,21 +65,20 @@ template <typename T>
 /// <param name="data"> - Data we should change the staticValue to.</param>
 /// <param name="lengthOfData"> - Length of the data (needed for VirtualProtect).</param>
 /// <returns>Successfully able to set the value.</returns>
-
 bool MemUtil::SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthOfData) {
 	DWORD dwOldProt, dwDummy;
 
 	// Change memory protection to allow writing
-	NTSTATUS status = HookedVirtualProtect((LPVOID)staticValue, lengthOfData, PAGE_EXECUTE_READWRITE, dwOldProt);
+	NTSTATUS status = HookedVirtualProtect(reinterpret_cast<LPVOID>(staticValue), lengthOfData, PAGE_EXECUTE_READWRITE, dwOldProt);
 	if (!NT_SUCCESS(status)) {
 		return false;
 	}
 
 	// Write the data
-	*(T*)staticValue = data;
+	*reinterpret_cast<T*>(staticValue) = data;
 
 	// Restore original protection
-	status = HookedVirtualProtect((LPVOID)staticValue, lengthOfData, dwOldProt, dwDummy);
+	status = HookedVirtualProtect(reinterpret_cast<LPVOID>(staticValue), lengthOfData, dwOldProt, dwDummy);
 	if (!NT_SUCCESS(status)) {
 		return false;
 	}
@@ -80,12 +86,12 @@ bool MemUtil::SetStaticValue(uintptr_t staticValue, T data, unsigned int lengthO
 	return true;
 }
 
-template <typename T>
+template <typename T> requires std::is_trivially_copyable_v<T>
 T MemUtil::ReadValue(uintptr_t address, bool addBaseHandle) {
-	if (address == NULL)
-		return NULL;
+	if (address == 0) {
+		return T{};
+	}
 
-	uintptr_t addr = address + (addBaseHandle ? Offsets::baseHandle : 0);
-
-	return *(T*)addr;
+	const uintptr_t addr = address + (addBaseHandle ? Offsets::baseHandle : 0);
+	return *reinterpret_cast<T*>(addr);
 }

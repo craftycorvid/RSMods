@@ -46,6 +46,11 @@ bool MemUtil::PatchAdr(uintptr_t address, LPCVOID changeToMake, size_t len, bool
 bool MemUtil::PatchAdr(VersioningStruct<uintptr_t>& address, LPCVOID changeToMake, size_t len, bool addBaseHandle) {
 	uintptr_t addr = address.Get() + (addBaseHandle ? Offsets::baseHandle : 0);
 	return PatchAdr((LPVOID)(addr), changeToMake, len);
+
+}
+
+bool MemUtil::PatchAdr(uintptr_t address, std::string_view data, bool addBaseHandle) {
+	return PatchAdr(address, static_cast<LPCVOID>(data.data()), data.size(), addBaseHandle);
 }
 
 /// <summary>
@@ -210,7 +215,7 @@ bool MemUtil::IsBadReadPtr(void* pointer)
 /// <param name="offsets"> - Cheat Engine Offsets</param>
 /// <param name="safe"> - Should we trust this to not crash our game?</param>
 /// <returns>Memory Address</returns>
-uintptr_t MemUtil::FindDMAAddy(uintptr_t ptr, const std::vector<unsigned int>& offsets, bool safe)
+uintptr_t MemUtil::FindDMAAddy(uintptr_t ptr, std::span<const unsigned int> offsets, bool safe)
 {
 	// Set addr to the base pointer.
 	uintptr_t addr = ptr;
