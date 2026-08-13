@@ -234,10 +234,16 @@ namespace Framework {
 					LOG_ERROR("[Framework] a queued settings update threw while applying" << std::endl);
 				}
 			}
+
+			// Only mods that are settled Inactive/Active get notified. A Deactivating mod still
+			// has render callbacks in flight and its teardown revert is pending, so delivering
+			// OnSettingsChanged there would touch state that is about to be freed (race/UAF).
+			// It receives fresh settings when it next reaches Active (Activate -> OnEnabled).
 			for (auto& record : records) {
-				if (record.state != ModState::Registered && record.state != ModState::Faulted)
+				if (IsActivatable(record.state))
 					Invoke(record, &IMod::OnSettingsChanged, "OnSettingsChanged");
 			}
+			
 			Commands().RefreshDiagnostics();
 		}
 
