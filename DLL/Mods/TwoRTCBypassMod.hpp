@@ -7,9 +7,14 @@ class TwoRTCBypassMod : public Framework::IMod {
 public:
 	MOD_ID(TwoRTCBypassMod)
 
-	void OnMenuTick(Framework::ModContext& c) override;
-	void OnSongTick(Framework::ModContext& c) override;
+	bool IsEnabled(const Framework::ModContext& c) const override;
+
+	void OnEnabled(Framework::ModContext& c) override;
+	void OnDisabled(Framework::ModContext& c) override;
 
 private:
-	void SyncPatch(Framework::ModContext& c);
+	void SetTwoRTCBypass(bool enable);
+
+	unsigned char originalBytes[25]{};
+	bool capturedOriginal = false;
 };

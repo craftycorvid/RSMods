@@ -119,38 +119,6 @@ namespace ModManager {
 		CrowdControl::StartServer();
 	}
 
-	// PatchTwoRTC overwrites 25 bytes of the connection check, so restoring it
-	// needs the 25 bytes that were actually there, captured from the live
-	// process before the first patch. The previous restore wrote 6 bytes from a
-	// 3-byte string literal, stamping 2 out-of-bounds bytes into game code.
-	static unsigned char twoRTCBypassOriginalBytes[25];
-	static bool hasCapturedTwoRTCBypassOriginal = false;
-
-	static void SetTwoRTCBypass(bool enable)
-	{
-		const bool isPatched =
-			*(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_patch_call[0];
-		if (enable == isPatched) return;
-
-		if (enable) {
-			if (!hasCapturedTwoRTCBypassOriginal) {
-				memcpy(
-					twoRTCBypassOriginalBytes,
-					(const void*)Offsets::ptr_twoRTCBypass.Get(),
-					sizeof(twoRTCBypassOriginalBytes));
-				hasCapturedTwoRTCBypassOriginal = true;
-			}
-
-			QualityOfLife::PatchTwoRTC();
-		}
-		else if (hasCapturedTwoRTCBypassOriginal) {
-			MemUtil::PatchAdr(
-				(LPVOID)Offsets::ptr_twoRTCBypass.Get(),
-				twoRTCBypassOriginalBytes,
-				sizeof(twoRTCBypassOriginalBytes));
-		}
-	}
-
 	/// <summary>
 	/// Applies all mods and fixes that must run at startup.
 	/// </summary>
@@ -163,15 +131,6 @@ namespace ModManager {
 		#ifdef _WWISE_LOGS
 				Wwise::Logging::Init();
 		#endif
-
-		// Look to see if RS_ASIO applied the 2 RTC input bypass.
-		// If they did, then we disregard the results from our version of the mod.
-		bool rsAsioBypassTwoRTC = false;
-		LOG_INFO("RS_ASIO Bypass2RTC: " << std::boolalpha << rsAsioBypassTwoRTC << std::endl);
-
-		if (Settings::IsOn("BypassTwoRTCMessageBox")) {
-			SetTwoRTCBypass(true);
-		}
 
 		// Allow the user to have a small amount of time to Alt+Tab while the game continues playing the audio.
 		if (Settings::IsOn("AllowAudioInBackground")) {

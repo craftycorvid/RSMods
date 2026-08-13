@@ -4,23 +4,36 @@
 using Framework::ModContext;
 namespace Setting = Settings::Setting;
 
-void TwoRTCBypassMod::OnMenuTick(ModContext& c) {
-	SyncPatch(c);
+bool TwoRTCBypassMod::IsEnabled(const ModContext& c) const {
+	return c.IsOn(Setting::BypassTwoRTCMessageBox);
 }
 
-void TwoRTCBypassMod::OnSongTick(ModContext& c) {
-	SyncPatch(c);
+void TwoRTCBypassMod::OnEnabled(ModContext&) {
+	SetTwoRTCBypass(true);
 }
 
-// Keeps the in-memory patch in sync with the setting, both applying and reverting as it toggles.
-// The memory-state comparisons make this idempotent. Post-load ticks only: it patches game memory,
-// so it must never run during Loading.
-void TwoRTCBypassMod::SyncPatch(ModContext& c) {
-	if (c.IsOff(Setting::BypassTwoRTCMessageBox) && *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_patch_call[0]) {
-		MemUtil::PatchAdr((LPVOID)Offsets::ptr_twoRTCBypass.Get(), (LPVOID)Offsets::ptr_twoRTCBypass_original, 6);
-	}
-	else if (c.IsOn(Setting::BypassTwoRTCMessageBox) && *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_original[0]) {
+void TwoRTCBypassMod::OnDisabled(ModContext&) {
+	SetTwoRTCBypass(false);
+}
+
+// PatchTwoRTC overwrites 25 bytes of the connection check, so capture those exact live bytes
+// before this mod's first patch and restore the complete instruction sequence when disabled.
+// If another component (such as RS_ASIO) already applied the bypass, leave its patch alone.
+void TwoRTCBypassMod::SetTwoRTCBypass(bool enable) {
+	const bool isPatched = *(char*)Offsets::ptr_twoRTCBypass.Get() == Offsets::ptr_twoRTCBypass_patch_call[0];
+	if (enable == isPatched)
+		return;
+
+	if (enable) {
+		if (!capturedOriginal) {
+			memcpy(originalBytes, (const void*)Offsets::ptr_twoRTCBypass.Get(), sizeof(originalBytes));
+			capturedOriginal = true;
+		}
+
 		QualityOfLife::PatchTwoRTC();
+	}
+	else if (capturedOriginal) {
+		MemUtil::PatchAdr((LPVOID)Offsets::ptr_twoRTCBypass.Get(), originalBytes, sizeof(originalBytes));
 	}
 }
 
