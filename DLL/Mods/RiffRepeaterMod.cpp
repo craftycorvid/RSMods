@@ -85,7 +85,7 @@ void RiffRepeaterMod::ChangeSpeed(const ModContext& c, const KeyEvent& event) {
 
 	float realSongSpeed = RiffRepeater::GetSpeed(true);
 	realSongSpeed += event.control ? -interval : interval;
-	realSongSpeed = std::clamp(realSongSpeed, 25.f, 400.f);
+	realSongSpeed = std::clamp(realSongSpeed, 25.f, 1600.f);
 
 	RiffRepeater::SetSpeed(realSongSpeed, true);
 	RiffRepeater::EnableTimeStretch();
