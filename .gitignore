@@ -1,5 +1,8 @@
-# Project-specific files
+# Project-specific files (DLL build output / linker byproducts)
 xinput1_3.dll
+xinput1_3.exp
+xinput1_3.lib
+xinput1_3.pdb
 
 # Claude Code local worktrees / scratch (never commit as gitlinks)
 **/.claude/worktrees/
