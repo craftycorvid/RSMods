@@ -4,11 +4,14 @@
 
 class NonStopPlayTimerMod : public Framework::IMod {
 public:
-	MOD_ID(NonStopPlayTimerMod)
+    MOD_ID(NonStopPlayTimerMod)
 
-	void OnMenuTick(Framework::ModContext& c) override;
-	void OnSongTick(Framework::ModContext& c) override;
+    void OnEnabled(Framework::ModContext& c) override;
+    void OnDisabled(Framework::ModContext& c) override;
+    void OnSettingsChanged(Framework::ModContext& c) override;
 
 private:
-	void EnforceTimer(Framework::ModContext& c);
+    void ApplyTimer(Framework::ModContext& c);
+
+    bool active = false;
 };

@@ -8,17 +8,21 @@ namespace {
 	constexpr double DefaultTimeLimit = 10.9899997711182; // The default pre-song timer for Non-Stop Play.
 }
 
-void NonStopPlayTimerMod::OnMenuTick(ModContext& c) {
-	EnforceTimer(c);
+void NonStopPlayTimerMod::OnEnabled(ModContext& c) {
+	ApplyTimer(c);
+	active = true;
 }
 
-void NonStopPlayTimerMod::OnSongTick(ModContext& c) {
-	EnforceTimer(c);
+void NonStopPlayTimerMod::OnSettingsChanged(ModContext& c) {
+	if (active)
+		ApplyTimer(c);
 }
 
-// Continuously enforces the Non-Stop Play pre-song timer to the desired value (custom or default),
-// re-correcting whenever the game's value drifts. Post-load ticks only, never during Loading.
-void NonStopPlayTimerMod::EnforceTimer(ModContext& c) {
+void NonStopPlayTimerMod::OnDisabled(ModContext&) {
+	active = false;
+}
+
+void NonStopPlayTimerMod::ApplyTimer(ModContext& c) {
 	const double desired = c.IsOn(Setting::UseCustomNSPTimer)
 		? c.Int(Setting::CustomNSPTimeLimit) / 1000.0
 		: DefaultTimeLimit;
