@@ -1,12 +1,48 @@
 #include "stdafx.h"
 #include "Settings.hpp"
 
+#include <mutex>
+#include <shared_mutex>
+#include <string>
+
+// The Settings maps/vectors are read from the D3D render thread and the Twitch/CrowdControl
+// threads while writes are drained on the main thread. std::map is not safe for concurrent
+// read/write, and the getters used to read via operator[] (which inserts on a miss), so even
+// two concurrent "reads" mutated the map and raced. Every accessor now takes a shared lock and
+// every mutator a unique lock on this one mutex, and reads use non-mutating lookups. Composite
+// getters call the *Unlocked helpers (never another public accessor) so they never re-lock. The
+// Read* reload functions take the lock only after LoadFile, so disk IO stays outside it.
+//
+// TODO(C++20): writes are rare and already serialized on the main thread, so this is a
+// single-writer/many-reader case. Publishing the state as an immutable snapshot behind a
+// std::atomic<std::shared_ptr<const SettingsData>> would make reads lock-free and never block on a reload.
+namespace {
+	std::shared_mutex g_settingsMutex;
+
+	std::string ModSettingUnlocked(const std::string& name) {
+		auto it = Settings::modSettings.find(name);
+		return it != Settings::modSettings.end() ? it->second : std::string();
+	}
+
+	int CustomSettingUnlocked(const std::string& name) {
+		auto it = Settings::customSettings.find(name);
+		return it != Settings::customSettings.end() ? it->second : 0;
+	}
+
+	unsigned int VKCodeUnlocked(const std::string& vkString) {
+		auto it = Settings::keyMap.find(vkString);
+		return it != Settings::keyMap.end() ? it->second : 0u;
+	}
+}
+
 /// <summary>
 /// Load Default Settings.
 /// Used if the user has the DLL but no INI.
 /// </summary>
 void Settings::Initialize()
 {
+	std::unique_lock lock(g_settingsMutex);
+
 	modSettings = {
 		{"CustomSongListTitles", "K"},
 		{"ToggleLoftKey", "T"},
@@ -170,6 +206,8 @@ void Settings::ReadKeyBinds() {
 		return;
 	}
 
+	std::unique_lock lock(g_settingsMutex);
+
 	modSettings = {
 		{ "ToggleLoftKey", reader.GetValue("Keybinds", "ToggleLoftKey", "T") },
 		{ "CustomSongListTitles", reader.GetValue("Keybinds", "CustomSongListTitles", "K")},
@@ -208,6 +246,10 @@ void Settings::ReadModSettings() {
 		LOG_ERROR("Error reading saved settings" << std::endl);
 		return;
 	}
+
+	// Augments the modSettings that ReadKeyBinds already populated, so it adds keys rather
+	// than replacing the map wholesale.
+	std::unique_lock lock(g_settingsMutex);
 
 	customSettings = {
 		{"ExtendedRangeMode", reader.GetLongValue("Mod Settings", "ExtendedRangeModeAt", -5)},
@@ -313,6 +355,8 @@ void Settings::ReadStringColors() {
 	if (reader.LoadFile("RSMods.ini") < 0)
 		return;
 
+	std::unique_lock lock(g_settingsMutex);
+
 	customStringColorsNormal.clear();
 	customStringColorsCB.clear();
 	customNoteColorsNormal.clear();
@@ -362,6 +406,8 @@ void Settings::ReadNotewayColors() {
 		return;
 	}
 
+	std::unique_lock lock(g_settingsMutex);
+
 	notewayColors = {
 			{ "CustomHighwayNumbered", reader.GetValue("Highway Colors", "CustomHighwayNumbered", "") },
 			{ "CustomHighwayUnNumbered", reader.GetValue("Highway Colors", "CustomHighwayUnNumbered", "") },
@@ -375,7 +421,8 @@ void Settings::ReadNotewayColors() {
 /// </summary>
 void Settings::ToggleExtendedRangeMode()
 {
-	modSettings["ExtendedRangeEnabled"] = (modSettings["ExtendedRangeEnabled"] == "on") ? "off" : "on";
+	std::unique_lock lock(g_settingsMutex);
+	modSettings["ExtendedRangeEnabled"] = (ModSettingUnlocked("ExtendedRangeEnabled") == "on") ? "off" : "on";
 }
 
 
@@ -385,7 +432,8 @@ void Settings::ToggleExtendedRangeMode()
 /// <param name="name"> - std::map[key]</param>
 /// <returns>Virtual Key | uint</returns>
 unsigned int Settings::GetKeyBind(const std::string& name) {
-	return GetVKCodeForString(modSettings[name]);
+	std::shared_lock lock(g_settingsMutex);
+	return VKCodeUnlocked(ModSettingUnlocked(name));
 }
 
 /// <summary>
@@ -394,7 +442,8 @@ unsigned int Settings::GetKeyBind(const std::string& name) {
 /// <param name="name"> - std::map[key]</param>
 /// <returns>Int for mod setting</returns>
 int Settings::GetModSetting(const std::string& name) {
-	return customSettings[name];
+	std::shared_lock lock(g_settingsMutex);
+	return CustomSettingUnlocked(name);
 }
 
 /// <summary>
@@ -403,14 +452,16 @@ int Settings::GetModSetting(const std::string& name) {
 /// <param name="name"> - std::map[key]</param>
 /// <returns>Value of mod toggle</returns>
 std::string Settings::ReturnSettingValue(const std::string& name) {
-	return modSettings[name];
+	std::shared_lock lock(g_settingsMutex);
+	return ModSettingUnlocked(name);
 }
 
 /// <summary>
 /// True when a mod toggle is set to "on". The single home for the on/off convention.
 /// </summary>
 bool Settings::IsOn(const std::string& name) {
-	return ReturnSettingValue(name) == "on";
+	std::shared_lock lock(g_settingsMutex);
+	return ModSettingUnlocked(name) == "on";
 }
 
 /// <summary>
@@ -418,7 +469,8 @@ bool Settings::IsOn(const std::string& name) {
 /// unrecognized value is neither on nor off, so this stays a faithful swap for == "off".
 /// </summary>
 bool Settings::IsOff(const std::string& name) {
-	return ReturnSettingValue(name) == "off";
+	std::shared_lock lock(g_settingsMutex);
+	return ModSettingUnlocked(name) == "off";
 }
 
 /// <summary>
@@ -437,7 +489,8 @@ Settings::When Settings::ParseWhen(std::string_view value) {
 /// Read a "...When" setting by name and return it parsed. See Settings::When.
 /// </summary>
 Settings::When Settings::GetWhen(const std::string& name) {
-	return ParseWhen(ReturnSettingValue(name));
+	std::shared_lock lock(g_settingsMutex);
+	return ParseWhen(ModSettingUnlocked(name));
 }
 
 /// <summary>
@@ -445,7 +498,8 @@ Settings::When Settings::GetWhen(const std::string& name) {
 /// out-of-range value stays out-of-range and falls through consumers' default cases.
 /// </summary>
 Settings::StringColorMode Settings::GetStringColorMode(const std::string& name) {
-	return static_cast<StringColorMode>(GetModSetting(name));
+	std::shared_lock lock(g_settingsMutex);
+	return static_cast<StringColorMode>(CustomSettingUnlocked(name));
 }
 
 /// <summary>
@@ -453,7 +507,8 @@ Settings::StringColorMode Settings::GetStringColorMode(const std::string& name) 
 /// the enum, so out-of-range values are preserved for consumers' default handling.
 /// </summary>
 Settings::NoteColorMode Settings::GetNoteColorMode(const std::string& name) {
-	return static_cast<NoteColorMode>(GetModSetting(name));
+	std::shared_lock lock(g_settingsMutex);
+	return static_cast<NoteColorMode>(CustomSettingUnlocked(name));
 }
 
 /// <summary>
@@ -462,7 +517,8 @@ Settings::NoteColorMode Settings::GetNoteColorMode(const std::string& name) {
 /// <param name="vkString"> - std::map[key]</param>
 /// <returns></returns>
 int Settings::GetVKCodeForString(const std::string& vkString) {
-	return keyMap[vkString];
+	std::shared_lock lock(g_settingsMutex);
+	return VKCodeUnlocked(vkString);
 }
 
 /// <summary>
@@ -470,10 +526,9 @@ int Settings::GetVKCodeForString(const std::string& vkString) {
 /// </summary>
 /// <param name="name"> - std::map[key]</param>
 bool Settings::IsTwitchSettingEnabled(const std::string& name) {
-	if (twitchSettings.count(name) == 0) // JIC
-		return false;
-
-	return twitchSettings[name] == "on";
+	std::shared_lock lock(g_settingsMutex);
+	auto it = twitchSettings.find(name);
+	return it != twitchSettings.end() && it->second == "on";
 }
 
 /// <summary>
@@ -482,7 +537,9 @@ bool Settings::IsTwitchSettingEnabled(const std::string& name) {
 /// <param name="name"> - std::map[key]</param>
 /// <returns>HEX color</returns>
 std::string Settings::ReturnNotewayColor(const std::string& name) {
-	return notewayColors[name];
+	std::shared_lock lock(g_settingsMutex);
+	auto it = notewayColors.find(name);
+	return it != notewayColors.end() ? it->second : std::string();
 }
 
 /// <summary>
@@ -504,6 +561,7 @@ std::vector<std::string> Settings::SplitByWhitespace(const std::string& input) {
 /// <param name="name"> - std::map[key]</param>
 /// <param name="newValue"> - new setting value</param>
 void Settings::UpdateModSetting(const std::string& name, const std::string_view& newValue) {
+	std::unique_lock lock(g_settingsMutex);
 	modSettings[name] = newValue;
 }
 
@@ -513,6 +571,7 @@ void Settings::UpdateModSetting(const std::string& name, const std::string_view&
 /// <param name="name"> - std::map[key]</param>
 /// <param name="newValue"> - new setting value</param>
 void Settings::UpdateCustomSetting(const std::string& name, int newValue) {
+	std::unique_lock lock(g_settingsMutex);
 	customSettings[name] = newValue;
 }
 
@@ -522,6 +581,7 @@ void Settings::UpdateCustomSetting(const std::string& name, int newValue) {
 /// <param name="name"> - std::map[key]</param>
 /// <param name="newValue"> - new setting value</param>
 void Settings::UpdateTwitchSetting(const std::string& name, const std::string_view& newValue) {
+	std::unique_lock lock(g_settingsMutex);
 	twitchSettings[name] = newValue;
 }
 
@@ -561,6 +621,7 @@ void Settings::ParseTwitchToggle(const std::string& twitchMsg, const std::string
 
 	std::string effectName = msgParts[1];
 
+	std::unique_lock lock(g_settingsMutex);
 	twitchSettings[effectName] = toggleType == "enable" ? "on" : "off";
 }
 
@@ -583,6 +644,7 @@ void Settings::ParseSolidColorsMessage(const std::string& twitchMsg) {
 /// <param name="CB"> - colorblind or not</param>
 /// <returns>List of all string colors</returns>
 std::vector<RSColor> Settings::GetStringColors(bool CB) {
+	std::shared_lock lock(g_settingsMutex);
 	if (CB)
 		return customStringColorsCB;
 	else
@@ -595,6 +657,7 @@ std::vector<RSColor> Settings::GetStringColors(bool CB) {
 /// <param name="CB"> - colorblind or not</param>
 /// <returns>List of all note colors</returns>
 std::vector<RSColor> Settings::GetNoteColors(bool CB) {
+	std::shared_lock lock(g_settingsMutex);
 	if (CB)
 		return customNoteColorsCB;
 	else
@@ -609,6 +672,7 @@ std::vector<RSColor> Settings::GetNoteColors(bool CB) {
 /// <param name="c"> - new color</param>
 /// <param name="CB"> - colorblind or not</param>
 void Settings::SetStringColors(int strIndex, RSColor c, bool CB) {
+	std::unique_lock lock(g_settingsMutex);
 	if (CB)
 		customStringColorsCB[strIndex] = c;
 	else
@@ -622,6 +686,7 @@ void Settings::SetStringColors(int strIndex, RSColor c, bool CB) {
 /// <param name="c"> - new color</param>
 /// <param name="CB"> - colorblind or not</param>
 void Settings::SetNoteColors(int strIndex, RSColor c, bool CB) {
+	std::unique_lock lock(g_settingsMutex);
 	if (CB)
 		customNoteColorsCB[strIndex] = c;
 	else
