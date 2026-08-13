@@ -131,11 +131,6 @@ namespace ModManager {
 		#ifdef _WWISE_LOGS
 				Wwise::Logging::Init();
 		#endif
-
-		// Allow the user to have a small amount of time to Alt+Tab while the game continues playing the audio.
-		if (Settings::IsOn("AllowAudioInBackground")) {
-			VolumeControl::AllowAltTabbingWithAudio();
-		}
 	}
 
 	/// <summary>

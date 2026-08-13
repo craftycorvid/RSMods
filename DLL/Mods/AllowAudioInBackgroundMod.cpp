@@ -5,21 +5,16 @@
 using Framework::ModContext;
 namespace Setting = Settings::Setting;
 
-void AllowAudioInBackgroundMod::OnMenuTick(ModContext& c) {
-	SyncState(c);
+bool AllowAudioInBackgroundMod::IsEnabled(const ModContext& c) const {
+    return c.IsOn(Setting::AllowAudioInBackground);
 }
 
-void AllowAudioInBackgroundMod::OnSongTick(ModContext& c) {
-	SyncState(c);
+void AllowAudioInBackgroundMod::OnEnabled(ModContext&) {
+    VolumeControl::AllowAltTabbingWithAudio();
 }
 
-void AllowAudioInBackgroundMod::SyncState(ModContext& c) {
-	if (c.IsOn(Setting::AllowAudioInBackground) && !VolumeControl::allowedAltTabbingWithAudio) {
-		VolumeControl::AllowAltTabbingWithAudio();
-	}
-	else if (c.IsOff(Setting::AllowAudioInBackground) && VolumeControl::allowedAltTabbingWithAudio) {
-		VolumeControl::DisableAltTabbingWithAudio();
-	}
+void AllowAudioInBackgroundMod::OnDisabled(ModContext&) {
+    VolumeControl::DisableAltTabbingWithAudio();
 }
 
 static Framework::ModRegistrar<AllowAudioInBackgroundMod> _allowAudioInBackgroundReg;

@@ -1,14 +1,15 @@
 #pragma once
 
+#include "VolumeControl.hpp"
+
 #include "../Framework/Framework.hpp"
 
 class AllowAudioInBackgroundMod : public Framework::IMod {
 public:
 	MOD_ID(AllowAudioInBackgroundMod)
 
-	void OnMenuTick(Framework::ModContext& c) override;
-	void OnSongTick(Framework::ModContext& c) override;
+	bool IsEnabled(const Framework::ModContext& c) const override;
 
-private:
-	void SyncState(Framework::ModContext& c);
+	void OnEnabled(Framework::ModContext& c) override;
+	void OnDisabled(Framework::ModContext& c) override;
 };

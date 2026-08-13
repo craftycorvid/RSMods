@@ -1,25 +1,19 @@
 #include "../stdafx.h"
 #include "SongPreviewsMod.hpp"
-#include "VolumeControl.hpp"
 
 using Framework::ModContext;
 namespace Setting = Settings::Setting;
 
-void SongPreviewsMod::OnMenuTick(ModContext& c) {
-	SyncState(c);
+bool SongPreviewsMod::IsEnabled(const ModContext& c) const {
+    return c.IsOn(Setting::SongPreviews);
 }
 
-// Keeps song-preview audio in sync with the setting, both muting and restoring as it toggles.
-// The VolumeControl::disabledSongPreviewAudio flag makes this idempotent.
-void SongPreviewsMod::SyncState(ModContext& c) {
-	if (c.IsOn(Setting::SongPreviews)) {
-		if (!VolumeControl::disabledSongPreviewAudio) {
-			VolumeControl::DisableSongPreviewAudio();
-		}
-	}
-	else if (VolumeControl::disabledSongPreviewAudio) { // User originally wanted song previews off, but now wants them on.
-		VolumeControl::EnableSongPreviewAudio();
-	}
+void SongPreviewsMod::OnEnabled(ModContext&) {
+    VolumeControl::DisableSongPreviewAudio();
+}
+
+void SongPreviewsMod::OnDisabled(ModContext&) {
+    VolumeControl::EnableSongPreviewAudio();
 }
 
 static Framework::ModRegistrar<SongPreviewsMod> _songPreviewsReg;
