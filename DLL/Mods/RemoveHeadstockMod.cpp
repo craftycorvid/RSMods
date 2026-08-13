@@ -3,31 +3,40 @@
 
 using Framework::ModContext;
 using Settings::When;
+using Framework::GamePhase;
 namespace Setting = Settings::Setting;
 
 bool RemoveHeadstockMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn(Setting::RemoveHeadstockEnabled);
 }
 
-void RemoveHeadstockMod::OnSongTick(ModContext& c) {
-	if (c.When(Setting::RemoveHeadstockWhen) == When::Song) {
-		D3DHooks::RemoveHeadstockInThisMenu = true;
-	}
-	ApplyStartup(c);
+void RemoveHeadstockMod::SyncState(ModContext& c) {
+	const When when = c.When(Setting::RemoveHeadstockWhen);
+
+	D3DHooks::RemoveHeadstockInThisMenu = when == When::Startup || (when == When::Song && c.phase == GamePhase::Song);
 }
 
-void RemoveHeadstockMod::OnMenuTick(ModContext& c) {
-	// Song mode hides the headstock only while playing, so restore it when back in menus.
-	if (c.When(Setting::RemoveHeadstockWhen) == When::Song) {
-		D3DHooks::RemoveHeadstockInThisMenu = false;
-	}
-	ApplyStartup(c);
+void RemoveHeadstockMod::OnEnabled(ModContext& c) {
+	SyncState(c);
+	active = true;
 }
 
-void RemoveHeadstockMod::ApplyStartup(ModContext& c) {
-	if (c.When(Setting::RemoveHeadstockWhen) == When::Startup) {
-		D3DHooks::RemoveHeadstockInThisMenu = true;
-	}
+void RemoveHeadstockMod::OnSettingsChanged(ModContext& c) {
+	if (active)
+		SyncState(c);
+}
+
+void RemoveHeadstockMod::OnSongEnter(ModContext& c) {
+	SyncState(c);
+}
+
+void RemoveHeadstockMod::OnDisabled(ModContext&) {
+	active = false;
+	D3DHooks::RemoveHeadstockInThisMenu = false;
+}
+
+void RemoveHeadstockMod::OnSongExit(ModContext& c) {
+	SyncState(c);
 }
 
 static Framework::ModRegistrar<RemoveHeadstockMod> _removeHeadstockReg;
