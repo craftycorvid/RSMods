@@ -17,10 +17,10 @@ void AllowAudioInBackgroundMod::OnSongTick(ModContext& c) {
 }
 
 void AllowAudioInBackgroundMod::SyncState(ModContext& c) {
-	if (c.IsOn("AllowAudioInBackground") && !VolumeControl::allowedAltTabbingWithAudio) {
+	if (c.IsOn(Id()) && !VolumeControl::allowedAltTabbingWithAudio) {
 		VolumeControl::AllowAltTabbingWithAudio();
 	}
-	else if (c.IsOff("AllowAudioInBackground") && VolumeControl::allowedAltTabbingWithAudio) {
+	else if (c.IsOff(Id()) && VolumeControl::allowedAltTabbingWithAudio) {
 		VolumeControl::DisableAltTabbingWithAudio();
 	}
 }

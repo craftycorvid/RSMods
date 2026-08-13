@@ -8,7 +8,7 @@ std::string_view LaunchOnExternalMonitorMod::Id() const {
 }
 
 bool LaunchOnExternalMonitorMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn("SecondaryMonitor");
+	return c.IsOn(Id());
 }
 
 void LaunchOnExternalMonitorMod::OnMenuTick(ModContext& c) {

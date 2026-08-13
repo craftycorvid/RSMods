@@ -9,7 +9,7 @@ std::string_view AlternativeSampleRateMod::Id() const {
 }
 
 bool AlternativeSampleRateMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn("AltOutputSampleRate");
+	return c.IsOn(Id());
 }
 
 // Patch the markers only during the loading phase, before the engine finishes coming up. The buffer

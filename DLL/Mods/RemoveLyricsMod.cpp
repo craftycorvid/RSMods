@@ -12,7 +12,7 @@ std::string_view RemoveLyricsMod::Id() const {
 }
 
 bool RemoveLyricsMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn("RemoveLyrics");
+	return c.IsOn(Id());
 }
 
 void RemoveLyricsMod::OnInitialize(ModContext& c) {

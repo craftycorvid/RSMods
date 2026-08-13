@@ -9,7 +9,7 @@ std::string_view ScreenShotScoresMod::Id() const {
 }
 
 void ScreenShotScoresMod::OnMenuTick(ModContext& c) {
-	if (c.IsOn("ScreenShotScores") && GameState::Menus::IsInScoreMenus()) {
+	if (c.IsOn(Id()) && GameState::Menus::IsInScoreMenus()) {
 		Keyboard::TakeScreenshot();
 	}
 	else {

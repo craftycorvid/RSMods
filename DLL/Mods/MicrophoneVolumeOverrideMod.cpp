@@ -27,7 +27,7 @@ void MicrophoneVolumeOverrideMod::SyncVolume(ModContext& c) {
 	if (device.empty())
 		return;
 
-	const int desired = c.Int("OverrideInputVolume");
+	const int desired = c.Int(Id());
 	if (AudioDevices::GetMicrophoneVolume(device) != desired) {
 		AudioDevices::SetMicrophoneVolume(device, desired);
 	}
