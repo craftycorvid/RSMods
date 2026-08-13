@@ -22,10 +22,13 @@ public:
 	void OnTick(Framework::ModContext& c) override;     // Device scanning (post-load only).
 	void OnMenuTick(Framework::ModContext& c) override; // Pedal revert + tuner auto-tune.
 	void OnSongTick(Framework::ModContext& c) override; // In-song auto-tune.
+	void OnDisabled(Framework::ModContext& c) override;
+	void OnSongExit(Framework::ModContext& c) override;
 
 private:
 	void ScanForMidiDevices(Framework::ModContext& c);
 	void RevertTuningWhenLeavingSong();
 	void AutoTuneInTuner(Framework::ModContext& c);
 	void AutoTuneInSong(Framework::ModContext& c);
+	void RevertTuning();
 };

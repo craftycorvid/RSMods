@@ -70,13 +70,6 @@ void MidiMod::ScanForMidiDevices(ModContext& c) {
 	}
 }
 
-// In menus. Revert first, then auto-tune if we are sitting in the pre-song tuner,
-// preserving the original revert-before-tuner ordering.
-void MidiMod::OnMenuTick(ModContext& c) {
-	RevertTuningWhenLeavingSong();
-	AutoTuneInTuner(c);
-}
-
 // Once we have left the song (and are not in its tuner), tell the pedal to drop the tuning we applied.
 void MidiMod::RevertTuningWhenLeavingSong() {
 	if ((Midi::alreadyAutomatedTuningInThisSong || Midi::alreadyAttemptedTuningInTuner) &&
@@ -102,6 +95,35 @@ void MidiMod::AutoTuneInTuner(ModContext& c) {
 // In a song. Tune the pedal from the song's tuning the first time through, honouring the When setting.
 void MidiMod::OnSongTick(ModContext& c) {
 	AutoTuneInSong(c);
+}
+
+void MidiMod::OnMenuTick(ModContext& c) {
+	// The user backed out of the tuner instead of starting a song.
+	if (Midi::alreadyAttemptedTuningInTuner &&
+		!GameState::Menus::IsInPreSongTuner()) {
+		RevertTuning();
+	}
+
+	AutoTuneInTuner(c);
+}
+
+void MidiMod::OnDisabled(ModContext&) {
+	RevertTuning();
+}
+
+void MidiMod::RevertTuning() {
+	if (!Midi::alreadyAutomatedTuningInThisSong &&
+		!Midi::alreadyAttemptedTuningInTuner) {
+		return;
+	}
+
+	Midi::RevertAutomatedTuning();
+	Midi::alreadyAttemptedTuningInTuner = false;
+	Midi::userWantsToUseAutoTuning = false;
+}
+
+void MidiMod::OnSongExit(ModContext&) {
+	RevertTuning();
 }
 
 void MidiMod::AutoTuneInSong(ModContext& c) {
