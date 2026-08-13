@@ -10,10 +10,6 @@ using Framework::KeyEvent;
 using Settings::When;
 namespace Setting = Settings::Setting;
 
-std::string_view MidiMod::Id() const {
-	return "Midi";
-}
-
 std::vector<std::string_view> MidiMod::ClaimsExclusive() const {
 	return { "tuning-controller" };
 }

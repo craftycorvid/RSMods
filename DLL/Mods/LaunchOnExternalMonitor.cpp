@@ -4,12 +4,8 @@
 using Framework::ModContext;
 namespace Setting = Settings::Setting;
 
-std::string_view LaunchOnExternalMonitorMod::Id() const {
-	return "SecondaryMonitor";
-}
-
 bool LaunchOnExternalMonitorMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn(Id());
+	return c.IsOn(Setting::SecondaryMonitor);
 }
 
 void LaunchOnExternalMonitorMod::OnMenuTick(ModContext& c) {

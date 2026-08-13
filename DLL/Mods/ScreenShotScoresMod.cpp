@@ -3,13 +3,10 @@
 #include "../Keyboard.hpp"
 
 using Framework::ModContext;
-
-std::string_view ScreenShotScoresMod::Id() const {
-	return "ScreenShotScores";
-}
+namespace Setting = Settings::Setting;
 
 void ScreenShotScoresMod::OnMenuTick(ModContext& c) {
-	if (c.IsOn(Id()) && GameState::Menus::IsInScoreMenus()) {
+	if (c.IsOn(Setting::ScreenShotScores) && GameState::Menus::IsInScoreMenus()) {
 		Keyboard::TakeScreenshot();
 	}
 	else {

@@ -4,7 +4,7 @@
 
 class LaunchOnExternalMonitorMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(LaunchOnExternalMonitorMod)
 	bool IsEnabled(const Framework::ModContext& c) const override;
 
 	void OnMenuTick(Framework::ModContext& c) override;

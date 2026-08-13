@@ -5,10 +5,6 @@ using Framework::ModContext;
 using Settings::When;
 namespace Setting = Settings::Setting;
 
-std::string_view RemoveSkylineMod::Id() const {
-	return "RemoveSkyline";
-}
-
 bool RemoveSkylineMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn(Setting::RemoveSkylineEnabled);
 }

@@ -8,10 +8,6 @@ namespace {
 	constexpr double DefaultTimeLimit = 10.9899997711182; // The default pre-song timer for Non-Stop Play.
 }
 
-std::string_view NonStopPlayTimerMod::Id() const {
-	return "NonStopPlayTimer";
-}
-
 void NonStopPlayTimerMod::OnMenuTick(ModContext& c) {
 	EnforceTimer(c);
 }

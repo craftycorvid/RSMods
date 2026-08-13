@@ -7,10 +7,6 @@ using Framework::Availability;
 using Framework::KeyEvent;
 namespace Setting = Settings::Setting;
 
-std::string_view RiffRepeaterMod::Id() const {
-	return "RiffRepeater";
-}
-
 void RiffRepeaterMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
 		"RewindKey",

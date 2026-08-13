@@ -11,7 +11,7 @@
 
 class EnumerationMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(EnumerationMod)
 
 	void OnInitialize(Framework::ModContext& c) override;
 	void OnSettingsChanged(Framework::ModContext& c) override;

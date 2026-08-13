@@ -7,7 +7,7 @@
 // is still coming up, and there is nothing to revert once the main menu is reached.
 class AutoLoadProfileMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(AutoLoadProfileMod)
 	bool IsEnabled(const Framework::ModContext& c) const override;
 
 	void OnTick(Framework::ModContext& c) override;

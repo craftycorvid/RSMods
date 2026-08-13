@@ -4,7 +4,7 @@
 
 class VolumeDisplayMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(VolumeDisplayMod)
 
 	void OnInitialize(Framework::ModContext& c) override;
 	void OnMenuTick(Framework::ModContext& c) override;

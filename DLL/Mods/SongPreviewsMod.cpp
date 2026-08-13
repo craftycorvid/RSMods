@@ -3,10 +3,7 @@
 #include "VolumeControl.hpp"
 
 using Framework::ModContext;
-
-std::string_view SongPreviewsMod::Id() const {
-	return "SongPreviews";
-}
+namespace Setting = Settings::Setting;
 
 void SongPreviewsMod::OnMenuTick(ModContext& c) {
 	SyncState(c);
@@ -15,7 +12,7 @@ void SongPreviewsMod::OnMenuTick(ModContext& c) {
 // Keeps song-preview audio in sync with the setting, both muting and restoring as it toggles.
 // The VolumeControl::disabledSongPreviewAudio flag makes this idempotent.
 void SongPreviewsMod::SyncState(ModContext& c) {
-	if (c.IsOn(Id())) {
+	if (c.IsOn(Setting::SongPreviews)) {
 		if (!VolumeControl::disabledSongPreviewAudio) {
 			VolumeControl::DisableSongPreviewAudio();
 		}

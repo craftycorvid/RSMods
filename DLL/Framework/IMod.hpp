@@ -1,9 +1,20 @@
 #pragma once
 
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 #include "GamePhase.hpp"
+
+// Keeps a mod's internal framework identity equal to its concrete class name.
+// The assertion catches copying the macro from another class without updating its argument.
+#define MOD_ID(Type)                                                   \
+    std::string_view Id() const final {                                \
+        using Self = std::decay_t<decltype(*this)>;                    \
+        static_assert(std::is_same_v<Type, Self>,                      \
+            "MOD_ID must name the class that contains it");            \
+        return #Type;                                                  \
+    }
 
 namespace Framework {
 	struct ModContext;
@@ -13,7 +24,7 @@ namespace Framework {
 	public:
 		virtual ~IMod() = default;
 
-		virtual std::string_view Id() const = 0;               // Stable, UNIQUE; matches the mod's INI key prefix.
+		virtual std::string_view Id() const = 0;               // Unique internal name used for logs, duplicate detection, and conflict tie-breaking.
 
 		// Must be cheap and side-effect free.
 		virtual bool IsEnabled(const ModContext&) const { return true; }

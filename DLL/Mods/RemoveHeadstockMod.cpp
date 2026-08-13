@@ -5,10 +5,6 @@ using Framework::ModContext;
 using Settings::When;
 namespace Setting = Settings::Setting;
 
-std::string_view RemoveHeadstockMod::Id() const {
-	return "RemoveHeadstock";
-}
-
 bool RemoveHeadstockMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn(Setting::RemoveHeadstockEnabled);
 }

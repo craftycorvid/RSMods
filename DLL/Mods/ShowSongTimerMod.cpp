@@ -8,10 +8,6 @@ using Framework::KeyEvent;
 using Settings::When;
 namespace Setting = Settings::Setting;
 
-std::string_view ShowSongTimerMod::Id() const {
-	return "ShowSongTimer";
-}
-
 // This mod owns only the automatic mode; manual show/hide is driven by the ShowSongTimerKey keybinding,
 // which stays independent of the mod. The timer only renders in a song (see GameOverlay::DisplaySongTimer).
 bool ShowSongTimerMod::IsEnabled(const ModContext& c) const {

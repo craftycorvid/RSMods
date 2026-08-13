@@ -5,10 +5,6 @@
 using Framework::ModContext;
 namespace Setting = Settings::Setting;
 
-std::string_view MicrophoneVolumeOverrideMod::Id() const {
-	return "OverrideInputVolume";
-}
-
 bool MicrophoneVolumeOverrideMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn(Setting::OverrideInputVolumeEnabled);
 }
@@ -28,7 +24,7 @@ void MicrophoneVolumeOverrideMod::SyncVolume(ModContext& c) {
 	if (device.empty())
 		return;
 
-	const int desired = c.Int(Id());
+	const int desired = c.Int(Setting::OverrideInputVolume);
 	if (AudioDevices::GetMicrophoneVolume(device) != desired) {
 		AudioDevices::SetMicrophoneVolume(device, desired);
 	}

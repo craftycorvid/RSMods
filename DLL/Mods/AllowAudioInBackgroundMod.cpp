@@ -3,10 +3,7 @@
 #include "VolumeControl.hpp"
 
 using Framework::ModContext;
-
-std::string_view AllowAudioInBackgroundMod::Id() const {
-	return "AllowAudioInBackground";
-}
+namespace Setting = Settings::Setting;
 
 void AllowAudioInBackgroundMod::OnMenuTick(ModContext& c) {
 	SyncState(c);
@@ -17,10 +14,10 @@ void AllowAudioInBackgroundMod::OnSongTick(ModContext& c) {
 }
 
 void AllowAudioInBackgroundMod::SyncState(ModContext& c) {
-	if (c.IsOn(Id()) && !VolumeControl::allowedAltTabbingWithAudio) {
+	if (c.IsOn(Setting::AllowAudioInBackground) && !VolumeControl::allowedAltTabbingWithAudio) {
 		VolumeControl::AllowAltTabbingWithAudio();
 	}
-	else if (c.IsOff(Id()) && VolumeControl::allowedAltTabbingWithAudio) {
+	else if (c.IsOff(Setting::AllowAudioInBackground) && VolumeControl::allowedAltTabbingWithAudio) {
 		VolumeControl::DisableAltTabbingWithAudio();
 	}
 }

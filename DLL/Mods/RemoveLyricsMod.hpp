@@ -4,7 +4,7 @@
 
 class RemoveLyricsMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(RemoveLyricsMod)
 	bool IsEnabled(const Framework::ModContext& c) const override;
 
 	void OnInitialize(Framework::ModContext& c) override;

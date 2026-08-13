@@ -3,13 +3,10 @@
 #include "GuitarSpeak.hpp"
 
 using Framework::ModContext;
-
-std::string_view GuitarSpeakMod::Id() const {
-	return "GuitarSpeak";
-}
+namespace Setting = Settings::Setting;
 
 void GuitarSpeakMod::OnMenuTick(ModContext& c) {
-	if (!guitarSpeakPresent && c.IsOn(Id())) {
+	if (!guitarSpeakPresent && c.IsOn(Setting::GuitarSpeak)) {
 		guitarSpeakPresent = true;
 		if (!GuitarSpeak::RunGuitarSpeak()) { // If we are in a menu where we don't want to read bad values
 			guitarSpeakPresent = false;

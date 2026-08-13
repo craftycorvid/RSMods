@@ -5,12 +5,8 @@ using Framework::ModContext;
 using Framework::GamePhase;
 namespace Setting = Settings::Setting;
 
-std::string_view AlternativeSampleRateMod::Id() const {
-	return "AltOutputSampleRate";
-}
-
 bool AlternativeSampleRateMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn(Id());
+	return c.IsOn(Setting::AltOutputSampleRate);
 }
 
 // Patch the markers only during the loading phase, before the engine finishes coming up. The buffer

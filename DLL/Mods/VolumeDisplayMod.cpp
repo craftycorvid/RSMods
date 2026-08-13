@@ -8,10 +8,6 @@ using Framework::Availability;
 using Framework::KeyEvent;
 namespace Setting = Settings::Setting;
 
-std::string_view VolumeDisplayMod::Id() const {
-	return Setting::VolumeControlEnabled;
-}
-
 void VolumeDisplayMod::OnInitialize(ModContext& c) {
 	auto commands = c.Commands();
 	const auto volumeEnabled = [](const ModContext& context, const KeyEvent&) { return context.IsOn(Setting::VolumeControlEnabled); };

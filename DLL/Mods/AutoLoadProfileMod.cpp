@@ -6,10 +6,6 @@ using Framework::ModContext;
 using Framework::GamePhase;
 namespace Setting = Settings::Setting;
 
-std::string_view AutoLoadProfileMod::Id() const {
-	return "AutoLoadProfile";
-}
-
 bool AutoLoadProfileMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn(Setting::ForceProfileEnabled);
 }

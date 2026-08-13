@@ -8,10 +8,6 @@ using Framework::KeyEvent;
 using Settings::When;
 namespace Setting = Settings::Setting;
 
-std::string_view EnumerationMod::Id() const {
-	return "ForceReEnumeration";
-}
-
 void EnumerationMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
 		"ForceReEnumerationKey",

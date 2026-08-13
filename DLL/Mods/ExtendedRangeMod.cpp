@@ -11,10 +11,6 @@ using Settings::StringColorMode;
 using Settings::NoteColorMode;
 namespace Setting = Settings::Setting;
 
-std::string_view ExtendedRangeMod::Id() const {
-	return "ExtendedRange";
-}
-
 void ExtendedRangeMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
 		"RainbowStringsKey",

@@ -32,8 +32,8 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
 
 ## Adding a mod
 
-1. `Mods/MyMod.hpp`: a class deriving `Framework::IMod`; read settings via the context, keep
-   state as members.
+1. `Mods/MyMod.hpp`: a class deriving `Framework::IMod`; put `MOD_ID(MyMod)` in its public
+   section, read settings via explicit `Settings::Setting` keys, and keep state as members.
 2. `Mods/MyMod.cpp`:
    ```cpp
    #include "stdafx.h"
@@ -46,7 +46,9 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
    game loop should become a member of the mod (or, for a signal another mod reads, a flag on the relevant
    namespace helper).
 
-`Id()` must be **unique**; duplicates are rejected at registration.
+`MOD_ID(Type)` makes the internal framework ID match the concrete class name and verifies that
+its argument names the containing class. IDs must be **unique**; duplicates are rejected at
+registration. They are deliberately separate from settings keys.
 
 ## Lifecycle state machine
 

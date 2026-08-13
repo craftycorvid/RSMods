@@ -4,7 +4,7 @@
 
 class ScreenShotScoresMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(ScreenShotScoresMod)
 
 	void OnMenuTick(Framework::ModContext& c) override;
 };

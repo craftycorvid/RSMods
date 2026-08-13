@@ -6,7 +6,7 @@
 // output sample rate. Loading-phase only (the engine only reads them while coming up) and apply-only.
 class AlternativeSampleRateMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(AlternativeSampleRateMod)
 	bool IsEnabled(const Framework::ModContext& c) const override;
 
 	void OnTick(Framework::ModContext& c) override;

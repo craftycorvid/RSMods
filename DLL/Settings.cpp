@@ -90,12 +90,12 @@ void Settings::Initialize()
 		{Setting::ToggleLoftWhen, "manual"},
 		{Setting::ToggleSkylineWhen, "song"},
 		{"RemoveLaneMarkersEnabled", "off"},
-		{"RemoveLyrics", "off"},
+		{Setting::RemoveLyricsEnabled, "off"},
 		{Setting::RemoveLyricsWhen, "manual"},
-		{"GuitarSpeak", "off"},
+		{Setting::GuitarSpeak, "off"},
 		{"GuitarSpeakWhileTuning", "off"},
 		{Setting::RemoveHeadstockWhen, "song"},
-		{"ScreenShotScores", "off"},
+		{Setting::ScreenShotScores, "off"},
 		{Setting::RRSpeedAboveOneHundred, "off"},
 		{Setting::AutoTuneForSong, "off"},
 		{Setting::AutoTuneForSongDevice, ""},
@@ -111,14 +111,14 @@ void Settings::Initialize()
 		{Setting::ProfileToLoad, ""},
 		{Setting::ShowSongTimerWhen, "manual"},
 		{"ShowSelectedVolumeWhen", "manual"},
-		{"SecondaryMonitor", "off"},
-		{"SongPreviews", "off"},
+		{Setting::SecondaryMonitor, "off"},
+		{Setting::SongPreviews, "off"},
 		{Setting::OverrideInputVolumeEnabled, "off"},
 		{Setting::OverrideInputVolumeDevice, ""},
-		{"AllowAudioInBackground", "off"},
-		{"BypassTwoRTCMessageBox", "off"},
+		{Setting::AllowAudioInBackground, "off"},
+		{Setting::BypassTwoRTCMessageBox, "off"},
 		{Setting::LinearRiffRepeater, "off"},
-		{"AltOutputSampleRate", "off"},
+		{Setting::AltOutputSampleRate, "off"},
 		{Setting::AllowLooping, "off"},
 		{Setting::AllowRewind, "off"},
 		{"FixOculusCrash", "off"},
@@ -139,7 +139,7 @@ void Settings::Initialize()
 		{Setting::SecondaryMonitorXPosition, 0},
 		{Setting::SecondaryMonitorYPosition, 0},
 		{Setting::SeparateNoteColorsMode, 0},
-		{"OverrideInputVolume", 17},
+		{Setting::OverrideInputVolume, 17},
 		{Setting::CustomStringColors, 0},
 		{Setting::AlternativeOutputSampleRate, 48000},
 		{"LoopingLeadUp", 0},
@@ -262,7 +262,7 @@ void Settings::ReadModSettings() {
 		{Setting::SecondaryMonitorYPosition, reader.GetLongValue("Mod Settings", "SecondaryMonitorYPosition", 0)},
 		{Setting::SeparateNoteColorsMode, reader.GetLongValue("Mod Settings", "SeparateNoteColorsMode", 0)}, // 0 = same as strings, 1 = default, 2 = custom
 		{Setting::CustomStringColors, reader.GetLongValue("Toggle Switches", "CustomStringColors", 0)}, //0 = default, 1 = Zag, 2 = custom colors
-		{"OverrideInputVolume", reader.GetLongValue("Mod Settings", "OverrideInputVolume", 17)}, // 17 is what Rocksmith calls default.
+		{Setting::OverrideInputVolume, reader.GetLongValue("Mod Settings", "OverrideInputVolume", 17)}, // 17 is what Rocksmith calls default.
 		{Setting::AlternativeOutputSampleRate, reader.GetLongValue("Mod Settings", "AlternativeOutputSampleRate", 48000)},
 		{"LoopingLeadUp", reader.GetLongValue("Mod Settings", "LoopingLeadUp", 0)},
 		{Setting::RewindBy, reader.GetLongValue("Mod Settings", "RewindBy", 5000)},
@@ -307,12 +307,12 @@ void Settings::ReadModSettings() {
 	modSettings[Setting::ToggleLoftWhen] = reader.GetValue("Toggle Switches", "ToggleLoftWhen", "manual");
 	modSettings[Setting::ToggleSkylineWhen] = reader.GetValue("Toggle Switches", "ToggleSkylineWhen", "song");
 	modSettings["RemoveLaneMarkersEnabled"] = reader.GetValue("Toggle Switches", "LaneMarkers", "off");
-	modSettings["RemoveLyrics"] = reader.GetValue("Toggle Switches", "Lyrics", "off");
+	modSettings[Setting::RemoveLyricsEnabled] = reader.GetValue("Toggle Switches", "Lyrics", "off");
 	modSettings[Setting::RemoveLyricsWhen] = reader.GetValue("Toggle Switches", "RemoveLyricsWhen", "manual");
-	modSettings["GuitarSpeak"] = reader.GetValue("Toggle Switches", "GuitarSpeak", "off");
+	modSettings[Setting::GuitarSpeak] = reader.GetValue("Toggle Switches", "GuitarSpeak", "off");
 	modSettings["GuitarSpeakWhileTuning"] = reader.GetValue("Guitar Speak", "GuitarSpeakWhileTuning", "off");
 	modSettings[Setting::RemoveHeadstockWhen] = reader.GetValue("Toggle Switches", "RemoveHeadstockWhen", "song");
-	modSettings["ScreenShotScores"] = reader.GetValue("Toggle Switches", "ScreenShotScores", "off");
+	modSettings[Setting::ScreenShotScores] = reader.GetValue("Toggle Switches", "ScreenShotScores", "off");
 	modSettings[Setting::RRSpeedAboveOneHundred] = reader.GetValue("Toggle Switches", "RRSpeedAboveOneHundred", "off");
 	modSettings[Setting::AutoTuneForSong] = reader.GetValue("Toggle Switches", "AutoTuneForSong", "off");
 	modSettings[Setting::AutoTuneForSongDevice] = reader.GetValue("Toggle Switches", "AutoTuneForSongDevice", "");
@@ -329,14 +329,14 @@ void Settings::ReadModSettings() {
 	modSettings["CustomHighwayColors"] = reader.GetValue("Highway Colors", "CustomHighwayColors", "off");
 	modSettings[Setting::ShowSongTimerWhen] = reader.GetValue("Toggle Switches", "ShowSongTimerWhen", "manual");
 	modSettings["ShowSelectedVolumeWhen"] = reader.GetValue("Toggle Switches", "ShowSelectedVolumeWhen", "manual");
-	modSettings["SecondaryMonitor"] = reader.GetValue("Toggle Switches", "SecondaryMonitor", "off");
-	modSettings["SongPreviews"] = reader.GetValue("Toggle Switches", "SongPreviews", "off");
+	modSettings[Setting::SecondaryMonitor] = reader.GetValue("Toggle Switches", "SecondaryMonitor", "off");
+	modSettings[Setting::SongPreviews] = reader.GetValue("Toggle Switches", "SongPreviews", "off");
 	modSettings[Setting::OverrideInputVolumeEnabled] = reader.GetValue("Toggle Switches", "OverrideInputVolumeEnabled", "off");
 	modSettings[Setting::OverrideInputVolumeDevice] = reader.GetValue("Toggle Switches", "OverrideInputVolumeDevice", "");
-	modSettings["AllowAudioInBackground"] = reader.GetValue("Toggle Switches", "AllowAudioInBackground", "off");
-	modSettings["BypassTwoRTCMessageBox"] = reader.GetValue("Toggle Switches", "BypassTwoRTCMessageBox", "off");
+	modSettings[Setting::AllowAudioInBackground] = reader.GetValue("Toggle Switches", "AllowAudioInBackground", "off");
+	modSettings[Setting::BypassTwoRTCMessageBox] = reader.GetValue("Toggle Switches", "BypassTwoRTCMessageBox", "off");
 	modSettings[Setting::LinearRiffRepeater] = reader.GetValue("Toggle Switches", "LinearRiffRepeater", "off");
-	modSettings["AltOutputSampleRate"] = reader.GetValue("Toggle Switches", "AltOutputSampleRate", "off");
+	modSettings[Setting::AltOutputSampleRate] = reader.GetValue("Toggle Switches", "AltOutputSampleRate", "off");
 	modSettings[Setting::AllowLooping] = reader.GetValue("Toggle Switches", "AllowLooping", "off");
 	modSettings[Setting::AllowRewind] = reader.GetValue("Toggle Switches", "AllowRewind", "off");
 	modSettings["FixOculusCrash"] = reader.GetValue("Toggle Switches", "FixOculusCrash", "off");

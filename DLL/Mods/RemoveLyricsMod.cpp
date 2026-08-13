@@ -8,12 +8,8 @@ using Framework::KeyEvent;
 using Settings::When;
 namespace Setting = Settings::Setting;
 
-std::string_view RemoveLyricsMod::Id() const {
-	return "RemoveLyrics";
-}
-
 bool RemoveLyricsMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn(Id());
+	return c.IsOn(Setting::RemoveLyricsEnabled);
 }
 
 void RemoveLyricsMod::OnInitialize(ModContext& c) {

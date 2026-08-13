@@ -4,7 +4,7 @@
 
 class SongPreviewsMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(SongPreviewsMod)
 
 	void OnMenuTick(Framework::ModContext& c) override;
 

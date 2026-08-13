@@ -39,6 +39,7 @@ namespace Settings {
 		inline constexpr char CheckForNewSongsInterval[]  = "CheckForNewSongsInterval";
 
 		// Remove Lyrics
+		inline constexpr char RemoveLyricsEnabled[]     = "RemoveLyrics";
 		inline constexpr char RemoveLyricsWhen[]        = "RemoveLyricsWhen";
 
 		// Volume
@@ -54,6 +55,7 @@ namespace Settings {
 		inline constexpr char TuningPedal[]             = "TuningPedal";
 
 		// Alternative Sample Rate
+		inline constexpr char AltOutputSampleRate[]         = "AltOutputSampleRate";
 		inline constexpr char AlternativeOutputSampleRate[] = "AlternativeOutputSampleRate";
 
 		// Auto Load Profile
@@ -68,12 +70,21 @@ namespace Settings {
 		inline constexpr char SeparateNoteColorsMode[] = "SeparateNoteColorsMode";
 
 		// Launch On External Monitor
+		inline constexpr char SecondaryMonitor[]          = "SecondaryMonitor";
 		inline constexpr char SecondaryMonitorXPosition[] = "SecondaryMonitorXPosition";
 		inline constexpr char SecondaryMonitorYPosition[] = "SecondaryMonitorYPosition";
 
 		// Microphone Volume Override
+		inline constexpr char OverrideInputVolume[]        = "OverrideInputVolume";
 		inline constexpr char OverrideInputVolumeEnabled[] = "OverrideInputVolumeEnabled";
 		inline constexpr char OverrideInputVolumeDevice[]  = "OverrideInputVolumeDevice";
+
+		// Standalone toggles
+		inline constexpr char AllowAudioInBackground[]  = "AllowAudioInBackground";
+		inline constexpr char BypassTwoRTCMessageBox[] = "BypassTwoRTCMessageBox";
+		inline constexpr char GuitarSpeak[]             = "GuitarSpeak";
+		inline constexpr char ScreenShotScores[]        = "ScreenShotScores";
+		inline constexpr char SongPreviews[]            = "SongPreviews";
 
 		// Non-Stop Play Timer
 		inline constexpr char UseCustomNSPTimer[]      = "UseCustomNSPTimer";

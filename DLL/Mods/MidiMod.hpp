@@ -11,7 +11,7 @@
 // flags rather than the setting - so the mod self-gates each feature internally instead.
 class MidiMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(MidiMod)
 
 	// Reserves pedal tuning. The sole claimant today, so it has no runtime effect yet; it declares the
 	// resource (default priority 0) so a future higher-priority DropPedal can take over tuning by claiming the

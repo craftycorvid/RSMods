@@ -9,10 +9,6 @@ using Framework::KeyEvent;
 using Settings::When;
 namespace Setting = Settings::Setting;
 
-std::string_view LoftMod::Id() const {
-	return "Loft";
-}
-
 bool LoftMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn(Setting::ToggleLoftEnabled);
 }

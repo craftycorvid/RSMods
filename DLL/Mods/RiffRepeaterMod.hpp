@@ -10,7 +10,7 @@
 // Also logs the current song id the first time it is seen so the >100% speed table is ready.
 class RiffRepeaterMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(RiffRepeaterMod)
 
 	void OnInitialize(Framework::ModContext& c) override;
 	void OnTick(Framework::ModContext& c) override;     // Linear-speed patch sync (all phases, incl. startup/loading).

@@ -5,7 +5,7 @@
 
 class TwoRTCBypassMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(TwoRTCBypassMod)
 
 	void OnMenuTick(Framework::ModContext& c) override;
 	void OnSongTick(Framework::ModContext& c) override;

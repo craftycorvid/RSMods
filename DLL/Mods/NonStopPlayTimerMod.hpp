@@ -4,7 +4,7 @@
 
 class NonStopPlayTimerMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(NonStopPlayTimerMod)
 
 	void OnMenuTick(Framework::ModContext& c) override;
 	void OnSongTick(Framework::ModContext& c) override;

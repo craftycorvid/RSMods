@@ -4,7 +4,7 @@
 
 class RemoveHeadstockMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(RemoveHeadstockMod)
 	bool IsEnabled(const Framework::ModContext& c) const override;
 
 	void OnMenuTick(Framework::ModContext& c) override;

@@ -7,7 +7,7 @@
 // in-song ER detection, which happens inside ERMode).
 class ExtendedRangeMod : public Framework::IMod {
 public:
-	std::string_view Id() const override;
+	MOD_ID(ExtendedRangeMod)
 
 	void OnInitialize(Framework::ModContext& c) override;
 	void OnSongEnter(Framework::ModContext& c) override;
