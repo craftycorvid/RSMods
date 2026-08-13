@@ -32,6 +32,13 @@ void EnumerationMod::OnSettingsChanged(ModContext& c) {
 	UpdateSettings(c);
 }
 
+// Runs on the main thread. ForceEnumeration() writes game memory, so it must never be
+// called from the monitor thread; the monitor only flags that the DLC count changed.
+void EnumerationMod::OnTick(ModContext&) {
+	if (enumerationRequested_.exchange(false))
+		Enumeration::ForceEnumeration();
+}
+
 void EnumerationMod::OnShutdown(ModContext&) {
 	{
 		std::lock_guard lock(waitMutex_);
@@ -61,7 +68,7 @@ void EnumerationMod::MonitorDlcDirectory() {
 		if (!automatic_.load()) continue;
 
 		const int currentDlcCount = Enumeration::GetCurrentDLCCount();
-		if (previousDlcCount != currentDlcCount) Enumeration::ForceEnumeration();
+		if (previousDlcCount != currentDlcCount) enumerationRequested_.store(true);
 		previousDlcCount = currentDlcCount;
 	}
 }
