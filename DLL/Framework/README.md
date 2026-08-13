@@ -143,6 +143,28 @@ and render-thread reload requests enqueue closures through `EnqueueSettingsUpdat
 registry `Tick` drains the complete FIFO batch, then notifies mods via `OnSettingsChanged` before
 resolving activation. Non-settings GUI and effect work still runs on its originating thread.
 
-> The `Settings` maps are not yet globally thread-safe: CrowdControl, Twitch, and render workers
-> still read them without a lock while `MainThread` may apply a queued write. Snapshot the values
-> needed by a worker before removing this remaining read-side race.
+`OnSettingsChanged` is delivered only to mods that are settled `Inactive`/`Active`. A
+`Deactivating` mod still has render callbacks in flight and a pending teardown revert, so it is
+skipped; it picks up fresh settings when it next activates.
+
+The `Settings` maps/vectors are guarded by a single `shared_mutex` in `Settings.cpp`: every
+accessor takes a shared lock, every mutator a unique lock, and reads use non-mutating lookups
+(the old getters read via `operator[]`, which inserts on a miss and so raced even between two
+readers). Worker threads may therefore call the `Settings` getters directly; disk IO in the
+reload path stays outside the lock.
+
+## Testing
+
+The framework has no game or Windows dependencies, so it is unit-tested in isolation. `Tests/`
+holds three standalone console programs (`ConflictResolverTests`, `CommandRouterTests`,
+`StateMachineTests`), each with its own `main()` that returns non-zero on failure.
+
+Build and run them all with:
+
+```powershell
+DLL/Framework/Tests/BuildAndRun.ps1
+```
+
+The script locates MSVC via `vswhere`, compiles each test against only the framework translation
+units it needs, and runs it. AppVeyor runs the same script as a `test_script` step (`appveyor.yml`),
+so a failing test fails the build (and skips deploy) and the tests can't rot out of compilation.
