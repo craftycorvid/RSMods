@@ -148,21 +148,20 @@ HRESULT APIENTRY D3DHooks::Hook_SetStreamSource(LPDIRECT3DDEVICE9 pDevice, UINT 
 /// <param name="pPresentationParameters"> - Pointer to a D3DPRESENT_PARAMETERS structure, describing the new presentation parameters. This value cannot be NULL.</param>
 /// <returns>Possible return values include: D3D_OK, D3DERR_DEVICELOST, D3DERR_DEVICEREMOVED, D3DERR_DRIVERINTERNALERROR, or D3DERR_OUTOFVIDEOMEMORY.</returns>
 HRESULT APIENTRY D3DHooks::Hook_Reset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters) {
-	// Lost Device
+	// Lost Device - release device-dependent resources before Reset.
 	ImGui_ImplDX9_InvalidateDeviceObjects();
-
-	if (GameOverlay::DX9FontEncapsulation)
-		GameOverlay::DX9FontEncapsulation->OnLostDevice();
-	GameOverlay::fontCache.OnLostDevice();
+	GameOverlay::OnLostDevice();
 
 	// Reset Device. Call original Reset.
 	HRESULT ResetReturn = oReset(pDevice, pPresentationParameters);
 
-	ImGui_ImplDX9_CreateDeviceObjects();
-
-	if (GameOverlay::DX9FontEncapsulation)
-		GameOverlay::DX9FontEncapsulation->OnResetDevice();
-	GameOverlay::fontCache.OnResetDevice();
+	// Only recreate device objects once the device is actually back. If Reset failed
+	// (e.g. still D3DERR_DEVICELOST mid-Alt+Tab out of exclusive fullscreen), the game
+	// retries Reset next frame; recreating against a lost device leaves a broken frame.
+	if (SUCCEEDED(ResetReturn)) {
+		ImGui_ImplDX9_CreateDeviceObjects();
+		GameOverlay::OnResetDevice();
+	}
 
 	return ResetReturn;
 }
