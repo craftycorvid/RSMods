@@ -48,8 +48,8 @@ namespace Framework {
 		std::string Value(std::string_view key) const { return Settings::ReturnSettingValue(std::string(key)); }
 		int  Int(std::string_view key) const { return Settings::GetModSetting(std::string(key)); }
 
-		Settings::When WhenSetting(std::string_view key) const { return Settings::GetWhen(std::string(key)); }
-		Settings::StringColorMode ColorModeSetting(std::string_view key) const { return Settings::GetStringColorMode(std::string(key)); }
-		Settings::NoteColorMode NoteColorModeSetting(std::string_view key) const { return Settings::GetNoteColorMode(std::string(key)); }
+		Settings::When When(std::string_view key) const { return Settings::GetWhen(std::string(key)); }
+		Settings::StringColorMode ColorMode(std::string_view key) const { return Settings::GetStringColorMode(std::string(key)); }
+		Settings::NoteColorMode NoteColorMode(std::string_view key) const { return Settings::GetNoteColorMode(std::string(key)); }
 	};
 }

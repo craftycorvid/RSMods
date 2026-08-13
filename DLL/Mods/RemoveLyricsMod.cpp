@@ -6,6 +6,7 @@ using Framework::KeyEdge;
 using Framework::Availability;
 using Framework::KeyEvent;
 using Settings::When;
+namespace Setting = Settings::Setting;
 
 std::string_view RemoveLyricsMod::Id() const {
 	return "RemoveLyrics";
@@ -24,7 +25,7 @@ void RemoveLyricsMod::OnInitialize(ModContext& c) {
 			D3DHooks::RemoveLyrics = !D3DHooks::RemoveLyrics;
 		},
 		[](const ModContext& context, const KeyEvent&) {
-			return context.WhenSetting("RemoveLyricsWhen") == When::Manual;
+			return context.When(Setting::RemoveLyricsWhen) == When::Manual;
 		},
 		"Remove Lyrics");
 }
@@ -40,7 +41,7 @@ void RemoveLyricsMod::OnMenuTick(ModContext& c) {
 // "Startup" mode latches lyric removal on once loaded; the manual keybinding and the
 // render-time setting check own every other case, so this is the mod's only policy.
 void RemoveLyricsMod::ApplyStartup(ModContext& c) {
-	if (!D3DHooks::RemoveLyrics && c.WhenSetting("RemoveLyricsWhen") == When::Startup) {
+	if (!D3DHooks::RemoveLyrics && c.When(Setting::RemoveLyricsWhen) == When::Startup) {
 		D3DHooks::RemoveLyrics = true;
 	}
 }

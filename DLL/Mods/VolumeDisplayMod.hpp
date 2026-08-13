@@ -23,7 +23,7 @@ private:
 		int overlayIndex;
 	};
 
-	static constexpr VolumeBinding volumeBindings[] = {
+	static constexpr std::array<VolumeBinding, 7> volumeBindings = { {
 		{ "MasterVolumeKey", "Master_Volume", 0 },
 		{ "SongVolumeKey", "Mixer_Music", 1 },
 		{ "Player1VolumeKey", "Mixer_Player1", 2 },
@@ -31,5 +31,5 @@ private:
 		{ "MicrophoneVolumeKey", "Mixer_Mic", 4 },
 		{ "VoiceOverVolumeKey", "Mixer_VO", 5 },
 		{ "SFXVolumeKey", "Mixer_SFX", 6 },
-	};
+	} };
 };

@@ -5,6 +5,7 @@ using Framework::ModContext;
 using Framework::KeyEdge;
 using Framework::Availability;
 using Framework::KeyEvent;
+namespace Setting = Settings::Setting;
 
 std::string_view RiffRepeaterMod::Id() const {
 	return "RiffRepeater";
@@ -17,7 +18,7 @@ void RiffRepeaterMod::OnInitialize(ModContext& c) {
 		Availability::Active,
 		[](ModContext& context, const KeyEvent&) { Rewind(context); },
 		[](const ModContext& context, const KeyEvent&) {
-			return context.IsOn("AllowRewind") && GameState::Menus::IsInLASPlayingModes();
+			return context.IsOn(Setting::AllowRewind) && GameState::Menus::IsInLASPlayingModes();
 		});
 
 	c.Commands().BindSetting(
@@ -26,7 +27,7 @@ void RiffRepeaterMod::OnInitialize(ModContext& c) {
 		Availability::Active,
 		[](ModContext&, const KeyEvent& event) { SetLoopStart(event); },
 		[](const ModContext& context, const KeyEvent&) {
-			return context.IsOn("AllowLooping") && GameState::Menus::IsInModesWithAllowedFastRiffRepeater();
+			return context.IsOn(Setting::AllowLooping) && GameState::Menus::IsInModesWithAllowedFastRiffRepeater();
 		},
 		"Loop Start Point Set");
 
@@ -36,7 +37,7 @@ void RiffRepeaterMod::OnInitialize(ModContext& c) {
 		Availability::Active,
 		[](ModContext&, const KeyEvent& event) { SetLoopEnd(event); },
 		[](const ModContext& context, const KeyEvent&) {
-			return context.IsOn("AllowLooping") && GameState::Menus::IsInModesWithAllowedFastRiffRepeater();
+			return context.IsOn(Setting::AllowLooping) && GameState::Menus::IsInModesWithAllowedFastRiffRepeater();
 		},
 		"Loop End Point Set");
 
@@ -46,18 +47,18 @@ void RiffRepeaterMod::OnInitialize(ModContext& c) {
 		Availability::Active,
 		[](ModContext& context, const KeyEvent& event) { ChangeSpeed(context, event); },
 		[](const ModContext& context, const KeyEvent&) {
-			return context.IsOn("RRSpeedAboveOneHundred") &&
+			return context.IsOn(Setting::RRSpeedAboveOneHundred) &&
 				GameState::Menus::IsInModesWithAllowedFastRiffRepeater() &&
 				RiffRepeater::loggedCurrentSongID;
 		});
 }
 
 void RiffRepeaterMod::Rewind(const ModContext& c) {
-	auto seekTo = static_cast<AkTimeMs>((SongTimer::SongTimer() * 1000) - c.Int("RewindBy") - c.Int("RewindLeadup"));
+	auto seekTo = static_cast<AkTimeMs>((SongTimer::SongTimer() * 1000) - c.Int(Setting::RewindBy) - c.Int(Setting::RewindLeadup));
 	if (seekTo < 0) seekTo = 0;
 	Wwise::SoundEngine::SeekOnEvent(std::string("Play_" + GameState::GetSongKey()).c_str(), 0x1234, seekTo, false);
 
-	const AkTimeMs greyNoteTimerMs = seekTo - c.Int("RewindLeadup");
+	const AkTimeMs greyNoteTimerMs = seekTo - c.Int(Setting::RewindLeadup);
 	SongTimer::SetGreyNoteTimer(greyNoteTimerMs / 1000.f);
 
 	LOG_INFO("(REWIND) Seeked to " << seekTo << "ms." << std::endl);
@@ -84,7 +85,7 @@ void RiffRepeaterMod::SetLoopEnd(const KeyEvent& event) {
 }
 
 void RiffRepeaterMod::ChangeSpeed(const ModContext& c, const KeyEvent& event) {
-	const float interval = static_cast<float>(c.Int("RRSpeedInterval"));
+	const float interval = static_cast<float>(c.Int(Setting::RRSpeedInterval));
 
 	float realSongSpeed = RiffRepeater::GetSpeed(true);
 	realSongSpeed += event.control ? -interval : interval;
@@ -103,10 +104,10 @@ void RiffRepeaterMod::OnTick(ModContext& c) {
 
 // Patch (or revert) the linear Riff Repeater speed logic to track the setting.
 void RiffRepeaterMod::SyncLinearSpeeds(ModContext& c) {
-	if (c.IsOn("LinearRiffRepeater") && !RiffRepeater::currentlyEnabled_LinearRR) {
+	if (c.IsOn(Setting::LinearRiffRepeater) && !RiffRepeater::currentlyEnabled_LinearRR) {
 		RiffRepeater::EnableLinearSpeeds();
 	}
-	else if (c.IsOff("LinearRiffRepeater") && RiffRepeater::currentlyEnabled_LinearRR) {
+	else if (c.IsOff(Setting::LinearRiffRepeater) && RiffRepeater::currentlyEnabled_LinearRR) {
 		RiffRepeater::DisableLinearSpeeds();
 	}
 }
@@ -124,7 +125,7 @@ void RiffRepeaterMod::OnSongTick(ModContext& c) {
 		RiffRepeater::readyToLogSongID = false;
 	}
 
-	if (c.IsOn("RRSpeedAboveOneHundred")) {
+	if (c.IsOn(Setting::RRSpeedAboveOneHundred)) {
 		RiffRepeater::EnableTimeStretch();
 	}
 }

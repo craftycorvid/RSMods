@@ -6,6 +6,7 @@ using Framework::KeyEdge;
 using Framework::Availability;
 using Framework::KeyEvent;
 using Settings::When;
+namespace Setting = Settings::Setting;
 
 std::string_view ShowSongTimerMod::Id() const {
 	return "ShowSongTimer";
@@ -14,7 +15,7 @@ std::string_view ShowSongTimerMod::Id() const {
 // This mod owns only the automatic mode; manual show/hide is driven by the ShowSongTimerKey keybinding,
 // which stays independent of the mod. The timer only renders in a song (see GameOverlay::DisplaySongTimer).
 bool ShowSongTimerMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn("ShowSongTimerEnabled") && c.WhenSetting("ShowSongTimerWhen") == When::Automatic;
+	return c.IsOn(Setting::ShowSongTimerEnabled) && c.When(Setting::ShowSongTimerWhen) == When::Automatic;
 }
 
 void ShowSongTimerMod::OnInitialize(ModContext& c) {
@@ -26,7 +27,7 @@ void ShowSongTimerMod::OnInitialize(ModContext& c) {
 			D3DHooks::showSongTimerOnScreen = !D3DHooks::showSongTimerOnScreen;
 		},
 		[](const ModContext& context, const KeyEvent&) {
-			return context.IsOn("ShowSongTimerEnabled");
+			return context.IsOn(Setting::ShowSongTimerEnabled);
 		},
 		"Show Song Timer");
 }

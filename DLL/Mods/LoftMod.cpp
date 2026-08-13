@@ -7,13 +7,14 @@ using Framework::KeyEdge;
 using Framework::Availability;
 using Framework::KeyEvent;
 using Settings::When;
+namespace Setting = Settings::Setting;
 
 std::string_view LoftMod::Id() const {
 	return "Loft";
 }
 
 bool LoftMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn("ToggleLoftEnabled");
+	return c.IsOn(Setting::ToggleLoftEnabled);
 }
 
 void LoftMod::OnInitialize(ModContext& c) {
@@ -23,7 +24,7 @@ void LoftMod::OnInitialize(ModContext& c) {
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) { Loft::ToggleLoft(); },
 		[](const ModContext& context, const KeyEvent&) {
-			return context.IsOn("ToggleLoftEnabled");
+			return context.IsOn(Setting::ToggleLoftEnabled);
 		},
 		"Toggle Loft");
 }
@@ -37,7 +38,7 @@ void LoftMod::OnDisabled(ModContext&) {
 }
 
 void LoftMod::OnSongTick(ModContext& c) {
-	if (c.WhenSetting("ToggleLoftWhen") == When::Song) {
+	if (c.When(Setting::ToggleLoftWhen) == When::Song) {
 		if (!loftOff) {
 			Loft::ToggleLoft();
 		}
@@ -47,7 +48,7 @@ void LoftMod::OnSongTick(ModContext& c) {
 }
 
 void LoftMod::OnMenuTick(ModContext& c) {
-	if (c.WhenSetting("ToggleLoftWhen") == When::Song) {
+	if (c.When(Setting::ToggleLoftWhen) == When::Song) {
 		if (loftOff) {
 			Loft::ToggleLoft();
 			loftOff = false;
@@ -60,7 +61,7 @@ void LoftMod::OnMenuTick(ModContext& c) {
 
 // Runs after the phase policy so lesson mode takes precedence.
 void LoftMod::ApplyAlwaysOn(ModContext& c) {
-	const When when = c.WhenSetting("ToggleLoftWhen");
+	const When when = c.When(Setting::ToggleLoftWhen);
 	if (when == When::Manual) {
 		if (loftOff) {
 			Loft::ToggleLoft();

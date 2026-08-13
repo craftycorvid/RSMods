@@ -8,6 +8,7 @@ using Framework::KeyEdge;
 using Framework::Availability;
 using Framework::KeyEvent;
 using Settings::When;
+namespace Setting = Settings::Setting;
 
 std::string_view MidiMod::Id() const {
 	return "Midi";
@@ -29,7 +30,7 @@ void MidiMod::OnInitialize(ModContext& c) {
 			LOG_INFO("Triggered Mod Setting: Tuning Offset is now set to " << Midi::tuningOffset << std::endl);
 		},
 		[](const ModContext& context, const KeyEvent&) {
-			return context.IsOn("AutoTuneForSong");
+			return context.IsOn(Setting::AutoTuneForSong);
 		});
 
 	// Delete is a fixed host shortcut, but its intent belongs to this tuning-controller mod.
@@ -42,7 +43,7 @@ void MidiMod::OnInitialize(ModContext& c) {
 			Midi::userWantsToUseAutoTuning = true;
 		},
 		[](const ModContext& context, const KeyEvent&) {
-			return context.WhenSetting("AutoTuneForSongWhen") == When::Manual &&
+			return context.When(Setting::AutoTuneForSongWhen) == When::Manual &&
 				GameState::Menus::IsInTuningMenus();
 		});
 }
@@ -57,18 +58,18 @@ void MidiMod::OnTick(ModContext& c) {
 // Two independent one-time setup steps: load the auto-tune pedal settings once AutoTuneForSong is on, 
 // and spin up the MIDI-in listener once a MidiInDevice is configured.
 void MidiMod::ScanForMidiDevices(ModContext& c) {
-	if (!Midi::scannedForMidiDevices && c.IsOn("AutoTuneForSong")) {
+	if (!Midi::scannedForMidiDevices && c.IsOn(Setting::AutoTuneForSong)) {
 		Midi::scannedForMidiDevices = true;
 		Midi::ReadMidiSettingsFromINI(
-			c.Value("ChordsMode"),
-			c.Int("TuningPedal"),
-			c.Value("AutoTuneForSongDevice"),
-			c.Value("MidiInDevice"));
+			c.Value(Setting::ChordsMode),
+			c.Int(Setting::TuningPedal),
+			c.Value(Setting::AutoTuneForSongDevice),
+			c.Value(Setting::MidiInDevice));
 	}
 
-	if (!Midi::attemptedToDetachMidiInThread && c.Value("MidiInDevice") != "") {
+	if (!Midi::attemptedToDetachMidiInThread && c.Value(Setting::MidiInDevice) != "") {
 		Midi::attemptedToDetachMidiInThread = true;
-		Midi::FindMidiInDevices(c.Value("MidiInDevice"));
+		Midi::FindMidiInDevices(c.Value(Setting::MidiInDevice));
 		std::thread(Midi::ListenToMidiInThread).detach();
 	}
 }
@@ -93,8 +94,8 @@ void MidiMod::RevertTuningWhenLeavingSong() {
 // While the pre-song tuner is up, tune the pedal from the tuner's tuning readout (When == Tuner only).
 void MidiMod::AutoTuneInTuner(ModContext& c) {
 	if (GameState::Menus::IsInPreSongTuner() &&
-		c.IsOn("AutoTuneForSong") &&
-		c.WhenSetting("AutoTuneForSongWhen") == When::Tuner &&
+		c.IsOn(Setting::AutoTuneForSong) &&
+		c.When(Setting::AutoTuneForSongWhen) == When::Tuner &&
 		!Midi::alreadyAttemptedTuningInTuner &&
 		!Midi::alreadyAutomatedTuningInThisSong) {
 		Midi::AttemptTuningInTuner();
@@ -108,10 +109,10 @@ void MidiMod::OnSongTick(ModContext& c) {
 }
 
 void MidiMod::AutoTuneInSong(ModContext& c) {
-	if (c.IsOn("AutoTuneForSong") &&
+	if (c.IsOn(Setting::AutoTuneForSong) &&
 		!Midi::alreadyAutomatedTuningInThisSong &&
-		(c.WhenSetting("AutoTuneForSongWhen") == When::Tuner ||
-			(c.WhenSetting("AutoTuneForSongWhen") == When::Manual && Midi::userWantsToUseAutoTuning))) {
+		(c.When(Setting::AutoTuneForSongWhen) == When::Tuner ||
+			(c.When(Setting::AutoTuneForSongWhen) == When::Manual && Midi::userWantsToUseAutoTuning))) {
 		Midi::AutomateTuning();
 	}
 }

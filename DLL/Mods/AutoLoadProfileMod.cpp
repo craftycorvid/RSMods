@@ -4,13 +4,14 @@
 
 using Framework::ModContext;
 using Framework::GamePhase;
+namespace Setting = Settings::Setting;
 
 std::string_view AutoLoadProfileMod::Id() const {
 	return "AutoLoadProfile";
 }
 
 bool AutoLoadProfileMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn("ForceProfileEnabled");
+	return c.IsOn(Setting::ForceProfileEnabled);
 }
 
 // Only acts while the game is still booting toward the main menu. Reads GameState::currentMenu, which the
@@ -27,7 +28,7 @@ void AutoLoadProfileMod::OnTick(ModContext& c) {
 		Keyboard::SendEscapeKey();
 		Keyboard::AutoEnterGame();
 	}
-	else if (c.Value("ProfileToLoad") != "" && GameState::currentMenu == "ProfileSelect") {
+	else if (c.Value(Setting::ProfileToLoad) != "" && GameState::currentMenu == "ProfileSelect") {
 		LoadSpecificProfile(c); // The user pinned a profile to always load.
 	}
 	else { // No preference - just select the first / top profile.
@@ -39,7 +40,7 @@ void AutoLoadProfileMod::OnTick(ModContext& c) {
 void AutoLoadProfileMod::LoadSpecificProfile(ModContext& c) {
 	const std::string selectedUser = GameState::CurrentSelectedUser();
 
-	if (selectedUser == c.Value("ProfileToLoad")) {
+	if (selectedUser == c.Value(Setting::ProfileToLoad)) {
 		Keyboard::AutoEnterGame();
 	}
 	else if (selectedUser == "New profile") {

@@ -6,6 +6,7 @@ using Framework::KeyEdge;
 using Framework::Availability;
 using Framework::KeyEvent;
 using Settings::When;
+namespace Setting = Settings::Setting;
 
 std::string_view EnumerationMod::Id() const {
 	return "ForceReEnumeration";
@@ -20,7 +21,7 @@ void EnumerationMod::OnInitialize(ModContext& c) {
 			Enumeration::ForceEnumeration();
 		},
 		[](const ModContext& context, const KeyEvent&) {
-			return context.WhenSetting("ForceReEnumerationEnabled") == When::Manual;
+			return context.When(Setting::ForceReEnumerationEnabled) == When::Manual;
 		},
 		"Force Enumeration");
 
@@ -50,9 +51,9 @@ void EnumerationMod::OnShutdown(ModContext&) {
 }
 
 void EnumerationMod::UpdateSettings(const ModContext& c) {
-	automatic_.store(c.WhenSetting("ForceReEnumerationEnabled") == When::Automatic);
+	automatic_.store(c.When(Setting::ForceReEnumerationEnabled) == When::Automatic);
 
-	intervalMs_.store(c.Int("CheckForNewSongsInterval"));
+	intervalMs_.store(c.Int(Setting::CheckForNewSongsInterval));
 }
 
 void EnumerationMod::MonitorDlcDirectory() {

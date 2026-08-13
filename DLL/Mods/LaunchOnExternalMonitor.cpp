@@ -2,6 +2,7 @@
 #include "LaunchOnExternalMonitor.hpp"
 
 using Framework::ModContext;
+namespace Setting = Settings::Setting;
 
 std::string_view LaunchOnExternalMonitorMod::Id() const {
 	return "SecondaryMonitor";
@@ -27,8 +28,8 @@ void LaunchOnExternalMonitorMod::MoveOnce(ModContext& c) {
 		return;
 
 	SendRocksmithToScreen(
-		c.Int("SecondaryMonitorXPosition"),
-		c.Int("SecondaryMonitorYPosition"));
+		c.Int(Setting::SecondaryMonitorXPosition),
+		c.Int(Setting::SecondaryMonitorYPosition));
 	moved = true;
 }
 

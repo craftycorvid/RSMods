@@ -3,13 +3,14 @@
 
 using Framework::ModContext;
 using Settings::When;
+namespace Setting = Settings::Setting;
 
 std::string_view RemoveSkylineMod::Id() const {
 	return "RemoveSkyline";
 }
 
 bool RemoveSkylineMod::IsEnabled(const ModContext& c) const {
-	return c.IsOn("RemoveSkylineEnabled");
+	return c.IsOn(Setting::RemoveSkylineEnabled);
 }
 
 void RemoveSkylineMod::OnDisabled(ModContext&) {
@@ -19,7 +20,7 @@ void RemoveSkylineMod::OnDisabled(ModContext&) {
 }
 
 void RemoveSkylineMod::OnSongTick(ModContext& c) {
-	if (c.WhenSetting("ToggleSkylineWhen") == When::Song) {
+	if (c.When(Setting::ToggleSkylineWhen) == When::Song) {
 		if (!D3DHooks::SkylineOff) {
 			D3DHooks::toggleSkyline = true;
 		}
@@ -32,7 +33,7 @@ void RemoveSkylineMod::OnSongTick(ModContext& c) {
 
 void RemoveSkylineMod::OnMenuTick(ModContext& c) {
 	// Coming back from a song with the skyline off: request the toggle and let it draw in the menu again.
-	if (D3DHooks::SkylineOff && c.WhenSetting("ToggleSkylineWhen") == When::Song) {
+	if (D3DHooks::SkylineOff && c.When(Setting::ToggleSkylineWhen) == When::Song) {
 		D3DHooks::toggleSkyline = true;
 		D3DHooks::DrawSkylineInMenu = true;
 	}
@@ -41,7 +42,7 @@ void RemoveSkylineMod::OnMenuTick(ModContext& c) {
 }
 
 void RemoveSkylineMod::ApplyStartup(ModContext& c) {
-	if (!D3DHooks::SkylineOff && c.WhenSetting("ToggleSkylineWhen") == When::Startup) {
+	if (!D3DHooks::SkylineOff && c.When(Setting::ToggleSkylineWhen) == When::Startup) {
 		D3DHooks::toggleSkyline = true;
 	}
 }

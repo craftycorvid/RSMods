@@ -3,6 +3,83 @@
 #include <functional>
 
 namespace Settings {
+	// Mods reference these (through ModContext) instead of raw string literals, 
+	// so a typo becomes a compile error rather than a silently-missing setting.
+	// NOTE: a setting's on-disk INI key can differ from its in-code key (e.g. "ToggleLoft" 
+	// on disk vs "ToggleLoftEnabled" in code), so the reader's INI-name argument stays
+	// its own literal and is not one of these constants.
+	namespace Setting {
+		// Riff Repeater
+		inline constexpr char AllowRewind[]             = "AllowRewind";
+		inline constexpr char AllowLooping[]            = "AllowLooping";
+		inline constexpr char RewindBy[]                = "RewindBy";
+		inline constexpr char RewindLeadup[]            = "RewindLeadup";
+		inline constexpr char RRSpeedInterval[]         = "RRSpeedInterval";
+		inline constexpr char RRSpeedAboveOneHundred[]  = "RRSpeedAboveOneHundred";
+		inline constexpr char LinearRiffRepeater[]      = "LinearRiffRepeater";
+
+		// Loft
+		inline constexpr char ToggleLoftEnabled[]       = "ToggleLoftEnabled";
+		inline constexpr char ToggleLoftWhen[]          = "ToggleLoftWhen";
+
+		// Remove Skyline
+		inline constexpr char RemoveSkylineEnabled[]    = "RemoveSkylineEnabled";
+		inline constexpr char ToggleSkylineWhen[]       = "ToggleSkylineWhen";
+
+		// Remove Headstock
+		inline constexpr char RemoveHeadstockEnabled[]  = "RemoveHeadstockEnabled";
+		inline constexpr char RemoveHeadstockWhen[]     = "RemoveHeadstockWhen";
+
+		// Show Song Timer
+		inline constexpr char ShowSongTimerEnabled[]    = "ShowSongTimerEnabled";
+		inline constexpr char ShowSongTimerWhen[]       = "ShowSongTimerWhen";
+
+		// Enumeration
+		inline constexpr char ForceReEnumerationEnabled[] = "ForceReEnumerationEnabled";
+		inline constexpr char CheckForNewSongsInterval[]  = "CheckForNewSongsInterval";
+
+		// Remove Lyrics
+		inline constexpr char RemoveLyricsWhen[]        = "RemoveLyricsWhen";
+
+		// Volume
+		inline constexpr char VolumeControlEnabled[]    = "VolumeControlEnabled";
+		inline constexpr char VolumeControlInterval[]   = "VolumeControlInterval";
+
+		// MIDI
+		inline constexpr char AutoTuneForSong[]         = "AutoTuneForSong";
+		inline constexpr char AutoTuneForSongWhen[]     = "AutoTuneForSongWhen";
+		inline constexpr char AutoTuneForSongDevice[]   = "AutoTuneForSongDevice";
+		inline constexpr char MidiInDevice[]            = "MidiInDevice";
+		inline constexpr char ChordsMode[]              = "ChordsMode";
+		inline constexpr char TuningPedal[]             = "TuningPedal";
+
+		// Alternative Sample Rate
+		inline constexpr char AlternativeOutputSampleRate[] = "AlternativeOutputSampleRate";
+
+		// Auto Load Profile
+		inline constexpr char ForceProfileEnabled[]    = "ForceProfileEnabled";
+		inline constexpr char ProfileToLoad[]          = "ProfileToLoad";
+
+		// Extended Range
+		inline constexpr char RainbowStringsEnabled[]  = "RainbowStringsEnabled";
+		inline constexpr char ExtendedRangeEnabled[]   = "ExtendedRangeEnabled";
+		inline constexpr char CustomStringColors[]     = "CustomStringColors";
+		inline constexpr char SeparateNoteColors[]     = "SeparateNoteColors";
+		inline constexpr char SeparateNoteColorsMode[] = "SeparateNoteColorsMode";
+
+		// Launch On External Monitor
+		inline constexpr char SecondaryMonitorXPosition[] = "SecondaryMonitorXPosition";
+		inline constexpr char SecondaryMonitorYPosition[] = "SecondaryMonitorYPosition";
+
+		// Microphone Volume Override
+		inline constexpr char OverrideInputVolumeEnabled[] = "OverrideInputVolumeEnabled";
+		inline constexpr char OverrideInputVolumeDevice[]  = "OverrideInputVolumeDevice";
+
+		// Non-Stop Play Timer
+		inline constexpr char UseCustomNSPTimer[]      = "UseCustomNSPTimer";
+		inline constexpr char CustomNSPTimeLimit[]     = "CustomNSPTimeLimit";
+	}
+
 	void Initialize(); // Default Settings
 
 	// Read INI

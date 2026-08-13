@@ -6,18 +6,15 @@ using Framework::ModContext;
 using Framework::KeyEdge;
 using Framework::Availability;
 using Framework::KeyEvent;
-
-namespace {
-	constexpr std::string_view volumeControlEnabled = "VolumeControlEnabled";
-}
+namespace Setting = Settings::Setting;
 
 std::string_view VolumeDisplayMod::Id() const {
-	return volumeControlEnabled;
+	return Setting::VolumeControlEnabled;
 }
 
 void VolumeDisplayMod::OnInitialize(ModContext& c) {
 	auto commands = c.Commands();
-	const auto volumeEnabled = [](const ModContext& context, const KeyEvent&) { return context.IsOn(volumeControlEnabled); };
+	const auto volumeEnabled = [](const ModContext& context, const KeyEvent&) { return context.IsOn(Setting::VolumeControlEnabled); };
 
 	commands.BindSetting("MutePlayer1Key", KeyEdge::Up,
 		Availability::Active,
@@ -72,7 +69,7 @@ void VolumeDisplayMod::ToggleMute(bool player2) {
 }
 
 void VolumeDisplayMod::ChangeVolume(const ModContext& c, const KeyEvent& event, std::string_view channel, int overlayIndex) {
-	const int interval = c.Int("VolumeControlInterval");
+	const int interval = c.Int(Setting::VolumeControlInterval);
 
 	if (event.control) {
 		VolumeControl::DecreaseVolume(interval, std::string(channel));
@@ -96,7 +93,7 @@ void VolumeDisplayMod::OnSongTick(ModContext& c) {
 
 // The volume overlay is raised by the volume keybindings; hide it again once it has been up for 3s.
 void VolumeDisplayMod::SyncDisplay(ModContext& c) {
-	if (c.IsOn(volumeControlEnabled) && MoreThanThreeSecondsPassed()) {
+	if (c.IsOn(Setting::VolumeControlEnabled) && MoreThanThreeSecondsPassed()) {
 		GameOverlay::displayCurrentVolume = false;
 	}
 }

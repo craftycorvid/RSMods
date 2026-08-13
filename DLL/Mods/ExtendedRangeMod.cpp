@@ -9,6 +9,7 @@ using Framework::Availability;
 using Framework::KeyEvent;
 using Settings::StringColorMode;
 using Settings::NoteColorMode;
+namespace Setting = Settings::Setting;
 
 std::string_view ExtendedRangeMod::Id() const {
 	return "ExtendedRange";
@@ -24,7 +25,7 @@ void ExtendedRangeMod::OnInitialize(ModContext& c) {
 			if (!ERMode::RainbowEnabled) ERMode::ResetAllStrings();
 		},
 		[](const ModContext& context, const KeyEvent&) {
-			return context.IsOn("RainbowStringsEnabled");
+			return context.IsOn(Setting::RainbowStringsEnabled);
 		},
 		"Rainbow Strings");
 
@@ -53,9 +54,9 @@ void ExtendedRangeMod::OnSongEnter(ModContext& c) {
 
 	ERMode::UseERExclusivelyInThisSong = SongTuning::IsExtendedRangeSong();
 	ERMode::UseEROrColorsInThisSong =
-		(c.IsOn("ExtendedRangeEnabled") && ERMode::UseERExclusivelyInThisSong) ||
-		c.ColorModeSetting("CustomStringColors") == StringColorMode::Custom ||
-		(c.IsOn("SeparateNoteColors") && c.NoteColorModeSetting("SeparateNoteColorsMode") != NoteColorMode::Default);
+		(c.IsOn(Setting::ExtendedRangeEnabled) && ERMode::UseERExclusivelyInThisSong) ||
+		c.ColorMode(Setting::CustomStringColors) == StringColorMode::Custom ||
+		(c.IsOn(Setting::SeparateNoteColors) && c.NoteColorMode(Setting::SeparateNoteColorsMode) != NoteColorMode::Default);
 	ERMode::AttemptedERInThisSong = true;
 }
 
