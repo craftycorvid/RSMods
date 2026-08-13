@@ -42,12 +42,15 @@ foreach ($t in $Tests) {
 
     Write-Host "=== Building $name ===" -ForegroundColor Cyan
     # cd into the output dir so intermediate .obj files land there instead of the source tree.
+    # Under Windows PowerShell 5.1 with ErrorActionPreference=Stop, any line a native exe
+    # writes to stderr is turned into a terminating error, but the tests deliberately log to
+    # stderr (LOG_ERROR) when exercising fault paths, so keep Stop scoped to cmdlets only.
     $build = "call `"$vcvars`" >nul && cd /d `"$OutDir`" && cl /nologo /std:c++17 /EHsc /W3 $srcArgs /Fe:`"$exe`""
-    & cmd /c $build
+    & { $ErrorActionPreference = 'Continue'; & cmd /c $build }
     if ($LASTEXITCODE -ne 0) { Write-Host "BUILD FAILED: $name" -ForegroundColor Red; $failed += "$name (build)"; continue }
 
     Write-Host "=== Running $name ===" -ForegroundColor Cyan
-    & $exe
+    & { $ErrorActionPreference = 'Continue'; & $exe }
     if ($LASTEXITCODE -ne 0) { Write-Host "TESTS FAILED: $name" -ForegroundColor Red; $failed += "$name (run)" }
 }
 
