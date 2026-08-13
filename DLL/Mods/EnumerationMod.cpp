@@ -26,7 +26,7 @@ void EnumerationMod::OnInitialize(ModContext& c) {
 		"Force Enumeration");
 
 	UpdateSettings(c);
-	monitorThread_ = std::thread(&EnumerationMod::MonitorDlcDirectory, this);
+	monitorThread = std::thread(&EnumerationMod::MonitorDlcDirectory, this);
 }
 
 void EnumerationMod::OnSettingsChanged(ModContext& c) {
@@ -36,24 +36,24 @@ void EnumerationMod::OnSettingsChanged(ModContext& c) {
 // Runs on the main thread. ForceEnumeration() writes game memory, so it must never be
 // called from the monitor thread; the monitor only flags that the DLC count changed.
 void EnumerationMod::OnTick(ModContext&) {
-	if (enumerationRequested_.exchange(false))
+	if (enumerationRequested.exchange(false))
 		Enumeration::ForceEnumeration();
 }
 
 void EnumerationMod::OnShutdown(ModContext&) {
 	{
-		std::lock_guard lock(waitMutex_);
-		stopping_ = true;
+		std::lock_guard lock(waitMutex);
+		stopping = true;
 	}
 
-	waitCondition_.notify_one();
-	if (monitorThread_.joinable()) monitorThread_.join();
+	waitCondition.notify_one();
+	if (monitorThread.joinable()) monitorThread.join();
 }
 
 void EnumerationMod::UpdateSettings(const ModContext& c) {
-	automatic_.store(c.When(Setting::ForceReEnumerationEnabled) == When::Automatic);
+	automatic.store(c.When(Setting::ForceReEnumerationEnabled) == When::Automatic);
 
-	intervalMs_.store(c.Int(Setting::CheckForNewSongsInterval));
+	intervalMs.store(c.Int(Setting::CheckForNewSongsInterval));
 }
 
 void EnumerationMod::MonitorDlcDirectory() {
@@ -64,20 +64,20 @@ void EnumerationMod::MonitorDlcDirectory() {
 	int previousDlcCount = Enumeration::GetCurrentDLCCount();
 
 	while (true) {
-		const auto interval = std::chrono::milliseconds(intervalMs_.load());
+		const auto interval = std::chrono::milliseconds(intervalMs.load());
 		if (WaitFor(interval)) return;
-		if (!automatic_.load()) continue;
+		if (!automatic.load()) continue;
 
 		const int currentDlcCount = Enumeration::GetCurrentDLCCount();
-		if (previousDlcCount != currentDlcCount) enumerationRequested_.store(true);
+		if (previousDlcCount != currentDlcCount) enumerationRequested.store(true);
 		previousDlcCount = currentDlcCount;
 	}
 }
 
 bool EnumerationMod::WaitFor(std::chrono::milliseconds duration) {
-	std::unique_lock lock(waitMutex_);
+	std::unique_lock lock(waitMutex);
 
-	return waitCondition_.wait_for(lock, duration, [this] { return stopping_; });
+	return waitCondition.wait_for(lock, duration, [this] { return stopping; });
 }
 
 static Framework::ModRegistrar<EnumerationMod> _enumerationReg;

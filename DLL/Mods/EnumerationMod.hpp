@@ -23,11 +23,11 @@ private:
 	void MonitorDlcDirectory();
 	bool WaitFor(std::chrono::milliseconds duration);
 
-	std::atomic<bool> automatic_{ false };
-	std::atomic<int> intervalMs_{ 0 };
-	std::atomic<bool> enumerationRequested_{ false }; // Set by monitor thread; consumed on the main thread in OnTick.
-	std::mutex waitMutex_;
-	std::condition_variable waitCondition_;
-	bool stopping_ = false;
-	std::thread monitorThread_;
+	std::atomic<bool> automatic{ false };
+	std::atomic<int> intervalMs{ 0 };
+	std::atomic<bool> enumerationRequested{ false }; // Set by monitor thread; consumed on the main thread in OnTick.
+	std::mutex waitMutex;
+	std::condition_variable waitCondition;
+	bool stopping = false;
+	std::thread monitorThread;
 };
