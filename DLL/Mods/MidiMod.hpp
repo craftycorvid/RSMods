@@ -24,6 +24,7 @@ public:
 	void OnSongTick(Framework::ModContext& c) override; // In-song auto-tune.
 	void OnDisabled(Framework::ModContext& c) override;
 	void OnSongExit(Framework::ModContext& c) override;
+	void OnSettingsChanged(Framework::ModContext& c) override;
 
 private:
 	void ScanForMidiDevices(Framework::ModContext& c);

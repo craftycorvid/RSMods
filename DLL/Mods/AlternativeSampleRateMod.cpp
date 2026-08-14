@@ -9,6 +9,20 @@ bool AlternativeSampleRateMod::IsEnabled(const ModContext& c) const {
 	return c.IsOn(Setting::AltOutputSampleRate);
 }
 
+// TODO: determine this is early enough in the process - this value needs to be set 
+// before the audio engine starts!
+void AlternativeSampleRateMod::OnInitialize(ModContext& c) {
+	const int sampleRate = c.Int(Setting::AlternativeOutputSampleRate);
+
+	if (!IsEnabled(c) || sampleRate == 48000)
+		return;
+
+	LOG_WARNING("[!] Overriding Output Sample Rate to " << sampleRate << std::endl);
+
+	AudioDevices::output_SampleRate = sampleRate;
+	AudioDevices::ChangeOutputSampleRate();
+}
+
 // Patch the markers only during the loading phase, before the engine finishes coming up. The buffer
 // checks keep it idempotent and avoid clobbering the values (5 / 2) the engine sets for itself.
 void AlternativeSampleRateMod::OnTick(ModContext& c) {

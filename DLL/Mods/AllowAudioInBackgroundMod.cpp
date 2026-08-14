@@ -1,6 +1,5 @@
 #include "../stdafx.h"
 #include "AllowAudioInBackgroundMod.hpp"
-#include "VolumeControl.hpp"
 
 using Framework::ModContext;
 namespace Setting = Settings::Setting;

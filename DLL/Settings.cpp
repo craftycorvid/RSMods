@@ -134,7 +134,7 @@ void Settings::Initialize()
 		{Setting::CheckForNewSongsInterval, 5000},
 		{Setting::RRSpeedInterval, 2},
 		{Setting::TuningPedal, 0},
-		{"TuningOffset", 0},
+		{Setting::TuningOffset, 0},
 		{Setting::VolumeControlInterval, 5},
 		{Setting::SecondaryMonitorXPosition, 0},
 		{Setting::SecondaryMonitorYPosition, 0},

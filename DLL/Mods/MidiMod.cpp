@@ -15,6 +15,8 @@ std::vector<std::string_view> MidiMod::ClaimsExclusive() const {
 }
 
 void MidiMod::OnInitialize(ModContext& c) {
+	Midi::tuningOffset = c.Int(Setting::TuningOffset);
+
 	// This command changes tuning-controller state, so it must never bypass conflict suppression.
 	c.Commands().BindSetting(
 		"TuningOffsetKey",
@@ -42,6 +44,10 @@ void MidiMod::OnInitialize(ModContext& c) {
 			return context.When(Setting::AutoTuneForSongWhen) == When::Manual &&
 				GameState::Menus::IsInTuningMenus();
 		});
+}
+
+void MidiMod::OnSettingsChanged(ModContext& c) {
+	Midi::tuningOffset = c.Int(Setting::TuningOffset);
 }
 
 void MidiMod::OnTick(ModContext& c) {

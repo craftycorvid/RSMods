@@ -126,27 +126,10 @@ namespace ModManager {
 	{
 		AudioDevices::SetupMicrophones();
 		ApplyBugPrevention();
-		ApplyAudioDeviceConfiguration();
 
 		#ifdef _WWISE_LOGS
 				Wwise::Logging::Init();
 		#endif
-	}
-
-	/// <summary>
-	/// Configures audio device settings including sample rates.
-	/// We have to do this early in execution as we need to change it before the audio engine starts up.
-	/// </summary>
-	void ApplyAudioDeviceConfiguration() 
-	{
-		Midi::tuningOffset = Settings::GetModSetting("TuningOffset");
-
-		if (Settings::IsOn("AltOutputSampleRate") &&
-			Settings::GetModSetting("AlternativeOutputSampleRate") != 48000) {
-			LOG_WARNING("[!] Overriding Output Sample Rate to " << Settings::GetModSetting("AlternativeOutputSampleRate") << std::endl);
-			AudioDevices::output_SampleRate = Settings::GetModSetting("AlternativeOutputSampleRate");
-			AudioDevices::ChangeOutputSampleRate();
-		}
 	}
 
 	/// <summary>

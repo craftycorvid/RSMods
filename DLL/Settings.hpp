@@ -53,6 +53,7 @@ namespace Settings {
 		inline constexpr char MidiInDevice[]            = "MidiInDevice";
 		inline constexpr char ChordsMode[]              = "ChordsMode";
 		inline constexpr char TuningPedal[]             = "TuningPedal";
+		inline constexpr char TuningOffset[]			= "TuningOffset";
 
 		// Alternative Sample Rate
 		inline constexpr char AltOutputSampleRate[]         = "AltOutputSampleRate";
