@@ -51,8 +51,8 @@ void ExtendedRangeMod::OnSongEnter(ModContext& c) {
 	ERMode::UseERExclusivelyInThisSong = SongTuning::IsExtendedRangeSong();
 	ERMode::UseEROrColorsInThisSong =
 		(c.IsOn(Setting::ExtendedRangeEnabled) && ERMode::UseERExclusivelyInThisSong) ||
-		c.ColorMode(Setting::CustomStringColors) == StringColorMode::Custom ||
-		(c.IsOn(Setting::SeparateNoteColors) && c.NoteColorMode(Setting::SeparateNoteColorsMode) != NoteColorMode::Default);
+		c.ColorMode() == StringColorMode::Custom ||
+		(c.IsOn(Setting::SeparateNoteColors) && c.NoteColorMode() != NoteColorMode::Default);
 	ERMode::AttemptedERInThisSong = true;
 }
 

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ModManager.hpp"
 
+namespace Setting = Settings::Setting;
+
 namespace ModManager {
 	void InitializeConfiguration() {
 		if (!(std::ifstream("RSMods.ini"))) {
@@ -20,11 +22,11 @@ namespace ModManager {
 		BugPrevention::PreventPortAudioInDeviceCrash();
 		BugPrevention::PreventExtraAudioDevicesCrash();
 
-		if (Settings::IsOn("FixBrokenTones")) {
+		if (Settings::IsOn(Setting::FixBrokenTones)) {
 			BugPrevention::PreventStuckTone();
 		}
 
-		if (Settings::IsOn("FixOculusCrash")) {
+		if (Settings::IsOn(Setting::FixOculusCrash)) {
 			BugPrevention::PreventOculusCrash();
 		}
 	}
@@ -145,7 +147,7 @@ namespace ModManager {
 			return;
 
 		// Returning to a menu ends the song: drop the A/B loop markers so the next song starts fresh.
-		if (Settings::IsOn("AllowLooping")) {
+		if (Settings::IsOn(Setting::AllowLooping)) {
 			Keybindings::loopStart = NULL;
 			Keybindings::loopEnd = NULL;
 		}

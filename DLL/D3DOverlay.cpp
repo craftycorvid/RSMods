@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "D3DOverlay.hpp"
 
+namespace Setting = Settings::Setting;
+
 /// <returns>Size of Rocksmith Window</returns>
 Resolution GameOverlay::GetWindowSize() {
 	RECT windowSize;
@@ -34,7 +36,7 @@ void GameOverlay::DX9DrawText(const std::string& textToDraw, int textColorHex, i
 
 	if (useInputFontSize) {
 		int targetH = setFontSize.height;
-		const std::string face = Settings::ReturnSettingValue("OnScreenFont");
+		const std::string face = Settings::ReturnSettingValue(Setting::OnScreenFont);
 		FontKey key = FontKey::Make(face, targetH, 0, FW_NORMAL, false);
 
 		if (!fontCache.Get(pDevice, key, font)) {
@@ -61,7 +63,7 @@ void GameOverlay::DX9DrawText(const std::string& textToDraw, int textColorHex, i
 
 void GameOverlay::DisplayMixer() {
 	// Display the whole mixer if displayMixer is true
-	if (Settings::ReturnSettingValue("VolumeControlEnabled") == "on" && displayMixer) {
+	if (Settings::IsOn(Setting::VolumeControlEnabled) && displayMixer) {
 
 		float offset = 0;
 		for (int volumeIndex = 0; volumeIndex < mixerInternalNames.size(); ++volumeIndex) {
@@ -84,7 +86,7 @@ void GameOverlay::DisplayMixer() {
 		}
 	}
 	// Display just the current volume based on context (This will display the last volume that was adjusted for a few seconds after adjusting it)
-	else if (Settings::ReturnSettingValue("VolumeControlEnabled") == "on" && displayCurrentVolume) {
+	else if (Settings::IsOn(Setting::VolumeControlEnabled) && displayCurrentVolume) {
 		float volume = 0;
 		RTPCValue_type type = RTPCValue_GameObject;
 		Wwise::SoundEngine::Query::GetRTPCValue(mixerInternalNames[currentVolumeIndex].c_str(), AK_INVALID_GAME_OBJECT, &volume, &type);
@@ -118,7 +120,7 @@ void GameOverlay::DisplaySongTimer()
 
 void GameOverlay::DisplayCurrentNote()
 {
-	if (Settings::ReturnSettingValue("ShowCurrentNoteOnScreen") == "on" && GuitarSpeak::GetCurrentNoteName() != (std::string)"") {
+	if (Settings::IsOn(Setting::ShowCurrentNoteOnScreen) && GuitarSpeak::GetCurrentNoteName() != (std::string)"") {
 
 		if (GameState::IsInSong()) {
 			DX9DrawText(
@@ -145,7 +147,7 @@ void GameOverlay::DisplayCurrentNote()
 
 void GameOverlay::DisplayRiffRepeaterOverHundredPercentSpeed()
 {
-	if (Settings::ReturnSettingValue("RRSpeedAboveOneHundred") == "on" && RiffRepeater::loggedCurrentSongID &&
+	if (Settings::IsOn(Setting::RRSpeedAboveOneHundred) && RiffRepeater::loggedCurrentSongID &&
 		(GameState::Menus::IsInModesWithAllowedFastRiffRepeater() || GameState::Menus::IsOnScoreScreens()) || RiffRepeater::currentlyEnabled_Above100) {
 		realSongSpeed = RiffRepeater::GetSpeed(true); // While this should almost always be the same value, the user might enable riff repeater, which could cause this number to be wrong.
 
@@ -164,7 +166,7 @@ void GameOverlay::DisplayRiffRepeaterOverHundredPercentSpeed()
 
 void GameOverlay::DisplayCurrentTuningForAutoTune()
 {
-	if (Settings::ReturnSettingValue("AutoTuneForSong") == "on" && Settings::GetKeyBind("TuningOffsetKey") != NULL && GameState::Menus::IsInTuningMenus()) {
+	if (Settings::IsOn(Setting::AutoTuneForSong) && Settings::GetKeyBind("TuningOffsetKey") != NULL && GameState::Menus::IsInTuningMenus()) {
 		DX9DrawText(
 			"Auto Tune For: " + Midi::GetTuningOffsetName(Midi::tuningOffset),
 			whiteText,
@@ -191,17 +193,17 @@ void GameOverlay::DisplayLoopStartEndTimes(float loopStart, float loopEnd)
 }
 
 void HandleLooping() {
-	if (Settings::ReturnSettingValue("AllowLooping") == "on" && (Keybindings::loopStart != NULL || Keybindings::loopEnd != NULL)) {
+	if (Settings::IsOn(Setting::AllowLooping) && (Keybindings::loopStart != NULL || Keybindings::loopEnd != NULL)) {
 		// Only enable looping in learn a song modes (learn a song & non-stop play)
 		if (GameState::Menus::IsInLearnASongModes()) {
 			GameOverlay::DisplayLoopStartEndTimes(Keybindings::loopStart, Keybindings::loopEnd);
 
 			// Prevent the user from creating a loop that starts at a negative timestamp.
-			if ((Settings::GetModSetting("LoopingLeadUp") / 1000.f) >= Keybindings::loopStart) {
+			if ((Settings::GetModSetting(Setting::LoopingLeadUp) / 1000.f) >= Keybindings::loopStart) {
 				Keybindings::roughLoopStart = 0.f;
 			}
 			else {
-				Keybindings::roughLoopStart = Keybindings::loopStart - (Settings::GetModSetting("LoopingLeadUp") / 1000.f);
+				Keybindings::roughLoopStart = Keybindings::loopStart - (Settings::GetModSetting(Setting::LoopingLeadUp) / 1000.f);
 			}
 
 			// If we are paused, reset the grey note timer.
@@ -269,7 +271,7 @@ static float ReadAccuracy() {
 }
 
 void GameOverlay::DisplaySongAccuracy() {
-	if (Settings::ReturnSettingValue("DisplayCurrentAccuracy") == "on" &&
+	if (Settings::IsOn(Setting::DisplayCurrentAccuracy) &&
 		GameState::IsInSong() && SongTimer::SongTimer() != 0.f) {
 		auto left = static_cast<int>(WindowSize.width - WindowSize.width / 16.0f);
 		auto right = static_cast<int>(WindowSize.width - WindowSize.width / 96.0f);
@@ -305,8 +307,8 @@ void GameOverlay::DisplaySongAccuracy() {
 }
 
 void GameOverlay::CheckCurrentFont() {
-	const std::string currentFontName = Settings::ReturnSettingValue("OnScreenFont");
-	const int currentFontSize = Settings::GetModSetting("OnScreenFontSize");
+	const std::string currentFontName = Settings::ReturnSettingValue(Setting::OnScreenFont);
+	const int currentFontSize = Settings::GetModSetting(Setting::OnScreenFontSize);
 
 	if (cachedFontName != currentFontName || cachedFontSize != currentFontSize || !cachedFont) {
 		LOG_INFO("Font settings changed. Re-caching default font..." << std::endl);

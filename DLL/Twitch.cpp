@@ -2,6 +2,8 @@
 #include "Twitch.hpp"
 #include "Framework/Framework.hpp"
 
+namespace Setting = Settings::Setting;
+
 namespace Twitch {
 	/// <summary>
 	/// Handle Twitch Toggle Message.
@@ -11,17 +13,17 @@ namespace Twitch {
 	/// <returns>BOOL. If effects triggered.</returns>
 	bool HandleMessage(std::string const& currMsg, std::string const& type) {
 		// Twitch wants Rainbow String mod.
-		if (Contains(currMsg, "RainbowStrings")) {
+		if (Contains(currMsg, Setting::Twitch::RainbowStrings)) {
 			ERMode::RainbowEnabled = type == "enable";
 		}
 
 		// Twitch wants Drunk Mode.
-		else if (Contains(currMsg, "DrunkMode")) {
+		else if (Contains(currMsg, Setting::Twitch::DrunkMode)) {
 			Loft::ToggleDrunkMode(type == "enable");
 		}
 
 		// Twitch wants Solid Note colors.
-		else if (Contains(currMsg, "SolidNotes")) {
+		else if (Contains(currMsg, Setting::Twitch::SolidNotes)) {
 			// Don't apply any effects if we haven't even been in a song yet
 			if (!ERMode::ColorsSaved)
 				return false;

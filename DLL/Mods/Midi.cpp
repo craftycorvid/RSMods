@@ -1,6 +1,8 @@
 #include "../stdafx.h"
 #include "Midi.hpp"
 
+namespace Setting = Settings::Setting;
+
 // Midi codes should follow this guide: http://fmslogo.sourceforge.net/manual/midi-table.html
 namespace Midi {
 	std::vector<MIDIOUTCAPSA> midiOutDevices;
@@ -963,7 +965,7 @@ namespace Midi {
 		}
 
 		void FillSemitoneMap() {
-			std::string triggers = Settings::ReturnSettingValue("AutoTuneForSoftwareSemitoneTriggers");
+			std::string triggers = Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareSemitoneTriggers);
 			std::string delim = ", ";
 			std::vector<std::string> separated;
 			size_t position = 0;
@@ -1009,7 +1011,7 @@ namespace Midi {
 		}
 
 		void LoadSemitoneSettings() {
-			std::string settings = Settings::ReturnSettingValue("AutoTuneForSoftwareSemitoneSettings");
+			std::string settings = Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareSemitoneSettings);
 			std::string delim = ", ";
 			std::vector<std::string> separated;
 			size_t position = 0;
@@ -1060,7 +1062,7 @@ namespace Midi {
 		}
 
 		void FillTrueTuningMap() {
-			std::string triggers = Settings::ReturnSettingValue("AutoTuneForSoftwareTrueTuningTriggers");
+			std::string triggers = Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareTrueTuningTriggers);
 			std::string delim = ", ";
 			std::vector<std::string> separated;
 			size_t position = 0;
@@ -1106,7 +1108,7 @@ namespace Midi {
 		}
 
 		void LoadTrueTuningSettings() {
-			std::string settings = Settings::ReturnSettingValue("AutoTuneForSoftwareTrueTuningSettings");
+			std::string settings = Settings::ReturnSettingValue(Setting::AutoTuneForSoftwareTrueTuningSettings);
 			std::string delim = ", ";
 			std::vector<std::string> separated;
 			size_t position = 0;

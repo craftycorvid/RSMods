@@ -55,6 +55,12 @@ namespace Settings {
 		inline constexpr char TuningPedal[]             = "TuningPedal";
 		inline constexpr char TuningOffset[]			= "TuningOffset";
 
+		// AutoTune for Software (MIDI)
+		inline constexpr char AutoTuneForSoftwareSemitoneSettings[]   = "AutoTuneForSoftwareSemitoneSettings";
+		inline constexpr char AutoTuneForSoftwareSemitoneTriggers[]   = "AutoTuneForSoftwareSemitoneTriggers";
+		inline constexpr char AutoTuneForSoftwareTrueTuningSettings[] = "AutoTuneForSoftwareTrueTuningSettings";
+		inline constexpr char AutoTuneForSoftwareTrueTuningTriggers[] = "AutoTuneForSoftwareTrueTuningTriggers";
+
 		// Alternative Sample Rate
 		inline constexpr char AltOutputSampleRate[]         = "AltOutputSampleRate";
 		inline constexpr char AlternativeOutputSampleRate[] = "AlternativeOutputSampleRate";
@@ -65,10 +71,23 @@ namespace Settings {
 
 		// Extended Range
 		inline constexpr char RainbowStringsEnabled[]  = "RainbowStringsEnabled";
+		inline constexpr char RainbowNotesEnabled[]    = "RainbowNotesEnabled";
 		inline constexpr char ExtendedRangeEnabled[]   = "ExtendedRangeEnabled";
 		inline constexpr char CustomStringColors[]     = "CustomStringColors";
 		inline constexpr char SeparateNoteColors[]     = "SeparateNoteColors";
 		inline constexpr char SeparateNoteColorsMode[] = "SeparateNoteColorsMode";
+		inline constexpr char ExtendedRangeMode[]          = "ExtendedRangeMode";
+		inline constexpr char ExtendedRangeDropTuning[]    = "ExtendedRangeDropTuning";
+		inline constexpr char ExtendedRangeFixBassTuning[] = "ExtendedRangeFixBassTuning";
+
+		// Gameplay / Highway toggles (D3D texture mods)
+		inline constexpr char DiscoModeEnabled[]         = "DiscoModeEnabled";
+		inline constexpr char RemoveFingerprints[]       = "RemoveFingerprints";
+		inline constexpr char CustomHighwayColors[]      = "CustomHighwayColors";
+		inline constexpr char GreenScreenWallEnabled[]   = "GreenScreenWallEnabled";
+		inline constexpr char FretlessModeEnabled[]      = "FretlessModeEnabled";
+		inline constexpr char RemoveInlaysEnabled[]      = "RemoveInlaysEnabled";
+		inline constexpr char RemoveLaneMarkersEnabled[] = "RemoveLaneMarkersEnabled";
 
 		// Launch On External Monitor
 		inline constexpr char SecondaryMonitor[]          = "SecondaryMonitor";
@@ -80,6 +99,36 @@ namespace Settings {
 		inline constexpr char OverrideInputVolumeEnabled[] = "OverrideInputVolumeEnabled";
 		inline constexpr char OverrideInputVolumeDevice[]  = "OverrideInputVolumeDevice";
 
+		// On-Screen Display / Overlay
+		inline constexpr char OnScreenFont[]            = "OnScreenFont";
+		inline constexpr char OnScreenFontSize[]        = "OnScreenFontSize";
+		inline constexpr char ShowCurrentNoteOnScreen[] = "ShowCurrentNoteOnScreen";
+		inline constexpr char DisplayCurrentAccuracy[]  = "DisplayCurrentAccuracy";
+		inline constexpr char LoopingLeadUp[]           = "LoopingLeadUp";
+
+		// Guitar Speak
+		inline constexpr char GuitarSpeakWhileTuning[] = "GuitarSpeakWhileTuning";
+		inline constexpr char GuitarSpeakDelete[]      = "GuitarSpeakDelete";
+		inline constexpr char GuitarSpeakSpace[]       = "GuitarSpeakSpace";
+		inline constexpr char GuitarSpeakEnter[]       = "GuitarSpeakEnter";
+		inline constexpr char GuitarSpeakTab[]         = "GuitarSpeakTab";
+		inline constexpr char GuitarSpeakPageUp[]      = "GuitarSpeakPageUp";
+		inline constexpr char GuitarSpeakPageDown[]    = "GuitarSpeakPageDown";
+		inline constexpr char GuitarSpeakUpArrow[]     = "GuitarSpeakUpArrow";
+		inline constexpr char GuitarSpeakDownArrow[]   = "GuitarSpeakDownArrow";
+		inline constexpr char GuitarSpeakEscape[]      = "GuitarSpeakEscape";
+		inline constexpr char GuitarSpeakClose[]       = "GuitarSpeakClose";
+		inline constexpr char GuitarSpeakOBracket[]    = "GuitarSpeakOBracket";
+		inline constexpr char GuitarSpeakCBracket[]    = "GuitarSpeakCBracket";
+		inline constexpr char GuitarSpeakTildea[]      = "GuitarSpeakTildea";
+		inline constexpr char GuitarSpeakForSlash[]    = "GuitarSpeakForSlash";
+		inline constexpr char GuitarSpeakAlt[]         = "GuitarSpeakAlt";
+
+		// Fixes / misc toggles
+		inline constexpr char FixBrokenTones[]      = "FixBrokenTones";
+		inline constexpr char FixOculusCrash[]      = "FixOculusCrash";
+		inline constexpr char PreventMidSongPause[] = "PreventMidSongPause";
+
 		// Standalone toggles
 		inline constexpr char AllowAudioInBackground[]  = "AllowAudioInBackground";
 		inline constexpr char BypassTwoRTCMessageBox[] = "BypassTwoRTCMessageBox";
@@ -90,6 +139,20 @@ namespace Settings {
 		// Non-Stop Play Timer
 		inline constexpr char UseCustomNSPTimer[]      = "UseCustomNSPTimer";
 		inline constexpr char CustomNSPTimeLimit[]     = "CustomNSPTimeLimit";
+
+		// Solid Notes (user-defined hex color; lives in modSettings, set by the Twitch/CC SolidNotes effect)
+		inline constexpr char SolidNoteColor[]         = "SolidNoteColor";
+
+		// Twitch / Crowd Control effect toggles. These live in the separate twitchSettings map
+		// (IsTwitchSettingEnabled / UpdateTwitchSetting), NOT modSettings, so they get their own scope.
+		namespace Twitch {
+			inline constexpr char RainbowStrings[]   = "RainbowStrings";
+			inline constexpr char RemoveNotes[]      = "RemoveNotes";
+			inline constexpr char TransparentNotes[] = "TransparentNotes";
+			inline constexpr char SolidNotes[]       = "SolidNotes";
+			inline constexpr char DrunkMode[]        = "DrunkMode";
+			inline constexpr char FYourFC[]          = "FYourFC";
+		}
 	}
 
 	void Initialize(); // Default Settings
@@ -116,10 +179,10 @@ namespace Settings {
 	When GetWhen(const std::string& name);
 
 	enum class StringColorMode { Default = 0, Zag = 1, Custom = 2, Test = 3 };
-	StringColorMode GetStringColorMode(const std::string& name);
+	StringColorMode GetStringColorMode();
 
 	enum class NoteColorMode { SameAsStrings = 0, Default = 1, Custom = 2 };
-	NoteColorMode GetNoteColorMode(const std::string& name);
+	NoteColorMode GetNoteColorMode();
 
 	int GetVKCodeForString(const std::string& vkString);
 	std::vector<RSColor> GetStringColors(bool CB);

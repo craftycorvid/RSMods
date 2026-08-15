@@ -30,7 +30,7 @@ namespace RSMods
                              DiscoModeEnabled, RemoveHeadstockEnabled, RemoveSkylineEnabled, GreenscreenWallEnabled, ForceProfileEnabled, FretlessEnabled, RemoveInlaysEnabled, ToggleLoftWhen,
                              ToggleSkylineWhen, RemoveLaneMarkersEnabled, RemoveLyricsEnabled, RemoveLyricsWhen, GuitarSpeakEnabled, RemoveHeadstockWhen, ScreenShotScores,
                              MidiAutoTuning, MidiAutoTuningDevice, MidiInDevice, MidiAutoTuningWhen, MidiSoftwareSemitoneTriggers, MidiSoftwareSemitoneSettings, MidiSoftwareTrueTuningTriggers, MidiSoftwareTrueTuningSettings, ChordsMode,
-                             RiffRepeaterAboveHundred, ShowCurrentNoteOnScreen, OnScreenFont, OnScreenFontSize, ProfileToLoad, ShowSongTimerWhen, ShowSelectedVolumeWhen, SecondaryMonitor, RemoveSongPreviews, OverrideInputVolumeEnabled, OverrideInputVolumeDevice,
+                             RiffRepeaterAboveHundred, ShowCurrentNoteOnScreen, OnScreenFont, OnScreenFontSize, ProfileToLoad, ShowSongTimerWhen, SecondaryMonitor, RemoveSongPreviews, OverrideInputVolumeEnabled, OverrideInputVolumeDevice,
                              AllowAudioInBackground, BypassTwoRTCMessageBox, LinearRiffRepeater, UseAlternativeOutputSampleRate, AllowLooping, AllowRewind, FixOculusCrash, FixBrokenTones, UseCustomNSPTimer, DisplayCurrentAccuracy, PreventMidSongPause, RemoveFingerprints,
 
 
@@ -151,7 +151,6 @@ namespace RSMods
             OnScreenFontSizeIdentifier                  = "OnScreenFontSize = ",
             ProfileToLoadIdentifier                     = "ProfileToLoad = ",
             ShowSongTimerWhenIdentifier                 = "ShowSongTimerWhen = ",
-            ShowSelectedVolumeWhenIdentifier            = "ShowSelectedVolumeWhen = ",
             SecondaryMonitorIdentifier                  = "SecondaryMonitor = ",
             RemoveSongPreviewsIdentifier                = "SongPreviews = ",
             OverrideInputVolumeEnabledIdentifier        = "OverrideInputVolumeEnabled = ",
@@ -481,8 +480,6 @@ namespace RSMods
                     return FillSettingVariable(ProfileToLoadIdentifier, SettingType.STRING, currentLine, out ProfileToLoad);
                 if (IdentifierIsFound(currentLine, ShowSongTimerWhenIdentifier, identifierToGrab))
                     return FillSettingVariable(ShowSongTimerWhenIdentifier, SettingType.STRING, currentLine, out ShowSongTimerWhen);
-                if (IdentifierIsFound(currentLine, ShowSelectedVolumeWhenIdentifier, identifierToGrab))
-                    return FillSettingVariable(ShowSelectedVolumeWhenIdentifier, SettingType.STRING, currentLine, out ShowSelectedVolumeWhen);
                 if (IdentifierIsFound(currentLine, SecondaryMonitorIdentifier, identifierToGrab))
                     return FillSettingVariable(SecondaryMonitorIdentifier, SettingType.STRING, currentLine, out SecondaryMonitor);
                 if (IdentifierIsFound(currentLine, RemoveSongPreviewsIdentifier, identifierToGrab))

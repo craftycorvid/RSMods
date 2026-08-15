@@ -2,6 +2,8 @@
 #include "Main.hpp"
 #include "Framework/Framework.hpp"
 
+namespace Setting = Settings::Setting;
+
 #include <io.h>
 #include <share.h>
 
@@ -90,7 +92,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 	if (Menu::menuEnabled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, keyPressed, lParam))
 		return true;
 
-	if (Settings::ReturnSettingValue("PreventMidSongPause") == "on" && D3DHooks::cachedIsInSong) {
+	if (Settings::IsOn(Setting::PreventMidSongPause) && D3DHooks::cachedIsInSong) {
 		switch (msg) {
 			case WM_NCACTIVATE:
 			case WM_ACTIVATEAPP:
@@ -143,7 +145,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 }
 
 void UpdateGameWindowStacking() {
-	if (Settings::ReturnSettingValue("PreventMidSongPause") == "on") {
+	if (Settings::IsOn(Setting::PreventMidSongPause)) {
 		bool actuallyInSong = GameState::IsInSong();
 
 		if (ensureForcedTopMode) {

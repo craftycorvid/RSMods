@@ -3,6 +3,7 @@
 #include "../StringState.h"
 
 using Settings::StringColorMode;
+namespace Setting = Settings::Setting;
 
 /// <param name="stringnum"> - Number of string</param>
 /// <param name="state"> - Structs::string_state</param>
@@ -137,7 +138,7 @@ void ERMode::Toggle7StringMode() {
 	InitStrings(pegsTuning, PegsTuning);
 	//InitStrings(stringsBodyPrev, BodyPrev);
 
-	if (ColorsSaved && Settings::IsTwitchSettingEnabled("SolidNotes")) {
+	if (ColorsSaved && Settings::IsTwitchSettingEnabled(Setting::Twitch::SolidNotes)) {
 		if (customSolidColor.size() != 6) // JIC
 			return;
 
@@ -151,7 +152,7 @@ void ERMode::Toggle7StringMode() {
 	}
 
 	if ((ERMode::AttemptedERInThisSong && ERMode::UseERExclusivelyInThisSong) || (AttemptedERInTuner && UseERInTuner)) {
-		switch (Settings::GetStringColorMode("CustomStringColors")) {
+		switch (Settings::GetStringColorMode()) {
 			case StringColorMode::Default: // User wants original Rocksmith colors
 				break;
 			case StringColorMode::Zag: // User wants ZZ / Zag's colors (normal colors, but shifted down one string with a dark green on the top for Extended Range).
@@ -192,7 +193,7 @@ void ERMode::Toggle7StringMode() {
 			ColorsSaved = true;
 		}
 
-		if (Settings::GetStringColorMode("CustomStringColors") == StringColorMode::Custom) { // User wants their own custom (non-ER) colors
+		if (Settings::GetStringColorMode() == StringColorMode::Custom) { // User wants their own custom (non-ER) colors
 			SetColors(stringsEnabled, "Enabled_N");
 			SetColors(stringsGlow, "Glow_N");
 			SetColors(stringsDisabled, "Disabled_N");
@@ -207,7 +208,7 @@ void ERMode::Toggle7StringMode() {
 	}
 
 	//NOTE: this overrides string colors, no matter if ER song or not
-	if (Settings::GetStringColorMode("CustomStringColors") == StringColorMode::Test) { // If you want the color testing menu to work
+	if (Settings::GetStringColorMode() == StringColorMode::Test) { // If you want the color testing menu to work
 		if (saveDefaults) {
 			defaultColors.clear();
 			for (int idx = 0; idx < 17; idx++) {

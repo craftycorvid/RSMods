@@ -2,6 +2,8 @@
 #include "SolidNotesEffect.hpp"
 #include "../../Framework/Framework.hpp"
 
+namespace Setting = Settings::Setting;
+
 namespace CrowdControl::Effects {
 	
 	/// <summary>
@@ -51,8 +53,8 @@ namespace CrowdControl::Effects {
 
 		// Update note texture
 		Framework::Registry().EnqueueSettingsUpdate([hexColor] {
-			Settings::UpdateModSetting("SolidNoteColor", hexColor);
-			Settings::UpdateTwitchSetting("SolidNotes", "on");
+			Settings::UpdateModSetting(Setting::SolidNoteColor, hexColor);
+			Settings::UpdateTwitchSetting(Setting::Twitch::SolidNotes, "on");
 			D3DHooks::regenerateUserDefinedTexture = true;
 		});
 
@@ -70,7 +72,7 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesCustomEffect::Stop()" << std::endl);
 
 		Framework::Registry().EnqueueSettingsUpdate([] {
-			Settings::UpdateTwitchSetting("SolidNotes", "off");
+			Settings::UpdateTwitchSetting(Setting::Twitch::SolidNotes, "off");
 		});
 		running = false;
 		//ERMode::ResetAllStrings();
@@ -122,7 +124,7 @@ namespace CrowdControl::Effects {
 		twitchUserDefinedTexture = randomTextures[currentRandomTexture];
 
 		Framework::Registry().EnqueueSettingsUpdate([] {
-			Settings::UpdateTwitchSetting("SolidNotes", "on");
+			Settings::UpdateTwitchSetting(Setting::Twitch::SolidNotes, "on");
 		});
 
 		SetDuration(request);
@@ -140,7 +142,7 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesRandomEffect::Stop()" << std::endl);
 
 		Framework::Registry().EnqueueSettingsUpdate([] {
-			Settings::UpdateTwitchSetting("SolidNotes", "off");
+			Settings::UpdateTwitchSetting(Setting::Twitch::SolidNotes, "off");
 		});
 		running = false;
 		//ERMode::ResetAllStrings();
@@ -194,8 +196,8 @@ namespace CrowdControl::Effects {
 		// Update note texture and publish its regeneration request as one ordered settings change.
 		const std::string hexColor = ss.str();
 		Framework::Registry().EnqueueSettingsUpdate([hexColor] {
-			Settings::UpdateModSetting("SolidNoteColor", hexColor);
-			Settings::UpdateTwitchSetting("SolidNotes", "on");
+			Settings::UpdateModSetting(Setting::SolidNoteColor, hexColor);
+			Settings::UpdateTwitchSetting(Setting::Twitch::SolidNotes, "on");
 			D3DHooks::regenerateUserDefinedTexture = true;
 		});
 
@@ -214,7 +216,7 @@ namespace CrowdControl::Effects {
 		LOG_INFO("SolidNotesCustomRGBEffect::Stop()" << std::endl);
 
 		Framework::Registry().EnqueueSettingsUpdate([] {
-			Settings::UpdateTwitchSetting("SolidNotes", "off");
+			Settings::UpdateTwitchSetting(Setting::Twitch::SolidNotes, "off");
 		});
 		running = false;
 		//ERMode::ResetAllStrings();

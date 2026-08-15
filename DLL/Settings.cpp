@@ -77,23 +77,23 @@ void Settings::Initialize()
 		{Setting::ShowSongTimerEnabled, "off"},
 		{Setting::RainbowStringsEnabled, "off"},
 		{Setting::ExtendedRangeEnabled, "off"},
-		{"ExtendedRangeDropTuning", "off"},
-		{"ExtendedRangeFixBassTuning", "off"},
+		{Setting::ExtendedRangeDropTuning, "off"},
+		{Setting::ExtendedRangeFixBassTuning, "off"},
 		{Setting::SeparateNoteColors, "off"},
-		{"DiscoModeEnabled", "off"},
+		{Setting::DiscoModeEnabled, "off"},
 		{Setting::RemoveHeadstockEnabled, "off"},
 		{Setting::RemoveSkylineEnabled, "off"},
-		{"GreenScreenWallEnabled", "off"},
+		{Setting::GreenScreenWallEnabled, "off"},
 		{Setting::ForceProfileEnabled, "off"},
-		{"FretlessModeEnabled", "off"},
-		{"RemoveInlaysEnabled", "off"},
+		{Setting::FretlessModeEnabled, "off"},
+		{Setting::RemoveInlaysEnabled, "off"},
 		{Setting::ToggleLoftWhen, "manual"},
 		{Setting::ToggleSkylineWhen, "song"},
-		{"RemoveLaneMarkersEnabled", "off"},
+		{Setting::RemoveLaneMarkersEnabled, "off"},
 		{Setting::RemoveLyricsEnabled, "off"},
 		{Setting::RemoveLyricsWhen, "manual"},
 		{Setting::GuitarSpeak, "off"},
-		{"GuitarSpeakWhileTuning", "off"},
+		{Setting::GuitarSpeakWhileTuning, "off"},
 		{Setting::RemoveHeadstockWhen, "song"},
 		{Setting::ScreenShotScores, "off"},
 		{Setting::RRSpeedAboveOneHundred, "off"},
@@ -101,16 +101,15 @@ void Settings::Initialize()
 		{Setting::AutoTuneForSongDevice, ""},
 		{Setting::MidiInDevice, ""},
 		{Setting::AutoTuneForSongWhen, "manual"},
-		{"AutoTuneForSoftwareSemitoneSettings", ""},
-		{"AutoTuneForSoftwareSemitoneTriggers", ""},
-		{"AutoTuneForSoftwareTrueTuningSettings", ""},
-		{"AutoTuneForSoftwareTrueTuningTriggers", ""},
+		{Setting::AutoTuneForSoftwareSemitoneSettings, ""},
+		{Setting::AutoTuneForSoftwareSemitoneTriggers, ""},
+		{Setting::AutoTuneForSoftwareTrueTuningSettings, ""},
+		{Setting::AutoTuneForSoftwareTrueTuningTriggers, ""},
 		{Setting::ChordsMode, "off"},
-		{"ShowCurrentNoteOnScreen", "off"},
-		{"OnScreenFont", "Arial"},
+		{Setting::ShowCurrentNoteOnScreen, "off"},
+		{Setting::OnScreenFont, "Arial"},
 		{Setting::ProfileToLoad, ""},
 		{Setting::ShowSongTimerWhen, "manual"},
-		{"ShowSelectedVolumeWhen", "manual"},
 		{Setting::SecondaryMonitor, "off"},
 		{Setting::SongPreviews, "off"},
 		{Setting::OverrideInputVolumeEnabled, "off"},
@@ -121,16 +120,16 @@ void Settings::Initialize()
 		{Setting::AltOutputSampleRate, "off"},
 		{Setting::AllowLooping, "off"},
 		{Setting::AllowRewind, "off"},
-		{"FixOculusCrash", "off"},
-		{"FixBrokenTones", "off"},
+		{Setting::FixOculusCrash, "off"},
+		{Setting::FixBrokenTones, "off"},
 		{Setting::UseCustomNSPTimer, "off"},
-		{"DisplayCurrentAccuracy", "off"},
-		{"PreventMidSongPause", "off"},
-		{"RemoveFingerprints", "off"},
+		{Setting::DisplayCurrentAccuracy, "off"},
+		{Setting::PreventMidSongPause, "off"},
+		{Setting::RemoveFingerprints, "off"},
 	};
 
 	customSettings = {
-		{"ExtendedRangeMode", -5},
+		{Setting::ExtendedRangeMode, -5},
 		{Setting::CheckForNewSongsInterval, 5000},
 		{Setting::RRSpeedInterval, 2},
 		{Setting::TuningPedal, 0},
@@ -142,36 +141,36 @@ void Settings::Initialize()
 		{Setting::OverrideInputVolume, 17},
 		{Setting::CustomStringColors, 0},
 		{Setting::AlternativeOutputSampleRate, 48000},
-		{"LoopingLeadUp", 0},
+		{Setting::LoopingLeadUp, 0},
 		{Setting::RewindBy, 5000},
 		{Setting::RewindLeadup, 2000},
 		{Setting::CustomNSPTimeLimit, 10000},
-		{"OnScreenFontSize", 24},
+		{Setting::OnScreenFontSize, 24},
 
-		{"GuitarSpeakDelete", 0},
-		{"GuitarSpeakSpace", 0},
-		{"GuitarSpeakEnter", 0},
-		{"GuitarSpeakTab", 0},
-		{"GuitarSpeakPageUp", 0},
-		{"GuitarSpeakPageDown", 0},
-		{"GuitarSpeakUpArrow", 0},
-		{"GuitarSpeakDownArrow", 0},
-		{"GuitarSpeakEscape", 0},
-		{"GuitarSpeakClose", 0},
-		{"GuitarSpeakOBracket", 0},
-		{"GuitarSpeakCBracket", 0},
-		{"GuitarSpeakTildea", 0},
-		{"GuitarSpeakForSlash", 0},
-		{"GuitarSpeakAlt", 0}
+		{Setting::GuitarSpeakDelete, 0},
+		{Setting::GuitarSpeakSpace, 0},
+		{Setting::GuitarSpeakEnter, 0},
+		{Setting::GuitarSpeakTab, 0},
+		{Setting::GuitarSpeakPageUp, 0},
+		{Setting::GuitarSpeakPageDown, 0},
+		{Setting::GuitarSpeakUpArrow, 0},
+		{Setting::GuitarSpeakDownArrow, 0},
+		{Setting::GuitarSpeakEscape, 0},
+		{Setting::GuitarSpeakClose, 0},
+		{Setting::GuitarSpeakOBracket, 0},
+		{Setting::GuitarSpeakCBracket, 0},
+		{Setting::GuitarSpeakTildea, 0},
+		{Setting::GuitarSpeakForSlash, 0},
+		{Setting::GuitarSpeakAlt, 0}
 	};
 
 	twitchSettings = {
-		{"RainbowStrings", "off"},
-		{"RemoveNotes", "off"},
-		{"TransparentNotes", "off"},
-		{"SolidNotes", "off"},
-		{"DrunkMode", "off"},
-		{"FYourFC", "off"},
+		{Setting::Twitch::RainbowStrings, "off"},
+		{Setting::Twitch::RemoveNotes, "off"},
+		{Setting::Twitch::TransparentNotes, "off"},
+		{Setting::Twitch::SolidNotes, "off"},
+		{Setting::Twitch::DrunkMode, "off"},
+		{Setting::Twitch::FYourFC, "off"},
 	};
 }
 
@@ -252,11 +251,11 @@ void Settings::ReadModSettings() {
 	std::unique_lock lock(g_settingsMutex);
 
 	customSettings = {
-		{"ExtendedRangeMode", reader.GetLongValue("Mod Settings", "ExtendedRangeModeAt", -5)},
+		{Setting::ExtendedRangeMode, reader.GetLongValue("Mod Settings", "ExtendedRangeModeAt", -5)},
 		{Setting::CheckForNewSongsInterval, reader.GetLongValue("Mod Settings", "CheckForNewSongsInterval", 5000)},
 		{Setting::RRSpeedInterval, reader.GetLongValue("Mod Settings", "RRSpeedInterval", 2)},
 		{Setting::TuningPedal, reader.GetLongValue("Mod Settings", "TuningPedal", 0)},
-		{"TuningOffset", reader.GetLongValue("Mod Settings", "TuningOffset", 0)},
+		{Setting::TuningOffset, reader.GetLongValue("Mod Settings", "TuningOffset", 0)},
 		{Setting::VolumeControlInterval, reader.GetLongValue("Mod Settings", "VolumeControlInterval", 5)},
 		{Setting::SecondaryMonitorXPosition, reader.GetLongValue("Mod Settings", "SecondaryMonitorXPosition", 0)},
 		{Setting::SecondaryMonitorYPosition, reader.GetLongValue("Mod Settings", "SecondaryMonitorYPosition", 0)},
@@ -264,27 +263,27 @@ void Settings::ReadModSettings() {
 		{Setting::CustomStringColors, reader.GetLongValue("Toggle Switches", "CustomStringColors", 0)}, //0 = default, 1 = Zag, 2 = custom colors
 		{Setting::OverrideInputVolume, reader.GetLongValue("Mod Settings", "OverrideInputVolume", 17)}, // 17 is what Rocksmith calls default.
 		{Setting::AlternativeOutputSampleRate, reader.GetLongValue("Mod Settings", "AlternativeOutputSampleRate", 48000)},
-		{"LoopingLeadUp", reader.GetLongValue("Mod Settings", "LoopingLeadUp", 0)},
+		{Setting::LoopingLeadUp, reader.GetLongValue("Mod Settings", "LoopingLeadUp", 0)},
 		{Setting::RewindBy, reader.GetLongValue("Mod Settings", "RewindBy", 5000)},
 		{Setting::RewindLeadup, reader.GetLongValue("Mod Settings", "RewindLeadup", 2000)},
 		{Setting::CustomNSPTimeLimit, reader.GetLongValue("Mod Settings", "CustomNSPTimeLimit", 10000)},
-		{"OnScreenFontSize", reader.GetLongValue("Mod Settings", "OnScreenFontSize", 24)},
+		{Setting::OnScreenFontSize, reader.GetLongValue("Mod Settings", "OnScreenFontSize", 24)},
 
-		{"GuitarSpeakDelete", reader.GetLongValue("Guitar Speak", "GuitarSpeakDeleteWhen", 0)},
-		{"GuitarSpeakSpace", reader.GetLongValue("Guitar Speak", "GuitarSpeakSpaceWhen", 0)},
-		{"GuitarSpeakEnter", reader.GetLongValue("Guitar Speak", "GuitarSpeakEnterWhen", 0)},
-		{"GuitarSpeakTab", reader.GetLongValue("Guitar Speak", "GuitarSpeakTabWhen", 0)},
-		{"GuitarSpeakPageUp", reader.GetLongValue("Guitar Speak", "GuitarSpeakPGUPWhen", 0)},
-		{"GuitarSpeakPageDown", reader.GetLongValue("Guitar Speak", "GuitarSpeakPGDNWhen", 0)},
-		{"GuitarSpeakUpArrow", reader.GetLongValue("Guitar Speak", "GuitarSpeakUPWhen", 0)},
-		{"GuitarSpeakDownArrow", reader.GetLongValue("Guitar Speak", "GuitarSpeakDNWhen", 0)},
-		{"GuitarSpeakEscape", reader.GetLongValue("Guitar Speak", "GuitarSpeakESCWhen", 0)},
-		{"GuitarSpeakClose", reader.GetLongValue("Guitar Speak", "GuitarSpeakCloseWhen", 0)},
-		{"GuitarSpeakOBracket", reader.GetLongValue("Guitar Speak", "GuitarSpeakOBracketWhen", 0)},
-		{"GuitarSpeakCBracket", reader.GetLongValue("Guitar Speak", "GuitarSpeakCBracketWhen", 0)},
-		{"GuitarSpeakTildea", reader.GetLongValue("Guitar Speak", "GuitarSpeakTildeaWhen", 0)},
-		{"GuitarSpeakForSlash", reader.GetLongValue("Guitar Speak", "GuitarSpeakForSlashWhen", 0)},
-		{"GuitarSpeakAlt", reader.GetLongValue("Guitar Speak", "GuitarSpeakAltWhen", 0)},
+		{Setting::GuitarSpeakDelete, reader.GetLongValue("Guitar Speak", "GuitarSpeakDeleteWhen", 0)},
+		{Setting::GuitarSpeakSpace, reader.GetLongValue("Guitar Speak", "GuitarSpeakSpaceWhen", 0)},
+		{Setting::GuitarSpeakEnter, reader.GetLongValue("Guitar Speak", "GuitarSpeakEnterWhen", 0)},
+		{Setting::GuitarSpeakTab, reader.GetLongValue("Guitar Speak", "GuitarSpeakTabWhen", 0)},
+		{Setting::GuitarSpeakPageUp, reader.GetLongValue("Guitar Speak", "GuitarSpeakPGUPWhen", 0)},
+		{Setting::GuitarSpeakPageDown, reader.GetLongValue("Guitar Speak", "GuitarSpeakPGDNWhen", 0)},
+		{Setting::GuitarSpeakUpArrow, reader.GetLongValue("Guitar Speak", "GuitarSpeakUPWhen", 0)},
+		{Setting::GuitarSpeakDownArrow, reader.GetLongValue("Guitar Speak", "GuitarSpeakDNWhen", 0)},
+		{Setting::GuitarSpeakEscape, reader.GetLongValue("Guitar Speak", "GuitarSpeakESCWhen", 0)},
+		{Setting::GuitarSpeakClose, reader.GetLongValue("Guitar Speak", "GuitarSpeakCloseWhen", 0)},
+		{Setting::GuitarSpeakOBracket, reader.GetLongValue("Guitar Speak", "GuitarSpeakOBracketWhen", 0)},
+		{Setting::GuitarSpeakCBracket, reader.GetLongValue("Guitar Speak", "GuitarSpeakCBracketWhen", 0)},
+		{Setting::GuitarSpeakTildea, reader.GetLongValue("Guitar Speak", "GuitarSpeakTildeaWhen", 0)},
+		{Setting::GuitarSpeakForSlash, reader.GetLongValue("Guitar Speak", "GuitarSpeakForSlashWhen", 0)},
+		{Setting::GuitarSpeakAlt, reader.GetLongValue("Guitar Speak", "GuitarSpeakAltWhen", 0)},
 	};
 
 	modSettings[Setting::ToggleLoftEnabled] = reader.GetValue("Toggle Switches", "ToggleLoft", "off");
@@ -292,25 +291,25 @@ void Settings::ReadModSettings() {
 	modSettings[Setting::ShowSongTimerEnabled] = reader.GetValue("Toggle Switches", "ShowSongTimer", "off");
 	modSettings[Setting::ForceReEnumerationEnabled] = reader.GetValue("Toggle Switches", "ForceReEnumeration", "off");
 	modSettings[Setting::RainbowStringsEnabled] = reader.GetValue("Toggle Switches", "RainbowStrings", "off");
-	modSettings["RainbowNotesEnabled"] = reader.GetValue("Toggle Switches", "RainbowNotes", "off");
+	modSettings[Setting::RainbowNotesEnabled] = reader.GetValue("Toggle Switches", "RainbowNotes", "off");
 	modSettings[Setting::ExtendedRangeEnabled] = reader.GetValue("Toggle Switches", "ExtendedRange", "off");
-	modSettings["ExtendedRangeDropTuning"] = reader.GetValue("Toggle Switches", "ExtendedRangeDropTuning", "off");
-	modSettings["ExtendedRangeFixBassTuning"] = reader.GetValue("Toggle Switches", "ExtendedRangeFixBassTuning", "off");
+	modSettings[Setting::ExtendedRangeDropTuning] = reader.GetValue("Toggle Switches", "ExtendedRangeDropTuning", "off");
+	modSettings[Setting::ExtendedRangeFixBassTuning] = reader.GetValue("Toggle Switches", "ExtendedRangeFixBassTuning", "off");
 	modSettings[Setting::SeparateNoteColors] = reader.GetValue("Toggle Switches", "SeparateNoteColors", "off");
-	modSettings["DiscoModeEnabled"] = reader.GetValue("Toggle Switches", "DiscoMode", "off");
+	modSettings[Setting::DiscoModeEnabled] = reader.GetValue("Toggle Switches", "DiscoMode", "off");
 	modSettings[Setting::RemoveHeadstockEnabled] = reader.GetValue("Toggle Switches", "Headstock", "off");
 	modSettings[Setting::RemoveSkylineEnabled] = reader.GetValue("Toggle Switches", "Skyline", "off");
-	modSettings["GreenScreenWallEnabled"] = reader.GetValue("Toggle Switches", "GreenScreenWall", "off");
+	modSettings[Setting::GreenScreenWallEnabled] = reader.GetValue("Toggle Switches", "GreenScreenWall", "off");
 	modSettings[Setting::ForceProfileEnabled] = reader.GetValue("Toggle Switches", "ForceProfileLoad", "off");
-	modSettings["FretlessModeEnabled"] = reader.GetValue("Toggle Switches", "Fretless", "off");
-	modSettings["RemoveInlaysEnabled"] = reader.GetValue("Toggle Switches", "Inlays", "off");
+	modSettings[Setting::FretlessModeEnabled] = reader.GetValue("Toggle Switches", "Fretless", "off");
+	modSettings[Setting::RemoveInlaysEnabled] = reader.GetValue("Toggle Switches", "Inlays", "off");
 	modSettings[Setting::ToggleLoftWhen] = reader.GetValue("Toggle Switches", "ToggleLoftWhen", "manual");
 	modSettings[Setting::ToggleSkylineWhen] = reader.GetValue("Toggle Switches", "ToggleSkylineWhen", "song");
-	modSettings["RemoveLaneMarkersEnabled"] = reader.GetValue("Toggle Switches", "LaneMarkers", "off");
+	modSettings[Setting::RemoveLaneMarkersEnabled] = reader.GetValue("Toggle Switches", "LaneMarkers", "off");
 	modSettings[Setting::RemoveLyricsEnabled] = reader.GetValue("Toggle Switches", "Lyrics", "off");
 	modSettings[Setting::RemoveLyricsWhen] = reader.GetValue("Toggle Switches", "RemoveLyricsWhen", "manual");
 	modSettings[Setting::GuitarSpeak] = reader.GetValue("Toggle Switches", "GuitarSpeak", "off");
-	modSettings["GuitarSpeakWhileTuning"] = reader.GetValue("Guitar Speak", "GuitarSpeakWhileTuning", "off");
+	modSettings[Setting::GuitarSpeakWhileTuning] = reader.GetValue("Guitar Speak", "GuitarSpeakWhileTuning", "off");
 	modSettings[Setting::RemoveHeadstockWhen] = reader.GetValue("Toggle Switches", "RemoveHeadstockWhen", "song");
 	modSettings[Setting::ScreenShotScores] = reader.GetValue("Toggle Switches", "ScreenShotScores", "off");
 	modSettings[Setting::RRSpeedAboveOneHundred] = reader.GetValue("Toggle Switches", "RRSpeedAboveOneHundred", "off");
@@ -318,17 +317,16 @@ void Settings::ReadModSettings() {
 	modSettings[Setting::AutoTuneForSongDevice] = reader.GetValue("Toggle Switches", "AutoTuneForSongDevice", "");
 	modSettings[Setting::MidiInDevice] = reader.GetValue("Toggle Switches", "MidiInDevice", "");
 	modSettings[Setting::AutoTuneForSongWhen] = reader.GetValue("Toggle Switches", "AutoTuneForSongWhen", "manual");
-	modSettings["AutoTuneForSoftwareSemitoneSettings"] = reader.GetValue("Toggle Switches", "AutoTuneForSoftwareSemitoneSettings", "");
-	modSettings["AutoTuneForSoftwareSemitoneTriggers"] = reader.GetValue("Toggle Switches", "AutoTuneForSoftwareSemitoneTriggers", "");
-	modSettings["AutoTuneForSoftwareTrueTuningSettings"] = reader.GetValue("Toggle Switches", "AutoTuneForSoftwareTrueTuningSettings", "");
-	modSettings["AutoTuneForSoftwareTrueTuningTriggers"] = reader.GetValue("Toggle Switches", "AutoTuneForSoftwareTrueTuningTriggers", "");
+	modSettings[Setting::AutoTuneForSoftwareSemitoneSettings] = reader.GetValue("Toggle Switches", "AutoTuneForSoftwareSemitoneSettings", "");
+	modSettings[Setting::AutoTuneForSoftwareSemitoneTriggers] = reader.GetValue("Toggle Switches", "AutoTuneForSoftwareSemitoneTriggers", "");
+	modSettings[Setting::AutoTuneForSoftwareTrueTuningSettings] = reader.GetValue("Toggle Switches", "AutoTuneForSoftwareTrueTuningSettings", "");
+	modSettings[Setting::AutoTuneForSoftwareTrueTuningTriggers] = reader.GetValue("Toggle Switches", "AutoTuneForSoftwareTrueTuningTriggers", "");
 	modSettings[Setting::ChordsMode] = reader.GetValue("Toggle Switches", "ChordsMode", "off");
-	modSettings["ShowCurrentNoteOnScreen"] = reader.GetValue("Toggle Switches", "ShowCurrentNoteOnScreen", "off");
-	modSettings["OnScreenFont"] = reader.GetValue("Toggle Switches", "OnScreenFont", "Arial");
+	modSettings[Setting::ShowCurrentNoteOnScreen] = reader.GetValue("Toggle Switches", "ShowCurrentNoteOnScreen", "off");
+	modSettings[Setting::OnScreenFont] = reader.GetValue("Toggle Switches", "OnScreenFont", "Arial");
 	modSettings[Setting::ProfileToLoad] = reader.GetValue("Toggle Switches", "ProfileToLoad", "");
-	modSettings["CustomHighwayColors"] = reader.GetValue("Highway Colors", "CustomHighwayColors", "off");
+	modSettings[Setting::CustomHighwayColors] = reader.GetValue("Highway Colors", "CustomHighwayColors", "off");
 	modSettings[Setting::ShowSongTimerWhen] = reader.GetValue("Toggle Switches", "ShowSongTimerWhen", "manual");
-	modSettings["ShowSelectedVolumeWhen"] = reader.GetValue("Toggle Switches", "ShowSelectedVolumeWhen", "manual");
 	modSettings[Setting::SecondaryMonitor] = reader.GetValue("Toggle Switches", "SecondaryMonitor", "off");
 	modSettings[Setting::SongPreviews] = reader.GetValue("Toggle Switches", "SongPreviews", "off");
 	modSettings[Setting::OverrideInputVolumeEnabled] = reader.GetValue("Toggle Switches", "OverrideInputVolumeEnabled", "off");
@@ -339,12 +337,12 @@ void Settings::ReadModSettings() {
 	modSettings[Setting::AltOutputSampleRate] = reader.GetValue("Toggle Switches", "AltOutputSampleRate", "off");
 	modSettings[Setting::AllowLooping] = reader.GetValue("Toggle Switches", "AllowLooping", "off");
 	modSettings[Setting::AllowRewind] = reader.GetValue("Toggle Switches", "AllowRewind", "off");
-	modSettings["FixOculusCrash"] = reader.GetValue("Toggle Switches", "FixOculusCrash", "off");
-	modSettings["FixBrokenTones"] = reader.GetValue("Toggle Switches", "FixBrokenTones", "off");
+	modSettings[Setting::FixOculusCrash] = reader.GetValue("Toggle Switches", "FixOculusCrash", "off");
+	modSettings[Setting::FixBrokenTones] = reader.GetValue("Toggle Switches", "FixBrokenTones", "off");
 	modSettings[Setting::UseCustomNSPTimer] = reader.GetValue("Toggle Switches", "UseCustomNSPTimer", "off");
-	modSettings["DisplayCurrentAccuracy"] = reader.GetValue("Toggle Switches", "DisplayCurrentAccuracy", "off");
-	modSettings["PreventMidSongPause"] = reader.GetValue("Toggle Switches", "PreventMidSongPause", "off");
-	modSettings["RemoveFingerprints"] = reader.GetValue("Toggle Switches", "RemoveFingerprints", "off");
+	modSettings[Setting::DisplayCurrentAccuracy] = reader.GetValue("Toggle Switches", "DisplayCurrentAccuracy", "off");
+	modSettings[Setting::PreventMidSongPause] = reader.GetValue("Toggle Switches", "PreventMidSongPause", "off");
+	modSettings[Setting::RemoveFingerprints] = reader.GetValue("Toggle Switches", "RemoveFingerprints", "off");
 }
 
 /// <summary>
@@ -493,22 +491,28 @@ Settings::When Settings::GetWhen(const std::string& name) {
 	return ParseWhen(ModSettingUnlocked(name));
 }
 
+template <typename T>
+T GetEnumSetting(const std::string& name) {
+	static_assert(std::is_enum_v<T>);
+
+	std::shared_lock lock(g_settingsMutex);
+	return static_cast<T>(CustomSettingUnlocked(name));
+}
+
 /// <summary>
 /// Read the CustomStringColors mode. The stored int maps 1:1 onto the enum, so an
 /// out-of-range value stays out-of-range and falls through consumers' default cases.
 /// </summary>
-Settings::StringColorMode Settings::GetStringColorMode(const std::string& name) {
-	std::shared_lock lock(g_settingsMutex);
-	return static_cast<StringColorMode>(CustomSettingUnlocked(name));
+Settings::StringColorMode Settings::GetStringColorMode() {
+	return GetEnumSetting<StringColorMode>(Setting::CustomStringColors);
 }
-
+	
 /// <summary>
 /// Read the SeparateNoteColorsMode. Like StringColorMode, the stored int maps 1:1 onto
 /// the enum, so out-of-range values are preserved for consumers' default handling.
 /// </summary>
-Settings::NoteColorMode Settings::GetNoteColorMode(const std::string& name) {
-	std::shared_lock lock(g_settingsMutex);
-	return static_cast<NoteColorMode>(CustomSettingUnlocked(name));
+Settings::NoteColorMode Settings::GetNoteColorMode() {
+	return GetEnumSetting<NoteColorMode>(Setting::SeparateNoteColorsMode);
 }
 
 /// <summary>
@@ -635,7 +639,7 @@ void Settings::ParseSolidColorsMessage(const std::string& twitchMsg) {
 	if (msgParts.size() < 3)
 		return;
 
-	UpdateModSetting("SolidNoteColor", msgParts[2]);
+	UpdateModSetting(Setting::SolidNoteColor, msgParts[2]);
 }
 
 /// <summary>
