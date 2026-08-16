@@ -1,47 +1,48 @@
-#include <iomanip>
-
 #include "CommandRouter.hpp"
 
 #include <algorithm>
 #include <array>
 #include <condition_variable>
 #include <deque>
+#include <exception>
+#include <iomanip>
 #include <mutex>
 #include <optional>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
 
-#include "../RSColor.h"
+#include "../Log.hpp"
 #include "CommandCollisionDiagnostics.hpp"
 #include "ModContext.hpp"
-#include "../Log.hpp"
 
 namespace Framework {
 	struct CommandRouter::Impl {
-		enum class DispatchPass {
-			Settings,
+		enum class BindingKind {
+			Setting,
 			FixedKey,
 		};
 
 		struct Binding {
 			const IMod* mod = nullptr;
-			std::string name;
-			std::optional<std::uint32_t> fixedKey;
+			std::string commandName;
+			std::string keySetting;
+			std::optional<std::uint32_t> fixedVirtualKey;
 			KeyEdge edge = KeyEdge::Up;
 			Availability availability = Availability::Active;
-			DispatchPass pass = DispatchPass::Settings;
+			BindingKind kind = BindingKind::Setting;
 			KeyAction action;
 			KeyPredicate predicate;
 			std::string logMessage;
 
-			static Binding ForSetting(const IMod* mod, std::string name, KeyEdge edge,
+			static Binding ForSetting(const IMod* mod, std::string keySetting, KeyEdge edge,
 				Availability availability, KeyAction action,
 				KeyPredicate predicate, std::string logMessage) {
 
 				Binding binding;
 				binding.mod = mod;
-				binding.name = std::move(name);
+				binding.commandName = keySetting;
+				binding.keySetting = std::move(keySetting);
 				binding.edge = edge;
 				binding.availability = availability;
 				binding.action = std::move(action);
@@ -54,35 +55,40 @@ namespace Framework {
 			static Binding ForFixedKey(const IMod* mod, std::string name, std::uint32_t virtualKey,
 				KeyEdge edge, Availability availability, KeyAction action,
 				KeyPredicate predicate, std::string logMessage) {
-				
-				Binding binding = ForSetting(mod, std::move(name), edge, availability,
-					std::move(action), std::move(predicate), std::move(logMessage));
-				binding.fixedKey = virtualKey;
-				binding.pass = DispatchPass::FixedKey;
+
+				Binding binding;
+				binding.mod = mod;
+				binding.commandName = std::move(name);
+				binding.fixedVirtualKey = virtualKey;
+				binding.edge = edge;
+				binding.availability = availability;
+				binding.kind = BindingKind::FixedKey;
+				binding.action = std::move(action);
+				binding.predicate = std::move(predicate);
+				binding.logMessage = std::move(logMessage);
 
 				return binding;
 			}
 
 			bool operator==(const Binding& other) const {
-				return std::tie(edge, pass, name, fixedKey) ==
-					std::tie(other.edge, other.pass, other.name, other.fixedKey);
+				return std::tie(edge, kind, commandName, fixedVirtualKey) ==
+					std::tie(other.edge, other.kind, other.commandName, other.fixedVirtualKey);
 			}
 
 			bool operator<(const Binding& other) const {
-				return std::tie(edge, pass, name) < std::tie(other.edge, other.pass, other.name);
+				return std::tie(edge, kind, commandName) < std::tie(other.edge, other.kind, other.commandName);
 			}
 
 			unsigned int ResolveKey(const KeyResolver& resolver) const {
-				if (fixedKey) return *fixedKey;
+				if (fixedVirtualKey) return *fixedVirtualKey;
 
-				return resolver ? resolver(name) : 0;
+				return resolver ? resolver(keySetting) : 0;
 			}
 
-			bool Matches(const KeyEvent& event, DispatchPass dispatchPass,
+			bool Matches(const KeyEvent& event, BindingKind requiredKind,
 				const KeyResolver& resolver) const {
 
-				return pass == dispatchPass && edge == event.edge &&
-					ResolveKey(resolver) == event.virtualKey;
+				return kind == requiredKind && edge == event.edge && ResolveKey(resolver) == event.virtualKey;
 			}
 		};
 
@@ -102,14 +108,14 @@ namespace Framework {
 			RoutingSnapshot routing;
 		};
 
-		inline static constexpr std::array<DispatchPass, 2> DispatchOrder = {
-			DispatchPass::Settings,
-			DispatchPass::FixedKey,
+		inline static constexpr std::array<BindingKind, 2> DispatchOrder = {
+			BindingKind::Setting,
+			BindingKind::FixedKey,
 		};
 
 		void AddBinding(Binding binding) {
 			if (std::find(bindings.begin(), bindings.end(), binding) != bindings.end()) {
-				LOG_ERROR("[Framework] duplicate binding '" << binding.name << "' rejected" << std::endl);
+				LOG_ERROR("[Framework] duplicate binding '" << binding.commandName << "' rejected" << std::endl);
 				return;
 			}
 
@@ -140,9 +146,9 @@ namespace Framework {
 			return batch;
 		}
 
-		const Binding* FindBinding(const RoutingSnapshot& routing, const KeyEvent& event, DispatchPass pass) const {
+		const Binding* FindBinding(const RoutingSnapshot& routing, const KeyEvent& event, BindingKind kind) const {
 			for (const Binding& binding : routing.bindings) {
-				if (binding.Matches(event, pass, routing.resolver) && IsAvailable(binding)) {
+				if (binding.Matches(event, kind, routing.resolver) && IsAvailable(binding)) {
 					return &binding;
 				}
 			}
@@ -162,16 +168,16 @@ namespace Framework {
 				}
 			}
 			catch (const std::exception& ex) {
-				NoteFault(binding.mod, binding.name, ex.what());
+				NoteFault(binding.mod, binding.commandName, ex.what());
 			}
 			catch (...) {
-				NoteFault(binding.mod, binding.name, "threw an unknown exception");
+				NoteFault(binding.mod, binding.commandName, "threw an unknown exception");
 			}
 		}
 
 		void DispatchEvent(ModContext& context, const KeyEvent& event, const RoutingSnapshot& routing) {
-			for (DispatchPass pass : DispatchOrder) {
-				const Binding* binding = FindBinding(routing, event, pass);
+			for (BindingKind kind : DispatchOrder) {
+				const Binding* binding = FindBinding(routing, event, kind);
 				if (binding) InvokeBinding(*binding, context, event);
 			}
 		}
@@ -190,10 +196,10 @@ namespace Framework {
 				const unsigned int key = binding.ResolveKey(routing.resolver);
 				if (key == 0) continue;
 
-				const auto kind = binding.pass == DispatchPass::Settings
+				const auto kind = binding.kind == BindingKind::Setting
 					? Detail::CommandBindingKind::Setting
 					: Detail::CommandBindingKind::FixedKey;
-				descriptions.push_back({ binding.edge, key, kind, binding.name });
+				descriptions.push_back({ binding.edge, key, kind, binding.commandName });
 			}
 
 			return descriptions;
@@ -211,8 +217,7 @@ namespace Framework {
 			if (!state.faulted) {
 				state.faulted = true;
 				faultedMods.push_back(mod);
-				LOG_ERROR("[Framework] binding '" << name << "' " << detail
-					<< "; its mod will be disabled" << std::endl);
+				LOG_ERROR("[Framework] binding '" << name << "' " << detail << "; its mod will be disabled" << std::endl);
 			}
 		}
 

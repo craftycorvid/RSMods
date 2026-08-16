@@ -1,9 +1,10 @@
 #pragma once
 
-// Enabled candidates are considered by priority then ID. Winners reserve their resources
-// immediately, so conflicts are checked against winners rather than all enabled candidates.
+// Requested candidates are considered by priority then ID. Winners reserve their resources
+// immediately, so conflicts are checked against winners rather than all requested candidates.
 
 #include <algorithm>
+#include <numeric>
 #include <string>
 #include <string_view>
 #include <unordered_set>
@@ -14,37 +15,50 @@ namespace Framework::Resolver {
 	struct Candidate {
 		std::string_view id;
 		int priority = 0;
-		bool enabled = false;
-		const std::vector<std::string>* resources = nullptr; // Exclusive resources needed (may be null/empty).
+		bool requested = false;
+		const std::vector<std::string>* exclusiveResources = nullptr;
+
+		const std::vector<std::string>& Resources() const {
+			static const std::vector<std::string> Empty;
+			return exclusiveResources ? *exclusiveResources : Empty;
+		}
 	};
 
-	inline void Resolve(const std::vector<Candidate>& candidates, std::vector<char>& active) {
-		const std::size_t n = candidates.size();
-		active.assign(n, 0);
+	// One win/lose flag per candidate, positionally indexed alongside `candidates`.
+	using SelectionMask = std::vector<char>;
 
-		std::vector<std::size_t> order(n);
-		for (std::size_t i = 0; i < n; ++i) order[i] = i;
-		std::sort(order.begin(), order.end(), [&](std::size_t x, std::size_t y) {
-			if (candidates[x].priority != candidates[y].priority) return candidates[x].priority > candidates[y].priority;
-			return candidates[x].id < candidates[y].id; // Stable across TUs, unlike registration order.
+	inline SelectionMask Resolve(const std::vector<Candidate>& candidates) {
+		SelectionMask selected(candidates.size(), 0);
+
+		std::vector<std::size_t> priorityOrder(candidates.size());
+		std::iota(priorityOrder.begin(), priorityOrder.end(), std::size_t{ 0 });
+		std::sort(priorityOrder.begin(), priorityOrder.end(), [&](std::size_t leftIndex, std::size_t rightIndex) {
+			const Candidate& left = candidates[leftIndex];
+			const Candidate& right = candidates[rightIndex];
+
+			if (left.priority != right.priority) {
+				return left.priority > right.priority;
+			}
+
+			return left.id < right.id; // Stable across TUs, unlike registration order.
 		});
 
-		std::unordered_set<std::string> reserved;
-		for (std::size_t idx : order) {
-			const Candidate& c = candidates[idx];
-			if (!c.enabled) continue;
+		std::unordered_set<std::string> reservedResources;
+		for (std::size_t candidateIndex : priorityOrder) {
+			const Candidate& candidate = candidates[candidateIndex];
+			if (!candidate.requested) continue;
 
-			bool blocked = false;
-			if (c.resources) {
-				for (const std::string& r : *c.resources) {
-					if (reserved.count(r)) { blocked = true; break; }
-				}
-			}
+			const auto& resources = candidate.Resources();
+			const bool blocked = std::any_of(resources.begin(), resources.end(),
+				[&](const std::string& resource) {
+					return reservedResources.count(resource) > 0;
+				});
 			if (blocked) continue;
 
-			active[idx] = 1;
-			if (c.resources)
-				for (const std::string& r : *c.resources) reserved.insert(r);
+			selected[candidateIndex] = 1;
+			reservedResources.insert(resources.begin(), resources.end());
 		}
+
+		return selected;
 	}
 }

@@ -1,43 +1,78 @@
-#include <iomanip>
-
-#include "../RSColor.h"
 #include "ModRegistry.hpp"
 
 #include <algorithm>
 #include <chrono>
-#include <functional>
+#include <exception>
+#include <iomanip>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <thread>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
+#include "../Log.hpp"
 #include "ConflictResolver.hpp"
 #include "HostHooks.hpp"
 #include "ModContext.hpp"
-#include "../Log.hpp"
 
 namespace Framework {
 	PendingRegistration* g_modPendingHead = nullptr;
 
+	// Registered initializes into Inactive; resolution moves Inactive <-> Active.
+	// Active may park in Deactivating until render callbacks quiesce. Faulted is terminal.
+	// The complete lifecycle contract and transition diagram live in README.md.
 	enum class ModState {
 		Registered,
-		Inactive,      // Initialized but not effectively active: never-activated, user-disabled, or conflict-suppressed.
+		Inactive,
 		Active,
-		Deactivating,  // Leaving Active but render callbacks still in flight; teardown deferred until quiescent.
+		Deactivating,
+		Faulted,
+	};
+
+	enum class DeactivationReason {
+		Disabled,
+		Suppressed,
 		Faulted,
 	};
 
 	struct ModRegistry::Impl {
 		using Hook = void (IMod::*)(ModContext&);
 
+		// One flag per record, positionally indexed alongside `records` and `exclusiveResourcesByMod`.
+		// vector<char> rather than vector<bool> so elements are addressable, plain bytes.
+		using ActivationMask = std::vector<char>;
+
+		struct PendingTeardown {
+			DeactivationReason reason;
+
+			ModState TargetState() const {
+				return reason == DeactivationReason::Faulted
+					? ModState::Faulted
+					: ModState::Inactive;
+			}
+
+			const char* LogOutcome() const {
+				switch (reason) {
+				case DeactivationReason::Disabled:
+					return " disabled";
+				case DeactivationReason::Suppressed:
+					return " suppressed by a higher-priority conflicting mod";
+				case DeactivationReason::Faulted:
+					return " faulted";
+				}
+
+				return " deactivated";
+			}
+		};
+
 		struct Record {
 			std::unique_ptr<IMod> mod;
 			ModState state = ModState::Registered;
 			bool inSong = false;
-			ModState pendingTarget = ModState::Inactive; // Resting state once a deferred teardown completes.
-			bool pendingSuppressed = false;              // When resting Inactive: suppressed-by-conflict vs user-disabled (log only).
+			std::optional<PendingTeardown> pendingTeardown;
 		};
 
 		bool Invoke(Record& record, Hook hook, const char* where) {
@@ -57,7 +92,7 @@ namespace Framework {
 			return false;
 		}
 
-		bool EnabledSafe(Record& record) {
+		bool IsRequestedSafe(Record& record) {
 			ctx.currentMod = record.mod.get();
 
 			try {
@@ -73,6 +108,7 @@ namespace Framework {
 			LOG_ERROR("[Framework] " << record.mod->Id() << " faulted (" << reason << "); it will no longer run" << std::endl);
 
 			record.state = ModState::Faulted;
+			record.pendingTeardown.reset();
 			Hooks::Render().RemoveMod(record.mod.get());
 			Commands().RemoveMod(record.mod.get());
 		}
@@ -88,27 +124,29 @@ namespace Framework {
 		}
 
 		void FinishTeardown(Record& record) {
+			const PendingTeardown teardown = *record.pendingTeardown;
+
 			Revert(record);
-			if (record.pendingTarget == ModState::Faulted) {
+			if (teardown.TargetState() == ModState::Faulted) {
 				Hooks::Render().RemoveMod(record.mod.get());
 				Commands().RemoveMod(record.mod.get());
 			}
 
-			record.state = record.pendingTarget;
-
-			const char* outcome = record.pendingTarget == ModState::Faulted ? " faulted"
-				: record.pendingSuppressed ? " suppressed by a higher-priority conflicting mod" : " disabled";
-			LOG_INFO("[Framework] " << record.mod->Id() << outcome << std::endl);
+			record.state = teardown.TargetState();
+			record.pendingTeardown.reset();
+			LOG_INFO("[Framework] " << record.mod->Id() << teardown.LogOutcome() << std::endl);
 		}
 
 		// Leaves Active. If render callbacks are still in flight, parks in Deactivating and
 		// defers the OnDisabled revert to a later tick (never frees state under a live callback).
-		void BeginTeardown(Record& record, ModState target, bool suppressed) {
+		void BeginTeardown(Record& record, DeactivationReason reason) {
 			Hooks::Render().SetModActive(record.mod.get(), false);
 			Commands().SetModActive(record.mod.get(), false);
-			if (target == ModState::Faulted) Commands().SetModInitialized(record.mod.get(), false);
-			record.pendingTarget = target;
-			record.pendingSuppressed = suppressed;
+			if (reason == DeactivationReason::Faulted) {
+				Commands().SetModInitialized(record.mod.get(), false);
+			}
+
+			record.pendingTeardown = PendingTeardown{ reason };
 
 			if (Hooks::Render().IsModQuiescent(record.mod.get())) {
 				FinishTeardown(record);
@@ -127,19 +165,21 @@ namespace Framework {
 			}
 		}
 
+		// Escalate an already-running mod toward Faulted, respecting an in-flight teardown.
+		// Redirects a pending deactivation to Faulted rather than starting a second teardown.
+		void EscalateToFaulted(Record& record) {
+			if (record.state == ModState::Active) {
+				BeginTeardown(record, DeactivationReason::Faulted);
+			}
+			else if (record.state == ModState::Deactivating) {
+				record.pendingTeardown = PendingTeardown{ DeactivationReason::Faulted };
+				Commands().SetModInitialized(record.mod.get(), false);
+			}
+		}
+
 		void HandleRenderFaults() {
 			for (const IMod* mod : Hooks::Render().TakeFaultedMods()) {
-				Record* record = FindByMod(mod);
-
-				if (!record) continue;
-
-				if (record->state == ModState::Active) {
-					BeginTeardown(*record, ModState::Faulted, false);
-				}
-				else if (record->state == ModState::Deactivating) {
-					record->pendingTarget = ModState::Faulted;
-					Commands().SetModInitialized(record->mod.get(), false);
-				}
+				if (Record* record = FindByMod(mod)) EscalateToFaulted(*record);
 			}
 		}
 
@@ -148,15 +188,13 @@ namespace Framework {
 				Record* record = FindByMod(mod);
 				if (!record) continue;
 
-				if (record->state == ModState::Active) {
-					BeginTeardown(*record, ModState::Faulted, false);
-				}
-				else if (record->state == ModState::Deactivating) {
-					record->pendingTarget = ModState::Faulted;
-					Commands().SetModInitialized(record->mod.get(), false);
-				}
-				else if (record->state == ModState::Inactive) {
+				// A binding can fault while the mod is only Inactive (initialized, not active),
+				// which the render path never sees; tear it down straight away.
+				if (record->state == ModState::Inactive) {
 					Fault(*record, "threw in a command");
+				}
+				else {
+					EscalateToFaulted(*record);
 				}
 			}
 		}
@@ -167,6 +205,7 @@ namespace Framework {
 					return &record;
 				}
 			}
+
 			return nullptr;
 		}
 
@@ -189,7 +228,7 @@ namespace Framework {
 				return true;
 			}
 
-			BeginTeardown(record, ModState::Faulted, false);
+			BeginTeardown(record, DeactivationReason::Faulted);
 			return false;
 		}
 
@@ -219,12 +258,13 @@ namespace Framework {
 			std::vector<std::function<void()>> batch;
 			std::lock_guard<std::mutex> lock(settingsMutex);
 			batch.swap(pendingSettings);
+
 			return batch;
 		}
 
 		void DrainSettings() {
 			auto batch = TakePendingSettings();
-			if (batch.empty())return;
+			if (batch.empty()) return;
 
 			for (auto& apply : batch) {
 				try {
@@ -240,25 +280,26 @@ namespace Framework {
 			// OnSettingsChanged there would touch state that is about to be freed (race/UAF).
 			// It receives fresh settings when it next reaches Active (Activate -> OnEnabled).
 			for (auto& record : records) {
-				if (IsActivatable(record.state))
+				if (IsResolutionEligible(record.state)) {
 					Invoke(record, &IMod::OnSettingsChanged, "OnSettingsChanged");
+				}
 			}
-			
+
 			Commands().RefreshDiagnostics();
 		}
 
-		bool IsActivatable(ModState state) const {
+		bool IsResolutionEligible(ModState state) const {
 			return state == ModState::Inactive || state == ModState::Active;
 		}
 
-		void BuildResolverIfNeeded() {
-			if (!resolverDirty) return;
+		void BuildResourceIndexIfNeeded() {
+			if (!resourceIndexDirty) return;
 
-			modResources.assign(records.size(), {});
+			exclusiveResourcesByMod.assign(records.size(), {});
 
 			for (size_t i = 0; i < records.size(); ++i) {
 				for (std::string_view resource : records[i].mod->ClaimsExclusive()) {
-					auto& resources = modResources[i];
+					auto& resources = exclusiveResourcesByMod[i];
 					const std::string owned(resource);
 
 					if (std::find(resources.begin(), resources.end(), owned) == resources.end()) {
@@ -266,25 +307,28 @@ namespace Framework {
 					}
 				}
 			}
-			resolverDirty = false;
+
+			resourceIndexDirty = false;
 		}
 
-		void ComputeRawEnabled(std::vector<char>& rawEnabled) {
-			rawEnabled.assign(records.size(), 0);
+		ActivationMask ComputeRequestedActive() {
+			ActivationMask requestedActive(records.size(), 0);
 
 			for (size_t i = 0; i < records.size(); ++i) {
-				if (IsActivatable(records[i].state)) {
-					rawEnabled[i] = EnabledSafe(records[i]);
+				if (IsResolutionEligible(records[i].state)) {
+					requestedActive[i] = IsRequestedSafe(records[i]);
 				}
 			}
+
+			return requestedActive;
 		}
 
-		void ResolveDesired(const std::vector<char>& rawEnabled, std::vector<char>& desired) {
+		ActivationMask SelectActiveMods(const ActivationMask& requestedActive) {
 			std::unordered_set<std::string_view> reservedByDeactivating;
 
 			for (size_t i = 0; i < records.size(); ++i) {
 				if (records[i].state == ModState::Deactivating) {
-					for (const std::string& resource : modResources[i]) {
+					for (const std::string& resource : exclusiveResourcesByMod[i]) {
 						reservedByDeactivating.insert(resource);
 					}
 				}
@@ -292,30 +336,59 @@ namespace Framework {
 
 			std::vector<Resolver::Candidate> candidates(records.size());
 			for (size_t i = 0; i < records.size(); ++i) {
-				candidates[i].id = records[i].mod->Id();
-				candidates[i].priority = records[i].mod->Priority();
-				candidates[i].enabled = rawEnabled[i] && IsActivatable(records[i].state);
-				candidates[i].resources = &modResources[i];
+				Resolver::Candidate& candidate = candidates[i];
+				candidate.id = records[i].mod->Id();
+				candidate.priority = records[i].mod->Priority();
+				candidate.exclusiveResources = &exclusiveResourcesByMod[i];
+				candidate.requested = requestedActive[i]
+					&& IsResolutionEligible(records[i].state)
+					&& std::none_of(exclusiveResourcesByMod[i].begin(), exclusiveResourcesByMod[i].end(),
+						[&](const std::string& resource) {
+							return reservedByDeactivating.count(resource) > 0;
+						});
+			}
 
-				if (candidates[i].enabled) {
-					for (const std::string& resource : modResources[i]) {
-						if (reservedByDeactivating.count(resource)) {
-							candidates[i].enabled = false;
-							break;
-						}
-					}
+			return Resolver::Resolve(candidates);
+		}
+
+		// Begin teardown of every Active mod the resolver did not select. Returns true if any
+		// parked in Deactivating (still reserving resources), so the caller can re-resolve.
+		bool BeginOutgoingTeardowns(const ActivationMask& requestedActive, const ActivationMask& selectedActive) {
+
+			bool teardownDeferred = false;
+
+			for (size_t i = 0; i < records.size(); ++i) {
+				auto& record = records[i];
+
+				if (record.state == ModState::Active && !selectedActive[i]) {
+					const DeactivationReason reason = requestedActive[i]
+						? DeactivationReason::Suppressed
+						: DeactivationReason::Disabled;
+					BeginTeardown(record, reason);
+					teardownDeferred |= record.state == ModState::Deactivating;
 				}
 			}
 
-			Resolver::Resolve(candidates, desired);
+			return teardownDeferred;
+		}
+
+		void ActivateAndTickSelected(const ActivationMask& selectedActive, GamePhase phase) {
+			for (size_t i = 0; i < records.size(); ++i) {
+				auto& record = records[i];
+
+				if (!selectedActive[i]) continue;
+
+				if (record.state != ModState::Active) Activate(record);
+				if (record.state == ModState::Active) ReconcileSongAndTick(record, phase);
+			}
 		}
 
 		std::vector<Record> records;
 		ModContext ctx;
 		std::mutex settingsMutex;
 		std::vector<std::function<void()>> pendingSettings;
-		bool resolverDirty = false;
-		std::vector<std::vector<std::string>> modResources;
+		bool resourceIndexDirty = false;
+		std::vector<std::vector<std::string>> exclusiveResourcesByMod;
 	};
 
 	ModRegistry::ModRegistry() : impl(std::make_unique<Impl>()) {}
@@ -334,14 +407,14 @@ namespace Framework {
 
 		for (const auto& record : impl->records) {
 			if (record.mod->Id() == id) {
-				LOG_ERROR("[Framework] Duplicate mod Id '" << id << "' — registration rejected" << std::endl);
+				LOG_ERROR("[Framework] Duplicate mod Id '" << id << "' - registration rejected" << std::endl);
 				return;
 			}
 		}
 
 		LOG_INFO("[Framework] Registered mod: " << id << std::endl);
 		impl->records.push_back(Impl::Record{ std::move(mod) });
-		impl->resolverDirty = true;
+		impl->resourceIndexDirty = true;
 	}
 
 	void ModRegistry::DispatchInitialize() {
@@ -356,6 +429,7 @@ namespace Framework {
 				impl->Fault(record, "threw in OnInitialize");
 			}
 		}
+
 		Commands().RefreshDiagnostics();
 	}
 
@@ -377,37 +451,19 @@ namespace Framework {
 		impl->HandleCommandFaults();
 		impl->RetryPendingDeactivations();
 		impl->DrainSettings();
-		impl->BuildResolverIfNeeded();
+		impl->BuildResourceIndexIfNeeded();
 
-		std::vector<char> rawEnabled;
-		std::vector<char> desired;
-		impl->ComputeRawEnabled(rawEnabled);
-		impl->ResolveDesired(rawEnabled, desired);
+		const auto requestedActive = impl->ComputeRequestedActive();
+		auto selectedActive = impl->SelectActiveMods(requestedActive);
 
-		// Pass 1: outgoing transitions begin before new activations, so a replacement cannot
-		// acquire an exclusive resource the outgoing (still-reserving) mod hasn't released.
-		bool teardownDeferred = false;
-		for (size_t i = 0; i < impl->records.size(); ++i) {
-			auto& record = impl->records[i];
-
-			if (record.state == ModState::Active && !desired[i]) {
-				impl->BeginTeardown(record, ModState::Inactive, /*suppressed=*/rawEnabled[i] != 0);
-				teardownDeferred |= record.state == ModState::Deactivating;
-			}
+		// Outgoing teardowns run before any activation so a replacement cannot acquire an
+		// exclusive resource the outgoing (still-reserving) mod hasn't released. If a teardown
+		// had to park in Deactivating, re-resolve so winners see the resources it still holds.
+		if (impl->BeginOutgoingTeardowns(requestedActive, selectedActive)) {
+			selectedActive = impl->SelectActiveMods(requestedActive);
 		}
 
-		if (teardownDeferred) impl->ResolveDesired(rawEnabled, desired);
-
-		// Pass 2: activate winners and tick them.
-		for (size_t i = 0; i < impl->records.size(); ++i) {
-			auto& record = impl->records[i];
-
-			if (!desired[i])
-				continue;
-
-			if (record.state != ModState::Active) impl->Activate(record);
-			if (record.state == ModState::Active) impl->ReconcileSongAndTick(record, phase);
-		}
+		impl->ActivateAndTickSelected(selectedActive, phase);
 	}
 
 	void ModRegistry::Shutdown() {

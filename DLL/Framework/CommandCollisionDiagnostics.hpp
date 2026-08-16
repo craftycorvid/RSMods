@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "CommandRouter.hpp"
+#include "CommandTypes.hpp"
 
 namespace Framework::Detail {
 	enum class CommandBindingKind {
@@ -36,7 +36,8 @@ namespace Framework::Detail {
 
 		static std::vector<Collision> CollectCollisions(
 			std::vector<ResolvedCommandBinding> bindings);
-		static void LogNewCollisions(const std::vector<Collision>& collisions,
+		static void LogNewCollisions(
+			const std::vector<Collision>& collisions,
 			const std::vector<Collision>& previousCollisions);
 
 		std::mutex mutex;

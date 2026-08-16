@@ -1,8 +1,7 @@
-#include <iomanip>
-
 #include "CommandCollisionDiagnostics.hpp"
 
 #include <algorithm>
+#include <iomanip>
 #include <map>
 #include <tuple>
 #include <utility>
@@ -11,7 +10,9 @@
 
 namespace Framework::Detail {
 	bool CommandCollisionDiagnostics::Collision::operator==(const Collision& other) const {
-		return edge == other.edge && virtualKey == other.virtualKey && kind == other.kind &&
+		return edge == other.edge &&
+			virtualKey == other.virtualKey &&
+			kind == other.kind &&
 			labels == other.labels;
 	}
 
@@ -22,16 +23,21 @@ namespace Framework::Detail {
 
 		for (auto& binding : bindings) {
 			const char* kind = binding.kind == CommandBindingKind::Setting ? "setting" : "fixed";
-			byPhysicalKey[{ binding.edge, binding.kind, binding.virtualKey }]
-				.push_back(std::string(kind) + "/" + binding.name);
+
+			const CollisionKey key = { binding.edge, binding.kind, binding.virtualKey };
+			byPhysicalKey[key].push_back(std::string(kind) + "/" + binding.name);
 		}
 
 		std::vector<Collision> collisions;
 		for (auto& [key, labels] : byPhysicalKey) {
 			if (labels.size() < 2) continue;
 
-			collisions.push_back({ std::get<0>(key), std::get<2>(key), std::get<1>(key),
-				std::move(labels) });
+			collisions.push_back({
+				std::get<0>(key),
+				std::get<2>(key),
+				std::get<1>(key),
+				std::move(labels),
+			});
 		}
 
 		return collisions;
@@ -40,9 +46,12 @@ namespace Framework::Detail {
 	void CommandCollisionDiagnostics::LogNewCollisions(
 		const std::vector<Collision>& collisions,
 		const std::vector<Collision>& previousCollisions) {
+
 		for (const Collision& collision : collisions) {
-			if (std::find(previousCollisions.begin(), previousCollisions.end(), collision)
-				!= previousCollisions.end()) continue;
+			if (std::find(previousCollisions.begin(), previousCollisions.end(), collision) !=
+				previousCollisions.end()) {
+				continue;
+			}
 
 			LOG_WARNING("[Framework] key collision on VK " << collision.virtualKey << " ("
 				<< (collision.edge == KeyEdge::Down ? "down" : "up") << "): '"

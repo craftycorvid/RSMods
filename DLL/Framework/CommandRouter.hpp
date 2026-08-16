@@ -2,41 +2,14 @@
 
 #include <chrono>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <string>
-#include <string_view>
 #include <vector>
 
+#include "CommandTypes.hpp"
+
 namespace Framework {
-	struct ModContext;
 	class IMod;
-
-	enum class KeyEdge {
-		Down,
-		Up,
-	};
-
-	enum class Availability {
-		// Strictly ModState::Active. Deactivating mods are already unavailable.
-		Active,
-		// Available after successful initialization until fault/shutdown, even while disabled or suppressed.
-		// Never use this for a command that mutates a resource returned by ClaimsExclusive().
-		Initialized,
-	};
-
-	struct KeyEvent {
-		std::uint32_t virtualKey = 0;
-		KeyEdge edge = KeyEdge::Up;
-		bool control = false;
-		bool shift = false;
-		bool alt = false;
-		bool repeat = false;
-	};
-
-	using KeyPredicate = std::function<bool(const ModContext&, const KeyEvent&)>;
-	using KeyAction = std::function<void(ModContext&, const KeyEvent&)>;
-	using KeyResolver = std::function<unsigned int(std::string_view)>;
 
 	class CommandRouter {
 	public:

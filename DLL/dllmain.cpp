@@ -232,8 +232,7 @@ unsigned WINAPI MainThread() {
 
 		if (GameState::GameLoaded) {
 			ModManager::HandlePostGameLoadedMods();
-			Framework::Registry().Tick(
-				GameState::IsInSong() ? Framework::GamePhase::Song : Framework::GamePhase::Menu);
+			Framework::Registry().Tick(GameState::IsInSong() ? Framework::GamePhase::Song : Framework::GamePhase::Menu);
 		}
 		else {
 			ModManager::UpdateGameLoadingState();

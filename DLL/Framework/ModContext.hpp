@@ -10,6 +10,8 @@
 #include "../Settings.hpp"
 
 namespace Framework {
+	class IMod;
+
 	struct RenderBinder {
 		Hooks::RenderHooks& hooks;
 		const IMod* mod;

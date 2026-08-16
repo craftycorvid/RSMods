@@ -710,6 +710,9 @@
     <ClInclude Include="Framework\CommandRouter.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="Framework\CommandTypes.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
     <ClInclude Include="Framework\ConflictResolver.hpp">
       <Filter>Framework</Filter>
     </ClInclude>

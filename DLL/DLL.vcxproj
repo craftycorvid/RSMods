@@ -415,6 +415,7 @@
     <ClInclude Include="Framework\GamePhase.hpp" />
     <ClInclude Include="Framework\CommandCollisionDiagnostics.hpp" />
     <ClInclude Include="Framework\CommandRouter.hpp" />
+    <ClInclude Include="Framework\CommandTypes.hpp" />
     <ClInclude Include="Framework\ConflictResolver.hpp" />
     <ClInclude Include="Framework\HostHooks.hpp" />
     <ClInclude Include="Framework\IMod.hpp" />

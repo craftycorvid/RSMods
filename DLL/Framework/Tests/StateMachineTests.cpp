@@ -1,5 +1,4 @@
 #include <iomanip>
-#include "../../RSColor.h"
 
 #include "../Framework.hpp"
 

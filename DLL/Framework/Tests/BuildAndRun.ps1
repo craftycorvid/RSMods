@@ -7,7 +7,7 @@
 # framework translation units it actually uses.
 #
 # Run locally:   pwsh DLL/Framework/Tests/BuildAndRun.ps1
-# CI entrypoint: .github/workflows/framework-tests.yml
+# CI entrypoint: appveyor.yml (the `test_script` step runs this script on the develop branch).
 #
 # Exits non-zero if any test fails to build or reports test failures.
 
@@ -45,7 +45,11 @@ foreach ($t in $Tests) {
     # Under Windows PowerShell 5.1 with ErrorActionPreference=Stop, any line a native exe
     # writes to stderr is turned into a terminating error, but the tests deliberately log to
     # stderr (LOG_ERROR) when exercising fault paths, so keep Stop scoped to cmdlets only.
-    $build = "call `"$vcvars`" >nul && cd /d `"$OutDir`" && cl /nologo /std:c++17 /EHsc /W3 $srcArgs /Fe:`"$exe`""
+    # vcvars is silenced on both streams (>nul 2>nul): on some machines it emits a stray
+    # "vswhere.exe is not recognized" to stderr while still setting up the toolset correctly.
+    # cl runs as a separate `&&` command, so its diagnostics are unaffected; a genuine vcvars
+    # failure still surfaces as a missing `cl` and a non-zero exit below.
+    $build = "call `"$vcvars`" >nul 2>nul && cd /d `"$OutDir`" && cl /nologo /std:c++17 /EHsc /W3 $srcArgs /Fe:`"$exe`""
     & { $ErrorActionPreference = 'Continue'; & cmd /c $build }
     if ($LASTEXITCODE -ne 0) { Write-Host "BUILD FAILED: $name" -ForegroundColor Red; $failed += "$name (build)"; continue }
 

@@ -23,15 +23,14 @@ namespace {
 		for (size_t i = 0; i < mods.size(); ++i) {
 			candidates[i].id = mods[i].id;
 			candidates[i].priority = mods[i].priority;
-			candidates[i].enabled = mods[i].enabled;
-			candidates[i].resources = &mods[i].resources;
+			candidates[i].requested = mods[i].enabled;
+			candidates[i].exclusiveResources = &mods[i].resources;
 		}
-		std::vector<char> active;
-		Framework::Resolver::Resolve(candidates, active);
+		const auto selected = Framework::Resolver::Resolve(candidates);
 
 		std::set<std::string> result;
 		for (size_t i = 0; i < mods.size(); ++i)
-			if (active[i]) result.insert(mods[i].id);
+			if (selected[i]) result.insert(mods[i].id);
 		return result;
 	}
 

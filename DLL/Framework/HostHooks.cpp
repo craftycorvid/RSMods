@@ -1,8 +1,7 @@
-#include <iomanip>
-
 #include "HostHooks.hpp"
 
 #include <algorithm>
+#include <iomanip>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
@@ -37,11 +36,13 @@ namespace Framework::Hooks {
 
 			if (batch.entries && batch.active) {
 				for (const auto& entry : *batch.entries) {
-					if (batch.active->count(entry.mod) &&
-						std::find(batch.counted.begin(), batch.counted.end(), entry.mod) == batch.counted.end()) {
-						batch.counted.push_back(entry.mod);
-						++inFlightByMod[entry.mod];
-					}
+					if (batch.active->count(entry.mod) == 0) continue;
+					if (std::find(batch.counted.begin(), batch.counted.end(), entry.mod) !=
+						batch.counted.end()) continue;
+
+					// A mod may hold several entries; count its in-flight dispatch exactly once.
+					batch.counted.push_back(entry.mod);
+					++inFlightByMod[entry.mod];
 				}
 			}
 
@@ -54,7 +55,7 @@ namespace Framework::Hooks {
 			for (const IMod* mod : counted) {
 				const auto it = inFlightByMod.find(mod);
 
-				if (it != inFlightByMod.end() && --it->second <= 0) {
+				if (it != inFlightByMod.end() && --it->second == 0) {
 					inFlightByMod.erase(it);
 				}
 			}
@@ -70,7 +71,7 @@ namespace Framework::Hooks {
 
 		std::vector<Entry> entries;
 		std::unordered_set<const IMod*> active;
-		std::unordered_map<const IMod*, int> inFlightByMod;
+		std::unordered_map<const IMod*, std::size_t> inFlightByMod;
 		std::unordered_set<const IMod*> faultedMods;
 		std::shared_ptr<const std::vector<Entry>> entriesSnapshot;
 		std::shared_ptr<const std::unordered_set<const IMod*>> activeSnapshot;
@@ -115,7 +116,7 @@ namespace Framework::Hooks {
 		std::lock_guard<std::mutex> lock(impl->mutex);
 
 		const auto it = impl->inFlightByMod.find(mod);
-		return it == impl->inFlightByMod.end() || it->second <= 0;
+		return it == impl->inFlightByMod.end();
 	}
 
 	std::vector<const IMod*> RenderHooks::TakeFaultedMods() {

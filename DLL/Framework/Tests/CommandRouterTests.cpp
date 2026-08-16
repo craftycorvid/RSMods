@@ -1,5 +1,4 @@
 #include <iomanip>
-#include "../../RSColor.h"
 
 #include "../CommandRouter.hpp"
 #include "../IMod.hpp"
