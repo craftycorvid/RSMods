@@ -1,6 +1,9 @@
 #pragma once
 #include <atomic>
 #include <functional>
+#include <map>
+#include <vector>
+#include "RSColor.h"
 
 namespace Settings {
 	// Mods reference these (through ModContext) instead of raw string literals, 

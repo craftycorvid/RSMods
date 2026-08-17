@@ -7,7 +7,14 @@
 #include "GamePhase.hpp"
 #include "CommandRouter.hpp"
 #include "HostHooks.hpp"
-#include "../Settings.hpp"
+
+namespace Settings {
+	// Opaque declarations keep the framework core free of the whole of Settings.hpp; only ModContext.cpp pulls it in. 
+	// Scoped enums default to an int underlying type, so these stay ABI-compatible with the definitions in Settings.hpp.
+	enum class When;
+	enum class StringColorMode;
+	enum class NoteColorMode;
+}
 
 namespace Framework {
 	class IMod;
@@ -45,13 +52,14 @@ namespace Framework {
 		RenderBinder Render() const { return { Hooks::Render(), currentMod }; } // Subscribe per-frame draw callbacks.
 		CommandBinder Commands() const { return { Framework::Commands(), currentMod }; }
 
-		bool IsOn(std::string_view key) const { return Settings::IsOn(std::string(key)); }
-		bool IsOff(std::string_view key) const { return Settings::IsOff(std::string(key)); }
-		std::string Value(std::string_view key) const { return Settings::ReturnSettingValue(std::string(key)); }
-		int  Int(std::string_view key) const { return Settings::GetModSetting(std::string(key)); }
+		// Defined in ModContext.cpp so this header stays free of Settings.hpp.
+		bool IsOn(std::string_view key) const;
+		bool IsOff(std::string_view key) const;
+		std::string Value(std::string_view key) const;
+		int  Int(std::string_view key) const;
 
-		Settings::When When(std::string_view key) const { return Settings::GetWhen(std::string(key)); }
-		Settings::StringColorMode ColorMode() const { return Settings::GetStringColorMode(); }
-		Settings::NoteColorMode NoteColorMode() const { return Settings::GetNoteColorMode(); }
+		Settings::When When(std::string_view key) const;
+		Settings::StringColorMode ColorMode() const;
+		Settings::NoteColorMode NoteColorMode() const;
 	};
 }
