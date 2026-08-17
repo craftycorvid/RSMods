@@ -2,14 +2,10 @@
 
 #include "../Framework.hpp"
 
-#include <atomic>
-#include <chrono>
-#include <condition_variable>
 #include <iostream>
 #include <mutex>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <vector>
 
 using Framework::ModRegistry;
@@ -64,23 +60,6 @@ namespace {
 		}
 	}
 
-	struct RenderBlock {
-		bool WaitUntilEntered() {
-			std::unique_lock<std::mutex> lock(mutex);
-			return changed.wait_for(lock, std::chrono::seconds(2), [this] { return entered; });
-		}
-
-		void Release() {
-			std::lock_guard<std::mutex> lock(mutex);
-			released = true;
-			changed.notify_all();
-		}
-
-		std::mutex mutex;
-		std::condition_variable changed;
-		bool entered = false;
-		bool released = false;
-	};
 }
 
 namespace {
@@ -92,10 +71,7 @@ namespace {
 		int prio = 0;
 		std::vector<std::string> claimStrings;
 		std::string throwOn;
-		bool subscribeRender = false;
-		bool throwInRender = false;
 		bool recordDestruction = false;
-		std::shared_ptr<RenderBlock> renderBlock;
 		std::string commandSetting;
 		Framework::Availability availability = Framework::Availability::Active;
 		int commandCalls = 0;
@@ -124,19 +100,6 @@ namespace {
 						lastCommandControl = event.control;
 					});
 			}
-			if (subscribeRender)
-				c.Render().OnEndScene([this](IDirect3DDevice9*) {
-					RecordEvent(tag + ":render");
-					if (renderBlock) {
-						std::unique_lock<std::mutex> lock(renderBlock->mutex);
-						renderBlock->entered = true;
-						renderBlock->changed.notify_all();
-						renderBlock->changed.wait(lock, [this] { return renderBlock->released; });
-						lock.unlock();
-						RecordEvent(tag + ":render-complete");
-					}
-					if (throwInRender) throw std::runtime_error("render boom");
-				});
 		}
 		void OnShutdown(Framework::ModContext&) override { Rec("OnShutdown"); }
 		void OnSettingsChanged(Framework::ModContext&) override { Rec("OnSettingsChanged"); }
@@ -400,176 +363,23 @@ static void Test_DuplicateIdRejected() {
 	reg.Shutdown();
 }
 
-static void Test_RenderModActivationGating() {
+static void Test_ShutdownRevertsAndDestroysInOrder() {
 	ClearEvents();
 	ModRegistry reg;
-	TestMod* v = Add(reg, "V");
-	v->subscribeRender = true;
-	reg.DispatchInitialize();
-	IDirect3DDevice9* dev = nullptr;
-
-	Framework::Hooks::Render().DispatchEndScene(dev);
-	Expect(!Has("V:render"), "callback not invoked while mod inactive");
-
-	reg.Tick(GamePhase::Menu);
-	ClearEvents();
-	Framework::Hooks::Render().DispatchEndScene(dev);
-	Expect(Has("V:render"), "callback invoked once mod active");
-
-	v->enabled = false;
-	reg.Tick(GamePhase::Menu);
-	ClearEvents();
-	Framework::Hooks::Render().DispatchEndScene(dev);
-	Expect(!Has("V:render"), "callback not invoked after deactivation");
-
-	reg.Shutdown();
-	ClearEvents();
-	Framework::Hooks::Render().DispatchEndScene(dev);
-	Expect(!Has("V:render"), "callback removed after shutdown");
-}
-
-static void Test_RemoveModDropsPublishedCallbacks() {
-	TestMod mod("render-test");
-	int calls = 0;
-	auto& hooks = Framework::Hooks::Render();
-
-	hooks.Subscribe(&mod, [&](IDirect3DDevice9*) { ++calls; });
-	hooks.SetModActive(&mod, true);
-	hooks.DispatchEndScene(nullptr);
-	Expect(calls == 1, "direct render subscription runs while mod is active");
-
-	hooks.RemoveMod(&mod);
-	hooks.SetModActive(&mod, true); // Simulate a later registration reusing the same mod address.
-	hooks.DispatchEndScene(nullptr);
-	Expect(calls == 1, "removed callback is absent from the published snapshot");
-
-	hooks.RemoveMod(&mod);
-}
-
-static void Test_RenderCallbackThrowDisablesMod() {
-	ClearEvents();
-	ModRegistry reg;
-	TestMod* v = Add(reg, "V");
-	v->subscribeRender = true;
-	v->throwInRender = true;
-	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu);
-
-	IDirect3DDevice9* dev = nullptr;
-	Framework::Hooks::Render().DispatchEndScene(dev);
-	Expect(Has("V:render"), "throwing render callback still ran once");
-
-	ClearEvents();
-	reg.Tick(GamePhase::Menu);
-	Expect(Has("V:OnDisabled"), "render-faulted mod is torn down (OnDisabled)");
-
-	ClearEvents();
-	Framework::Hooks::Render().DispatchEndScene(dev);
-	Expect(!Has("V:render"), "render-faulted mod no longer receives callbacks");
-	reg.Shutdown();
-}
-
-static void Test_ResourceHandoffWaitsForRenderQuiescence() {
-	ClearEvents();
-	ModRegistry reg;
-	TestMod* oldMod = Add(reg, "Old", true, 1);
-	TestMod* newMod = Add(reg, "New", false, 2);
-	oldMod->claimStrings = { "R" };
-	newMod->claimStrings = { "R" };
-	oldMod->subscribeRender = true;
-	oldMod->renderBlock = std::make_shared<RenderBlock>();
-	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu);
-	ClearEvents();
-
-	std::thread renderThread([] {
-		Framework::Hooks::Render().DispatchEndScene(nullptr);
-	});
-	Expect(oldMod->renderBlock->WaitUntilEntered(), "old mod's render callback entered");
-
-	newMod->enabled = true;
-	reg.Tick(GamePhase::Menu);
-	Expect(!Has("Old:OnDisabled"), "old mod teardown waits for its render callback");
-	Expect(!Has("New:OnEnabled"), "replacement waits while the old mod holds the resource");
-	Expect(!Has("Old:OnTick"), "deactivating mod no longer receives tick hooks");
-
-	oldMod->renderBlock->Release();
-	renderThread.join();
-	reg.Tick(GamePhase::Menu);
-	Expect(Has("Old:OnDisabled") && Has("New:OnEnabled"), "handoff completes after render quiescence");
-	Expect(IndexOf("Old:OnDisabled") < IndexOf("New:OnEnabled"), "old mod releases state before replacement activation");
-	reg.Shutdown();
-}
-
-static void Test_RenderFaultUpgradesDeferredTeardown() {
-	ClearEvents();
-	ModRegistry reg;
-	TestMod* mod = Add(reg, "V");
-	mod->subscribeRender = true;
-	mod->throwInRender = true;
-	mod->renderBlock = std::make_shared<RenderBlock>();
-	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu);
-	ClearEvents();
-
-	std::thread renderThread([] {
-		Framework::Hooks::Render().DispatchEndScene(nullptr);
-	});
-	Expect(mod->renderBlock->WaitUntilEntered(), "faulting render callback entered");
-	mod->enabled = false;
-	reg.Tick(GamePhase::Menu);
-	Expect(!Has("V:OnDisabled"), "disabled mod waits for its render callback");
-
-	mod->renderBlock->Release();
-	renderThread.join();
-	reg.Tick(GamePhase::Menu);
-	Expect(Has("V:OnDisabled"), "deferred render fault completes teardown");
-
-	ClearEvents();
-	mod->enabled = true;
-	reg.Tick(GamePhase::Menu);
-	Expect(!Has("V:OnEnabled"), "render fault upgrades deferred teardown to terminal Faulted");
-	reg.Shutdown();
-}
-
-static void Test_ShutdownWaitsForRenderQuiescence() {
-	ClearEvents();
-	ModRegistry reg;
-	TestMod* mod = Add(reg, "V");
-	mod->subscribeRender = true;
+	TestMod* mod = Add(reg, "S");
 	mod->recordDestruction = true;
-	mod->renderBlock = std::make_shared<RenderBlock>();
 	reg.DispatchInitialize();
-	reg.Tick(GamePhase::Menu);
+	reg.Tick(GamePhase::Song); // active in a song, so inSong is set
+	Expect(Has("S:OnEnabled") && Has("S:OnSongEnter"), "mod is active in a song before shutdown");
+
 	ClearEvents();
-
-	std::thread renderThread([] {
-		Framework::Hooks::Render().DispatchEndScene(nullptr);
-	});
-	Expect(mod->renderBlock->WaitUntilEntered(), "shutdown test render callback entered");
-
-	std::atomic<bool> shutdownStarted{ false };
-	std::atomic<bool> shutdownFinished{ false };
-	std::thread shutdownThread([&] {
-		shutdownStarted.store(true, std::memory_order_release);
-		reg.Shutdown();
-		shutdownFinished.store(true, std::memory_order_release);
-	});
-	while (!shutdownStarted.load(std::memory_order_acquire))
-		std::this_thread::yield();
-	std::this_thread::sleep_for(std::chrono::milliseconds(30));
-	Expect(!shutdownFinished.load(std::memory_order_acquire), "shutdown remains blocked while callback is in flight");
-	Expect(!Has("V:OnDisabled") && !Has("V:destroy"), "shutdown preserves mod state while callback is in flight");
-
-	mod->renderBlock->Release();
-	renderThread.join();
-	shutdownThread.join();
-	Expect(Has("V:render-complete") && Has("V:OnDisabled") && Has("V:OnShutdown") && Has("V:destroy"),
-		"shutdown completes lifecycle and destruction after quiescence");
-	Expect(IndexOf("V:render-complete") < IndexOf("V:OnDisabled") &&
-		IndexOf("V:OnDisabled") < IndexOf("V:OnShutdown") &&
-		IndexOf("V:OnShutdown") < IndexOf("V:destroy"),
-		"shutdown ordering keeps callback completion before teardown and destruction");
+	reg.Shutdown();
+	Expect(Has("S:OnSongExit") && Has("S:OnDisabled") && Has("S:OnShutdown") && Has("S:destroy"),
+		"shutdown runs the full teardown and destroys the mod");
+	Expect(IndexOf("S:OnSongExit") < IndexOf("S:OnDisabled") &&
+		IndexOf("S:OnDisabled") < IndexOf("S:OnShutdown") &&
+		IndexOf("S:OnShutdown") < IndexOf("S:destroy"),
+		"shutdown order: OnSongExit -> OnDisabled -> OnShutdown -> destruction");
 }
 
 int main() {
@@ -589,12 +399,7 @@ int main() {
 	Test_KeyAvailabilityTracksRegistryLifecycle();
 	Test_ConflictSuppressionGatesEffectiveCommand();
 	Test_DuplicateIdRejected();
-	Test_RenderModActivationGating();
-	Test_RemoveModDropsPublishedCallbacks();
-	Test_RenderCallbackThrowDisablesMod();
-	Test_ResourceHandoffWaitsForRenderQuiescence();
-	Test_RenderFaultUpgradesDeferredTeardown();
-	Test_ShutdownWaitsForRenderQuiescence();
+	Test_ShutdownRevertsAndDestroysInOrder();
 
 	std::cout << (g_failures == 0 ? "\nALL PASS\n" : "\nFAILURES: " + std::to_string(g_failures) + "\n");
 	return g_failures == 0 ? 0 : 1;

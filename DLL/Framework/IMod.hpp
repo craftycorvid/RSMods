@@ -34,7 +34,7 @@ namespace Framework {
 		// Higher wins; ties favor the lexicographically smaller Id().
 		virtual int Priority() const { return 0; }
 
-		virtual void OnInitialize(ModContext&)      {} // Host services are ready; subscribe to render callbacks here.
+		virtual void OnInitialize(ModContext&)      {} // Host services are ready; bind commands (ctx.Commands()) and do one-time setup here.
 		virtual void OnShutdown(ModContext&)        {}
 
 		virtual void OnSettingsChanged(ModContext&) {} // Applied AND delivered on MainThread.

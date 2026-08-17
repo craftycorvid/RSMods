@@ -13,9 +13,9 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
 
 - **Two layers, kept separate.** `IMod`/`ModContext` are an **internal C++ API** for built-in
   mods. They are **not** the third-party plugin boundary and must not be used as an ABI. 
-- **Activation and threading ownership live in the framework, not in each mod.** A mod says *what*
-  it wants (enabled? which resources? render callback?); the registry decides *whether*, *when*,
-  and on *which thread* it runs.
+- **Activation ownership lives in the framework, not in each mod.** A mod says *what* it wants
+  (enabled? which resources?); the registry decides *whether* and *when* it runs. All mod hooks
+  run on `MainThread`.
 - **No raw input/WndProc surface.** `Keybindings` remains the Win32 adapter and never exposes
   consumable window messages to mods. It snapshots key events into non-consumable `KeyEvent`s;
   mods register named commands through `ModContext`.
@@ -54,21 +54,19 @@ registration. They are deliberately separate from settings keys.
 ## Lifecycle state machine
 
 ```
-Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active ──▶ Deactivating
-     │                          ▲                       │             │
-     │ OnInitialize throws      └───────OnDisabled──────┴─────────────┘
-     ▼                                                  (once render callbacks quiesce)
-  Faulted ◀──────────── OnEnabled / tick / render hook throws
+Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active
+     │                          ▲                       │
+     │ OnInitialize throws      └───────OnDisabled──────┘
+     ▼
+  Faulted ◀──────────── OnEnabled / tick hook throws
 ```
 
 - **Inactive** means initialized but not effectively active. It covers a mod that never activated,
   one the user disabled, and one **suppressed** by losing a resource conflict; their next valid
   transition is identical (the suppressed-vs-disabled distinction survives only in the log line).
 - **Effective activation** = `IsEnabled()` **and** winning every resource it contends for. Only
-  `Active` mods get tick hooks.
-- **Deactivating** - a mod leaving `Active` that still has render callbacks in flight parks here:
-  inactive and no longer ticking, but its `OnDisabled` revert is **deferred** to a later tick until
-  the render hooks report it quiescent, so a callback can never touch state `OnDisabled` is freeing.
+  `Active` mods get tick hooks. A mod leaving `Active` reverts **synchronously** (there are no
+  in-flight callbacks to wait for): its `OnDisabled` runs in the same `Tick` that deselects it.
 - **Ordering guarantees** (edges are per-mod, not global phase edges):
   - Activate in a song: `OnEnabled → OnSongEnter → OnTick → OnSongTick`
   - Deactivate in a song: `OnSongExit → OnDisabled`
@@ -79,10 +77,8 @@ Registered ──OnInitialize──▶ Inactive ──OnEnabled──▶ Active 
     strongly exception-safe, as `OnDisabled` is *not* called on a failed enable.
   - A tick hook (`OnTick`/`OnMenuTick`/`OnSongTick`/`OnSongEnter`) throws → the mod is faulted
     immediately and receives a best-effort `OnDisabled` revert.
-  - A **render callback** that throws is caught (never crosses the D3D hook); the next tick the
-    registry tears that mod down and drops its subscriptions, so it disables itself instead of spamming.
 - **Shutdown**: `OnSongExit`(if in song) → `OnDisabled`(if active) → `OnShutdown`, then the
-  registry destroys the mod objects, waiting first for every in-flight render callback to finish.
+  registry destroys the mod objects.
 
 ## Conflicts & resources
 
@@ -98,16 +94,14 @@ Among all *enabled* mods claiming a resource the highest-`Priority()` one wins i
 any resource it claims is suppressed (its `OnDisabled` reverts its game state). The resolver
 (`ConflictResolver.hpp`, pure and unit-tested) is deterministic greedy: order enabled mods by
 `(Priority desc, Id asc)`, activate each iff none of its resources are already reserved by an
-already-activated mod. `Tick` deactivates losers before activating winners, and a `Deactivating`
-mod keeps reserving its resources, so a contested handoff can't double-acquire.
+already-activated mod. `Tick` deactivates losers before activating winners; because a loser's
+`OnDisabled` reverts synchronously, it releases its resources before any winner is activated, so a
+contested handoff can't double-acquire in a single pass.
 
-## Render callbacks & threading
-
-`ctx.Render().OnEndScene(fn)` subscribes a per-frame callback (subscribe in `OnInitialize`). It is
-**owner-scoped** (only invoked while that mod is effective-active, dropped on shutdown) and
-**snapshot-dispatched** (no lock held across mod code). `DispatchEndScene` runs on the **render
-thread**, tick hooks on **MainThread**, so state shared between them must be `std::atomic` or a
-published immutable snapshot, a plain `bool` is a data race.
+> **Rendering.** The framework has no render surface. Mods that draw contribute to the shared
+> `GameOverlay` HUD directly (as they do any other shared subsystem). A framework-owned per-frame
+> render-callback subsystem once existed and was removed as unused — see
+> [`docs/render-hooks.md`](docs/render-hooks.md) for what it was and the one condition to revive it.
 
 ## Main-thread inbox
 
@@ -128,8 +122,6 @@ query as parameters.
 answers from its own `records` + `ModState`. The one thing the router still owns is its **fault
 set** - a binding that throws mid-batch must suppress that mod's remaining events before the
 registry hears about it - which is discovered by the router, not mirrored from the registry.
-(The render subsystem's `active` flag is a separate matter: it is the cross-thread projection the
-render thread reads lock-free, not a same-thread mirror, and it lives and dies with that subsystem.)
 
 ## Commands & keybindings
 
@@ -142,8 +134,8 @@ poll `GetAsyncKeyState` after delivery.
 
 Every command keeps its own predicate. Owner availability is an additional lifecycle gate:
 
-- `Availability::Active` means **strictly `ModState::Active`**. It becomes unavailable as soon as
-  deactivation starts, before render callbacks quiesce and `OnDisabled` runs.
+- `Availability::Active` means **strictly `ModState::Active`**. It becomes unavailable the moment
+  the mod leaves `Active` (whose `OnDisabled` revert runs synchronously in that `Tick`).
 - `Availability::Initialized` remains available after successful initialization while the mod is normally
   inactive or conflict-suppressed, and disappears on fault/shutdown. It is only for uncontended state.
 - **A command that mutates any resource returned by its owner's `ClaimsExclusive()` must use
@@ -174,9 +166,9 @@ bodies live in `ModContext.cpp`; the framework headers forward-declare the few `
 those accessors return and never `#include "Settings.hpp"`. Only that one TU depends on the game's
 settings header, which is what keeps the rest of the framework host-agnostic (and unit-testable).
 
-`OnSettingsChanged` is delivered only to mods that are settled `Inactive`/`Active`. A
-`Deactivating` mod still has render callbacks in flight and a pending teardown revert, so it is
-skipped; it picks up fresh settings when it next activates.
+`OnSettingsChanged` is delivered only to mods that are settled `Inactive`/`Active` (a `Registered`
+mod isn't initialized yet; a `Faulted` one is terminal). A mod suppressed on the same `Tick` reverts
+synchronously, after the notification pass.
 
 The `Settings` maps/vectors are guarded by a single `shared_mutex` in `Settings.cpp`: every
 accessor takes a shared lock, every mutator a unique lock, and reads use non-mutating lookups

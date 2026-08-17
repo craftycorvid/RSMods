@@ -202,7 +202,7 @@ static void Test_AvailabilityPolicies() {
 
 	owner.life[&mod] = Life::Active;
 	router.DispatchPending(context, { Event(1) }, true, owner);
-	owner.life[&mod] = Life::Initialized; // Deactivating loses active availability immediately.
+	owner.life[&mod] = Life::Initialized; // leaving Active drops the active-only binding immediately.
 	router.DispatchPending(context, { Event(1) }, true, owner);
 	Expect(activeCalls == 1, "active binding is unavailable as soon as deactivation begins");
 }

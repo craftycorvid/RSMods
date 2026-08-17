@@ -119,9 +119,6 @@
     <ClCompile Include="Framework\CommandRouter.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Framework\HostHooks.cpp">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Framework\MainThreadInbox.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -423,7 +420,6 @@
     <ClInclude Include="Framework\CommandRouter.hpp" />
     <ClInclude Include="Framework\CommandTypes.hpp" />
     <ClInclude Include="Framework\ConflictResolver.hpp" />
-    <ClInclude Include="Framework\HostHooks.hpp" />
     <ClInclude Include="Framework\IMod.hpp" />
     <ClInclude Include="Framework\MainThreadInbox.hpp" />
     <ClInclude Include="Framework\ModContext.hpp" />

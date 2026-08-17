@@ -6,7 +6,6 @@
 
 #include "GamePhase.hpp"
 #include "CommandRouter.hpp"
-#include "HostHooks.hpp"
 
 namespace Settings {
 	// Opaque declarations keep the framework core free of the whole of Settings.hpp; only ModContext.cpp pulls it in. 
@@ -18,13 +17,6 @@ namespace Settings {
 
 namespace Framework {
 	class IMod;
-
-	struct RenderBinder {
-		Hooks::RenderHooks& hooks;
-		const IMod* mod;
-
-		void OnEndScene(Hooks::EndSceneFn fn) const { hooks.Subscribe(mod, std::move(fn)); }
-	};
 
 	struct CommandBinder {
 		CommandRouter& router;
@@ -49,7 +41,6 @@ namespace Framework {
 		GamePhase phase = GamePhase::Loading;
 		const IMod* currentMod = nullptr; // Set by the registry before each hook call.
 
-		RenderBinder Render() const { return { Hooks::Render(), currentMod }; } // Subscribe per-frame draw callbacks.
 		CommandBinder Commands() const { return { Framework::Commands(), currentMod }; }
 
 		// Defined in ModContext.cpp so this header stays free of Settings.hpp.

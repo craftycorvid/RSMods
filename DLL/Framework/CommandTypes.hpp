@@ -13,7 +13,7 @@ namespace Framework {
 	};
 
 	enum class Availability {
-		// Strictly ModState::Active. Deactivating mods are already unavailable.
+		// Strictly ModState::Active; unavailable the moment the mod leaves Active.
 		Active,
 		// Available after successful initialization until fault/shutdown, even while disabled or suppressed.
 		// Never use this for a command that mutates a resource returned by ClaimsExclusive().
