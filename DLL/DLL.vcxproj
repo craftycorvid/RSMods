@@ -122,6 +122,9 @@
     <ClCompile Include="Framework\HostHooks.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Framework\MainThreadInbox.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Framework\ModContext.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -422,6 +425,7 @@
     <ClInclude Include="Framework\ConflictResolver.hpp" />
     <ClInclude Include="Framework\HostHooks.hpp" />
     <ClInclude Include="Framework\IMod.hpp" />
+    <ClInclude Include="Framework\MainThreadInbox.hpp" />
     <ClInclude Include="Framework\ModContext.hpp" />
     <ClInclude Include="Framework\ModRegistry.hpp" />
     <ClInclude Include="Framework\Framework.hpp" />

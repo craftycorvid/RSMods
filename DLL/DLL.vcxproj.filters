@@ -366,6 +366,9 @@
     <ClCompile Include="Framework\HostHooks.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Framework\MainThreadInbox.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
     <ClCompile Include="Framework\ModContext.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
@@ -723,6 +726,9 @@
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\IMod.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\MainThreadInbox.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\ModContext.hpp">

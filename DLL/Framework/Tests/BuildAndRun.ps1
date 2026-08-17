@@ -22,7 +22,8 @@ New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 $Tests = @(
     @{ Name = 'ConflictResolverTests'; Sources = @() },  # header-only resolver
     @{ Name = 'CommandRouterTests';    Sources = @('CommandRouter.cpp', 'CommandCollisionDiagnostics.cpp') },
-    @{ Name = 'StateMachineTests';     Sources = @('ModRegistry.cpp', 'CommandRouter.cpp', 'HostHooks.cpp', 'CommandCollisionDiagnostics.cpp') }
+    @{ Name = 'MainThreadInboxTests';  Sources = @('MainThreadInbox.cpp') },
+    @{ Name = 'StateMachineTests';     Sources = @('ModRegistry.cpp', 'CommandRouter.cpp', 'HostHooks.cpp', 'MainThreadInbox.cpp', 'CommandCollisionDiagnostics.cpp') }
 )
 
 # Locate the MSVC developer environment (matches the DLL's v143 toolset).

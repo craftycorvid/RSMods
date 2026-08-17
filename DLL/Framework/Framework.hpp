@@ -3,6 +3,7 @@
 #include "GamePhase.hpp"
 #include "CommandTypes.hpp"
 #include "CommandRouter.hpp"
+#include "MainThreadInbox.hpp"
 #include "HostHooks.hpp"
 #include "IMod.hpp"
 #include "ModContext.hpp"

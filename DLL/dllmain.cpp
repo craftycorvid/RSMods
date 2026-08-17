@@ -126,7 +126,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 			break;
 		case WM_CLOSE:
 			GameState::GameClosing = true;
-			Framework::Commands().Wake();
+			Framework::Inbox().Wake();
 			break;
 		case WM_COPYDATA:
 			Keybindings::UpdateSettingsOnGUIChange(lParam);
@@ -217,7 +217,7 @@ unsigned WINAPI MainThread() {
 
 	auto nextModTick = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
 	while (!GameState::GameClosing) {
-		Framework::Commands().WaitUntil(nextModTick);
+		Framework::Inbox().WaitUntil(nextModTick);
 		if (GameState::GameClosing) break;
 
 		// Commands are drained independently of the maintenance tick. Both paths run on this

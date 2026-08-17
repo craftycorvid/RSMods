@@ -16,12 +16,12 @@ namespace {
 
 namespace Keybindings {
 	void HandleKeyUp(WPARAM keyPressed, LPARAM lParam) {
-		Framework::Commands().Enqueue(CaptureKeyEvent(
+		Framework::Inbox().PostKeyEvent(CaptureKeyEvent(
 			keyPressed, lParam, Framework::KeyEdge::Up));
 	}
 
 	void HandleKeyDown(WPARAM keyPressed, LPARAM lParam) {
-		Framework::Commands().Enqueue(CaptureKeyEvent(
+		Framework::Inbox().PostKeyEvent(CaptureKeyEvent(
 			keyPressed, lParam, Framework::KeyEdge::Down));
 	}
 

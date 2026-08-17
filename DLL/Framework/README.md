@@ -24,11 +24,12 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
 
 - `MainThread` - `InstantiatePending()` → `ApplyStartupMods` → `DispatchInitialize()`, then
   `Registry().Tick(phase)` each loop, and `Registry().Shutdown()` after the loop.
-- `WndProc` `WM_COPYDATA` - `Keybindings::UpdateSettingsOnGUIChange`, which *queues* the
-  settings mutation onto the registry instead of applying it on the message thread.
-- `WndProc` key messages - snapshot modifiers/repeat state and enqueue a `KeyEvent`. A wakeable
-  FIFO delivers commands promptly on `MainThread`; the 250 ms maintenance tick is not accelerated
-  and missed deadlines are not replayed as catch-up bursts.
+- `WndProc` `WM_COPYDATA` - `Keybindings::UpdateSettingsOnGUIChange` posts the settings mutation
+  as a closure onto the `MainThreadInbox` instead of applying it on the message thread.
+- `WndProc` key messages - snapshot modifiers/repeat state and post a `KeyEvent` to the same
+  `MainThreadInbox`, the single main-thread work queue (see below). Commands are delivered promptly
+  on `MainThread`; the 250 ms maintenance tick is not accelerated and missed deadlines are not
+  replayed as catch-up bursts.
 
 ## Adding a mod
 
@@ -108,6 +109,19 @@ mod keeps reserving its resources, so a contested handoff can't double-acquire.
 thread**, tick hooks on **MainThread**, so state shared between them must be `std::atomic` or a
 published immutable snapshot, a plain `bool` is a data race.
 
+## Main-thread inbox
+
+`MainThreadInbox` (`Inbox()`) is the single main-thread work queue. Foreign threads post to it -
+`WndProc` key input, GUI/`WM_COPYDATA`/Twitch/CrowdControl/render-thread settings writes, and the
+window-close wake - and `MainThread` blocks in `WaitUntil`, then drains the two queues at their own
+cadences: key events every command-dispatch pass, settings closures on the 250 ms maintenance tick.
+
+The wake semantics mirror those cadences. Key events wake on a non-empty queue, because they are
+drained every pass and the predicate self-clears. Settings and the close signal set a **one-shot**
+wake flag, because settings are not drained until the next tick and a queue-based predicate would
+spin. The `CommandRouter` no longer owns the wait/wake primitive or an event queue: it is pure
+binding storage plus dispatch, taking the already-drained event batch as a parameter.
+
 ## Commands & keybindings
 
 `ctx.Commands().BindSetting(...)` attaches a settings-named keybinding to its owning mod;
@@ -141,9 +155,15 @@ Force Enumeration is owned by `EnumerationMod`, while the fixed Delete auto-tune
 ## Settings
 
 All settings writes are serialized onto `MainThread`. GUI/`WM_COPYDATA`, Twitch, CrowdControl,
-and render-thread reload requests enqueue closures through `EnqueueSettingsUpdate`; the next
-registry `Tick` drains the complete FIFO batch, then notifies mods via `OnSettingsChanged` before
-resolving activation. Non-settings GUI and effect work still runs on its originating thread.
+and render-thread reload requests enqueue closures through `Registry().EnqueueSettingsUpdate`,
+which posts them to the `MainThreadInbox`; the next registry `Tick` drains the complete FIFO batch,
+then notifies mods via `OnSettingsChanged` before resolving activation. Non-settings GUI and effect
+work still runs on its originating thread.
+
+Mods read settings through typed `ModContext` accessors (`IsOn`, `Value`, `Int`, `When`, …) whose
+bodies live in `ModContext.cpp`; the framework headers forward-declare the few `Settings` enums
+those accessors return and never `#include "Settings.hpp"`. Only that one TU depends on the game's
+settings header, which is what keeps the rest of the framework host-agnostic (and unit-testable).
 
 `OnSettingsChanged` is delivered only to mods that are settled `Inactive`/`Active`. A
 `Deactivating` mod still has render callbacks in flight and a pending teardown revert, so it is
@@ -158,8 +178,8 @@ reload path stays outside the lock.
 ## Testing
 
 The framework has no game or Windows dependencies, so it is unit-tested in isolation. `Tests/`
-holds three standalone console programs (`ConflictResolverTests`, `CommandRouterTests`,
-`StateMachineTests`), each with its own `main()` that returns non-zero on failure.
+holds four standalone console programs (`ConflictResolverTests`, `CommandRouterTests`,
+`MainThreadInboxTests`, `StateMachineTests`), each with its own `main()` that returns non-zero on failure.
 
 Build and run them all with:
 

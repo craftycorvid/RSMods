@@ -345,22 +345,22 @@ static void Test_KeyAvailabilityTracksRegistryLifecycle() {
 	initialized->availability = Framework::Availability::Initialized;
 	reg.DispatchInitialize();
 
-	Framework::Commands().Enqueue(TestKeyEvent(80, true));
-	Framework::Commands().Enqueue(TestKeyEvent(81, true));
+	Framework::Inbox().PostKeyEvent(TestKeyEvent(80, true));
+	Framework::Inbox().PostKeyEvent(TestKeyEvent(81, true));
 	reg.DispatchCommands(GamePhase::Menu, true);
 	Expect(effective->commandCalls == 0 && initialized->commandCalls == 1 && initialized->lastCommandControl,
 		"registry exposes initialized binding but gates inactive active-only binding");
 
 	effective->enabled = true;
 	reg.Tick(GamePhase::Menu);
-	Framework::Commands().Enqueue(TestKeyEvent(80, true));
+	Framework::Inbox().PostKeyEvent(TestKeyEvent(80, true));
 	reg.DispatchCommands(GamePhase::Menu, true);
 	Expect(effective->commandCalls == 1 && effective->lastCommandControl,
 		"registry activation enables command with captured modifier state");
 
 	effective->enabled = false;
 	reg.Tick(GamePhase::Menu);
-	Framework::Commands().Enqueue(TestKeyEvent(80));
+	Framework::Inbox().PostKeyEvent(TestKeyEvent(80));
 	reg.DispatchCommands(GamePhase::Menu, true);
 	Expect(effective->commandCalls == 1, "registry deactivation disables effective command before delivery");
 	reg.Shutdown();
@@ -380,7 +380,7 @@ static void Test_ConflictSuppressionGatesEffectiveCommand() {
 	reg.DispatchInitialize();
 	reg.Tick(GamePhase::Menu);
 
-	Framework::Commands().Enqueue(TestKeyEvent(82));
+	Framework::Inbox().PostKeyEvent(TestKeyEvent(82));
 	reg.DispatchCommands(GamePhase::Menu, true);
 	Expect(suppressed->commandCalls == 0,
 		"conflict-suppressed mod cannot bypass exclusive resource through effective command");

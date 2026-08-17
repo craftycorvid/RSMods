@@ -2,9 +2,9 @@
 
 #include <algorithm>
 #include <chrono>
+#include <deque>
 #include <exception>
 #include <iomanip>
-#include <mutex>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -16,6 +16,7 @@
 #include "../Log.hpp"
 #include "ConflictResolver.hpp"
 #include "HostHooks.hpp"
+#include "MainThreadInbox.hpp"
 #include "ModContext.hpp"
 
 namespace Framework {
@@ -249,21 +250,8 @@ namespace Framework {
 			if (phase == GamePhase::Song) InvokeActive(record, &IMod::OnSongTick, "OnSongTick");
 		}
 
-		void QueueSettingsUpdate(std::function<void()> apply) {
-			std::lock_guard<std::mutex> lock(settingsMutex);
-			pendingSettings.push_back(std::move(apply));
-		}
-
-		std::vector<std::function<void()>> TakePendingSettings() {
-			std::vector<std::function<void()>> batch;
-			std::lock_guard<std::mutex> lock(settingsMutex);
-			batch.swap(pendingSettings);
-
-			return batch;
-		}
-
 		void DrainSettings() {
-			auto batch = TakePendingSettings();
+			auto batch = Inbox().DrainSettings();
 			if (batch.empty()) return;
 
 			for (auto& apply : batch) {
@@ -385,8 +373,6 @@ namespace Framework {
 
 		std::vector<Record> records;
 		ModContext ctx;
-		std::mutex settingsMutex;
-		std::vector<std::function<void()>> pendingSettings;
 		bool resourceIndexDirty = false;
 		std::vector<std::vector<std::string>> exclusiveResourcesByMod;
 	};
@@ -435,13 +421,16 @@ namespace Framework {
 
 	void ModRegistry::DispatchCommands(GamePhase phase, bool gameLoaded) {
 		impl->ctx.phase = phase;
-		Commands().DispatchPending(impl->ctx, gameLoaded);
+
+		// Always drain the inbox so startup input isn't replayed later; the router discards it
+		// when the game isn't loaded yet.
+		const auto events = Inbox().DrainKeyEvents();
+		Commands().DispatchPending(impl->ctx, events, gameLoaded);
 		impl->HandleCommandFaults();
 	}
 
 	void ModRegistry::EnqueueSettingsUpdate(std::function<void()> apply) {
-		impl->QueueSettingsUpdate(std::move(apply));
-		Commands().Wake();
+		Inbox().PostSettingsUpdate(std::move(apply));
 	}
 
 	void ModRegistry::Tick(GamePhase phase) {

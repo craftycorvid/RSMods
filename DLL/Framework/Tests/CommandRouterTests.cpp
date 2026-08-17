@@ -64,8 +64,7 @@ static void Test_FirstPhysicalMatchDoesNotFallThrough() {
 	router.SetModInitialized(&modB, true);
 	router.SetModActive(&modA, true);
 	router.SetModActive(&modB, true);
-	router.Enqueue(Event(42));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(42) }, true);
 
 	Expect(callsA == 0 && callsB == 0, "false predicate on name-first collision does not fall through");
 }
@@ -85,8 +84,7 @@ static void Test_UnavailableOwnerVanishesFromCollisionOrder() {
 	router.SetModInitialized(&modA, true);
 	router.SetModInitialized(&modB, true);
 	router.SetModActive(&modB, true);
-	router.Enqueue(Event(42));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(42) }, true);
 
 	Expect(callsB == 1, "inactive mod is removed before physical collision resolution");
 }
@@ -107,10 +105,11 @@ static void Test_ModifierSnapshotAndFifoArePreserved() {
 	router.SetModInitialized(&mod, true);
 	router.SetModActive(&mod, true);
 
-	router.Enqueue(Event(9, KeyEdge::Down, true, false));
-	router.Enqueue(Event(9, KeyEdge::Down, false, true));
-	router.Enqueue(Event(9, KeyEdge::Up));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, {
+		Event(9, KeyEdge::Down, true, false),
+		Event(9, KeyEdge::Down, false, true),
+		Event(9, KeyEdge::Up),
+	}, true);
 
 	Expect(received == std::vector<std::string>{ "ctrl:first", "plain:repeat", "up" },
 		"modifier snapshots, repeats, and down/up FIFO survive deferred delivery");
@@ -131,8 +130,7 @@ static void Test_VolumeBindingsUseNormalCollisionOrdering() {
 		[&](ModContext&, const KeyEvent&) { received.push_back("song"); });
 	router.SetModInitialized(&mod, true);
 	router.SetModActive(&mod, true);
-	router.Enqueue(Event(7, KeyEdge::Down));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(7, KeyEdge::Down) }, true);
 
 	Expect(received == std::vector<std::string>{ "master" },
 		"volume bindings share the normal setting-name collision order");
@@ -157,16 +155,14 @@ static void Test_OwnerScopedFixedKeyRunsAfterSettingCommands() {
 	router.SetModInitialized(&fixedMod, true);
 	router.SetModActive(&settingMod, true);
 	router.SetModActive(&fixedMod, true);
-	router.Enqueue(Event(46));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(46) }, true);
 
 	Expect(received == std::vector<std::string>{ "setting", "fixed" },
 		"mod-scoped fixed key preserves the post-setting host shortcut pass");
 
 	received.clear();
 	router.SetModActive(&fixedMod, false);
-	router.Enqueue(Event(46));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(46) }, true);
 	Expect(received == std::vector<std::string>{ "setting" },
 		"active gating removes a fixed-key mod during suppression");
 }
@@ -185,17 +181,13 @@ static void Test_AvailabilityPolicies() {
 		[&](ModContext&, const KeyEvent&) { ++initializedCalls; });
 	router.SetModInitialized(&mod, true);
 
-	router.Enqueue(Event(1));
-	router.Enqueue(Event(2));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(1), Event(2) }, true);
 	Expect(activeCalls == 0 && initializedCalls == 1, "initialized policy works while active policy is unavailable");
 
 	router.SetModActive(&mod, true);
-	router.Enqueue(Event(1));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(1) }, true);
 	router.SetModActive(&mod, false); // Deactivating loses active availability immediately.
-	router.Enqueue(Event(1));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(1) }, true);
 	Expect(activeCalls == 1, "active binding is unavailable as soon as deactivation begins");
 }
 
@@ -210,9 +202,8 @@ static void Test_LoadingEventsAreDropped() {
 	router.SetModInitialized(&mod, true);
 	router.SetModActive(&mod, true);
 
-	router.Enqueue(Event(3));
-	router.DispatchPending(context, false);
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(3) }, false); // discarded: game not loaded yet
+	router.DispatchPending(context, {}, true);            // nothing retained to replay
 	Expect(calls == 0, "startup input is discarded rather than replayed after GameLoaded");
 }
 
@@ -270,30 +261,11 @@ static void Test_CommandFaultStopsRemainingBatch() {
 		});
 	router.SetModInitialized(&mod, true);
 	router.SetModActive(&mod, true);
-	router.Enqueue(Event(4));
-	router.Enqueue(Event(4));
-	router.DispatchPending(context, true);
+	router.DispatchPending(context, { Event(4), Event(4) }, true);
 	const auto faultedMods = router.TakeFaultedMods();
 
 	Expect(calls == 1 && faultedMods.size() == 1 && faultedMods.front() == &mod,
 		"throwing command faults its mod and suppresses its remaining queued events");
-}
-
-static void Test_EnqueueWakesWaiter() {
-	CommandRouter router;
-	std::atomic<bool> returned{ false };
-	const auto started = std::chrono::steady_clock::now();
-	std::thread waiter([&] {
-		router.WaitUntil(started + std::chrono::seconds(2));
-		returned.store(true, std::memory_order_release);
-	});
-	std::this_thread::sleep_for(std::chrono::milliseconds(20));
-	router.Enqueue(Event(5));
-	waiter.join();
-	const auto elapsed = std::chrono::steady_clock::now() - started;
-
-	Expect(returned.load(std::memory_order_acquire) && elapsed < std::chrono::seconds(1),
-		"enqueue wakes framework waiter without waiting for maintenance deadline");
 }
 
 int main() {
@@ -308,7 +280,6 @@ int main() {
 	Test_CollisionDiagnosticsOnlyLogChanges();
 	Test_CollisionDiagnosticsDoNotMergeDispatchPasses();
 	Test_CommandFaultStopsRemainingBatch();
-	Test_EnqueueWakesWaiter();
 
 	std::cout << (failures == 0 ? "\nALL PASS\n" : "\nFAILURES: " + std::to_string(failures) + "\n");
 	return failures == 0 ? 0 : 1;

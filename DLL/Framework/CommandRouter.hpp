@@ -1,7 +1,7 @@
 #pragma once
 
-#include <chrono>
 #include <cstdint>
+#include <deque>
 #include <memory>
 #include <string>
 #include <vector>
@@ -31,10 +31,9 @@ namespace Framework {
 		void SetModActive(const IMod* mod, bool active);
 		void RemoveMod(const IMod* mod);
 
-		void Enqueue(KeyEvent event);
-		void Wake();
-		void WaitUntil(std::chrono::steady_clock::time_point deadline);
-		void DispatchPending(ModContext& context, bool gameLoaded);
+		// Key events are supplied by the caller (drained from the MainThreadInbox), not queued
+		// inside the router. Startup input is discarded here when gameLoaded is false.
+		void DispatchPending(ModContext& context, const std::deque<KeyEvent>& events, bool gameLoaded);
 
 		std::vector<const IMod*> TakeFaultedMods();
 		void RefreshDiagnostics();

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <array>
-#include <condition_variable>
 #include <deque>
 #include <exception>
 #include <iomanip>
@@ -103,11 +102,6 @@ namespace Framework {
 			KeyResolver resolver;
 		};
 
-		struct DispatchBatch {
-			std::deque<KeyEvent> events;
-			RoutingSnapshot routing;
-		};
-
 		inline static constexpr std::array<BindingKind, 2> DispatchOrder = {
 			BindingKind::Setting,
 			BindingKind::FixedKey,
@@ -134,16 +128,6 @@ namespace Framework {
 			return binding.availability == Availability::Active
 				? mod->second.active
 				: mod->second.initialized;
-		}
-
-		DispatchBatch TakeDispatchBatch() {
-			std::lock_guard<std::mutex> lock(mutex);
-			
-			DispatchBatch batch;
-			batch.events.swap(pending);
-			batch.routing = { bindings, keyResolver };
-
-			return batch;
 		}
 
 		const Binding* FindBinding(const RoutingSnapshot& routing, const KeyEvent& event, BindingKind kind) const {
@@ -224,12 +208,9 @@ namespace Framework {
 		std::vector<Binding> bindings;
 		std::unordered_map<const IMod*, ModCommandState> modStates;
 		std::vector<const IMod*> faultedMods;
-		std::deque<KeyEvent> pending;
 		KeyResolver keyResolver;
 		Detail::CommandCollisionDiagnostics collisionDiagnostics;
-		bool wakeRequested = false;
 		mutable std::mutex mutex;
-		std::condition_variable changed;
 	};
 
 	CommandRouter::CommandRouter() : impl(std::make_unique<Impl>()) {}
@@ -282,41 +263,13 @@ namespace Framework {
 			impl->faultedMods.end());
 	}
 
-	void CommandRouter::Enqueue(KeyEvent event) {
-		{
-			std::lock_guard<std::mutex> lock(impl->mutex);
-			impl->pending.push_back(event);
-		}
-
-		impl->changed.notify_one();
-	}
-
-	void CommandRouter::Wake() {
-		{
-			std::lock_guard<std::mutex> lock(impl->mutex);
-			impl->wakeRequested = true;
-		}
-
-		impl->changed.notify_one();
-	}
-
-	void CommandRouter::WaitUntil(std::chrono::steady_clock::time_point deadline) {
-		std::unique_lock<std::mutex> lock(impl->mutex);
-
-		impl->changed.wait_until(lock, deadline, [&] {
-			return impl->wakeRequested || !impl->pending.empty();
-		});
-		impl->wakeRequested = false;
-	}
-
-	void CommandRouter::DispatchPending(ModContext& context, bool gameLoaded) {
-		auto batch = impl->TakeDispatchBatch();
-
-		// Input received during startup is deliberately discarded.
+	void CommandRouter::DispatchPending(ModContext& context, const std::deque<KeyEvent>& events, bool gameLoaded) {
+		// Input received during startup is deliberately discarded (drained by the caller, not replayed).
 		if (!gameLoaded) return;
 
-		for (const KeyEvent& event : batch.events) {
-			impl->DispatchEvent(context, event, batch.routing);
+		const auto routing = impl->SnapshotRouting();
+		for (const KeyEvent& event : events) {
+			impl->DispatchEvent(context, event, routing);
 		}
 	}
 
