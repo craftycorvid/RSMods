@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -10,6 +11,11 @@
 
 namespace Framework {
 	class IMod;
+
+	// Answers "is this mod's owner available for a binding that requires this Availability level?"
+	// The registry (the single source of lifecycle truth) supplies this at dispatch time; the router
+	// no longer caches any per-mod lifecycle state, it only tracks bindings it has faulted itself.
+	using OwnerAvailabilityFn = std::function<bool(const IMod*, Availability)>;
 
 	class CommandRouter {
 	public:
@@ -27,13 +33,13 @@ namespace Framework {
 			KeyPredicate predicate = {}, std::string logMessage = {});
 		void SetKeyResolver(KeyResolver resolver);
 
-		void SetModInitialized(const IMod* mod, bool initialized);
-		void SetModActive(const IMod* mod, bool active);
 		void RemoveMod(const IMod* mod);
 
 		// Key events are supplied by the caller (drained from the MainThreadInbox), not queued
-		// inside the router. Startup input is discarded here when gameLoaded is false.
-		void DispatchPending(ModContext& context, const std::deque<KeyEvent>& events, bool gameLoaded);
+		// inside the router. Startup input is discarded here when gameLoaded is false. Owner
+		// availability is resolved through `ownerAvailable` rather than cached in the router.
+		void DispatchPending(ModContext& context, const std::deque<KeyEvent>& events, bool gameLoaded,
+			const OwnerAvailabilityFn& ownerAvailable);
 
 		std::vector<const IMod*> TakeFaultedMods();
 		void RefreshDiagnostics();

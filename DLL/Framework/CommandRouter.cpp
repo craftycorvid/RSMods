@@ -8,7 +8,7 @@
 #include <mutex>
 #include <optional>
 #include <tuple>
-#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "../Log.hpp"
@@ -91,12 +91,6 @@ namespace Framework {
 			}
 		};
 
-		struct ModCommandState {
-			bool initialized = false;
-			bool active = false;
-			bool faulted = false;
-		};
-
 		struct RoutingSnapshot {
 			std::vector<Binding> bindings;
 			KeyResolver resolver;
@@ -117,22 +111,23 @@ namespace Framework {
 			std::sort(bindings.begin(), bindings.end());
 		}
 
-		bool IsAvailable(const Binding& binding) const {
-			if (!binding.mod) return true;
+		bool IsAvailable(const Binding& binding, const OwnerAvailabilityFn& ownerAvailable) const {
+			if (!binding.mod) return true; // host-owned bindings have no mod lifecycle to gate on
 
-			std::lock_guard<std::mutex> lock(mutex);
+			{
+				// A binding this router has already faulted this batch stays unavailable until the
+				// registry tears the mod down (RemoveMod). The registry hasn't seen the fault yet.
+				std::lock_guard<std::mutex> lock(mutex);
+				if (faulted.count(binding.mod)) return false;
+			}
 
-			const auto mod = modStates.find(binding.mod);
-			if (mod == modStates.end() || mod->second.faulted) return false;
-			
-			return binding.availability == Availability::Active
-				? mod->second.active
-				: mod->second.initialized;
+			return ownerAvailable && ownerAvailable(binding.mod, binding.availability);
 		}
 
-		const Binding* FindBinding(const RoutingSnapshot& routing, const KeyEvent& event, BindingKind kind) const {
+		const Binding* FindBinding(const RoutingSnapshot& routing, const KeyEvent& event, BindingKind kind,
+			const OwnerAvailabilityFn& ownerAvailable) const {
 			for (const Binding& binding : routing.bindings) {
-				if (binding.Matches(event, kind, routing.resolver) && IsAvailable(binding)) {
+				if (binding.Matches(event, kind, routing.resolver) && IsAvailable(binding, ownerAvailable)) {
 					return &binding;
 				}
 			}
@@ -159,9 +154,10 @@ namespace Framework {
 			}
 		}
 
-		void DispatchEvent(ModContext& context, const KeyEvent& event, const RoutingSnapshot& routing) {
+		void DispatchEvent(ModContext& context, const KeyEvent& event, const RoutingSnapshot& routing,
+			const OwnerAvailabilityFn& ownerAvailable) {
 			for (BindingKind kind : DispatchOrder) {
-				const Binding* binding = FindBinding(routing, event, kind);
+				const Binding* binding = FindBinding(routing, event, kind, ownerAvailable);
 				if (binding) InvokeBinding(*binding, context, event);
 			}
 		}
@@ -197,17 +193,15 @@ namespace Framework {
 
 			std::lock_guard<std::mutex> lock(mutex);
 
-			auto& state = modStates[mod];
-			if (!state.faulted) {
-				state.faulted = true;
+			if (faulted.insert(mod).second) { // newly faulted
 				faultedMods.push_back(mod);
 				LOG_ERROR("[Framework] binding '" << name << "' " << detail << "; its mod will be disabled" << std::endl);
 			}
 		}
 
 		std::vector<Binding> bindings;
-		std::unordered_map<const IMod*, ModCommandState> modStates;
-		std::vector<const IMod*> faultedMods;
+		std::unordered_set<const IMod*> faulted;   // mods this router faulted; persists until RemoveMod
+		std::vector<const IMod*> faultedMods;       // newly faulted, drained by TakeFaultedMods
 		KeyResolver keyResolver;
 		Detail::CommandCollisionDiagnostics collisionDiagnostics;
 		mutable std::mutex mutex;
@@ -239,37 +233,22 @@ namespace Framework {
 		impl->keyResolver = std::move(resolver);
 	}
 
-	void CommandRouter::SetModInitialized(const IMod* mod, bool initialized) {
-		std::lock_guard<std::mutex> lock(impl->mutex);
-
-		auto& state = impl->modStates[mod];
-		state.initialized = initialized;
-		if (!initialized) state.active = false;
-	}
-
-	void CommandRouter::SetModActive(const IMod* mod, bool active) {
-		std::lock_guard<std::mutex> lock(impl->mutex);
-		
-		impl->modStates[mod].active = active;
-	}
-
 	void CommandRouter::RemoveMod(const IMod* mod) {
 		std::lock_guard<std::mutex> lock(impl->mutex);
-		
+
 		impl->bindings.erase(std::remove_if(impl->bindings.begin(), impl->bindings.end(),
 			[mod](const Impl::Binding& binding) { return binding.mod == mod; }), impl->bindings.end());
-		impl->modStates.erase(mod);
+		impl->faulted.erase(mod);
 		impl->faultedMods.erase(std::remove(impl->faultedMods.begin(), impl->faultedMods.end(), mod),
 			impl->faultedMods.end());
 	}
 
-	void CommandRouter::DispatchPending(ModContext& context, const std::deque<KeyEvent>& events, bool gameLoaded) {
-		// Input received during startup is deliberately discarded (drained by the caller, not replayed).
-		if (!gameLoaded) return;
+	void CommandRouter::DispatchPending(ModContext& context, const std::deque<KeyEvent>& events, bool gameLoaded, const OwnerAvailabilityFn& ownerAvailable) {
+		if (!gameLoaded) return; // Input received during startup is deliberately discarded (drained by the caller, not replayed).
 
 		const auto routing = impl->SnapshotRouting();
 		for (const KeyEvent& event : events) {
-			impl->DispatchEvent(context, event, routing);
+			impl->DispatchEvent(context, event, routing, ownerAvailable);
 		}
 	}
 
@@ -278,7 +257,6 @@ namespace Framework {
 		std::vector<const IMod*> mods;
 		
 		mods.swap(impl->faultedMods);
-
 		return mods;
 	}
 

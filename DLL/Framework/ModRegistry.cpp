@@ -142,11 +142,6 @@ namespace Framework {
 		// defers the OnDisabled revert to a later tick (never frees state under a live callback).
 		void BeginTeardown(Record& record, DeactivationReason reason) {
 			Hooks::Render().SetModActive(record.mod.get(), false);
-			Commands().SetModActive(record.mod.get(), false);
-			if (reason == DeactivationReason::Faulted) {
-				Commands().SetModInitialized(record.mod.get(), false);
-			}
-
 			record.pendingTeardown = PendingTeardown{ reason };
 
 			if (Hooks::Render().IsModQuiescent(record.mod.get())) {
@@ -174,7 +169,6 @@ namespace Framework {
 			}
 			else if (record.state == ModState::Deactivating) {
 				record.pendingTeardown = PendingTeardown{ DeactivationReason::Faulted };
-				Commands().SetModInitialized(record.mod.get(), false);
 			}
 		}
 
@@ -210,6 +204,30 @@ namespace Framework {
 			return nullptr;
 		}
 
+		// Single source of command-owner availability: the router asks this instead of caching its
+		// own initialized/active bits. Reproduces the retired mirror exactly:
+		//   Active       -> available for both Active and Initialized bindings
+		//   Inactive     -> Initialized-only (user-disabled or conflict-suppressed, still initialized)
+		//   Deactivating -> Initialized-only, unless the pending teardown is a fault (then gone)
+		//   Registered / Faulted / unknown -> unavailable
+		bool IsOwnerAvailable(const IMod* mod, Availability required) {
+			const Record* record = FindByMod(mod);
+			if (!record) return false;
+
+			switch (record->state) {
+			case ModState::Active:
+				return true;
+			case ModState::Inactive:
+				return required == Availability::Initialized;
+			case ModState::Deactivating:
+				return required == Availability::Initialized
+					&& record->pendingTeardown
+					&& record->pendingTeardown->reason != DeactivationReason::Faulted;
+			default: // Registered, Faulted
+				return false;
+			}
+		}
+
 		void Activate(Record& record) {
 			if (!Invoke(record, &IMod::OnEnabled, "OnEnabled")) {
 				Fault(record, "threw in OnEnabled");
@@ -218,7 +236,6 @@ namespace Framework {
 
 			record.state = ModState::Active;
 			Hooks::Render().SetModActive(record.mod.get(), true);
-			Commands().SetModActive(record.mod.get(), true);
 
 			LOG_INFO("[Framework] " << record.mod->Id() << " activated" << std::endl);
 		}
@@ -409,7 +426,6 @@ namespace Framework {
 
 			if (impl->Invoke(record, &IMod::OnInitialize, "OnInitialize")) {
 				record.state = ModState::Inactive;
-				Commands().SetModInitialized(record.mod.get(), true);
 			}
 			else {
 				impl->Fault(record, "threw in OnInitialize");
@@ -423,9 +439,11 @@ namespace Framework {
 		impl->ctx.phase = phase;
 
 		// Always drain the inbox so startup input isn't replayed later; the router discards it
-		// when the game isn't loaded yet.
+		// when the game isn't loaded yet. The router resolves owner availability through the
+		// registry (single source of lifecycle truth) rather than a cached mirror.
 		const auto events = Inbox().DrainKeyEvents();
-		Commands().DispatchPending(impl->ctx, events, gameLoaded);
+		Commands().DispatchPending(impl->ctx, events, gameLoaded,
+			[this](const IMod* mod, Availability required) { return impl->IsOwnerAvailable(mod, required); });
 		impl->HandleCommandFaults();
 	}
 
@@ -462,7 +480,6 @@ namespace Framework {
 
 			if (record.state == ModState::Active || record.state == ModState::Deactivating) {
 				Hooks::Render().SetModActive(record.mod.get(), false);
-				Commands().SetModActive(record.mod.get(), false);
 
 				while (!Hooks::Render().IsModQuiescent(record.mod.get())) {
 					std::this_thread::sleep_for(std::chrono::milliseconds(5));

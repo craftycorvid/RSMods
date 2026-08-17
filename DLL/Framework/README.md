@@ -120,7 +120,16 @@ The wake semantics mirror those cadences. Key events wake on a non-empty queue, 
 drained every pass and the predicate self-clears. Settings and the close signal set a **one-shot**
 wake flag, because settings are not drained until the next tick and a queue-based predicate would
 spin. The `CommandRouter` no longer owns the wait/wake primitive or an event queue: it is pure
-binding storage plus dispatch, taking the already-drained event batch as a parameter.
+binding storage plus dispatch, taking the already-drained event batch and an owner-availability
+query as parameters.
+
+**Lifecycle state has a single source: the registry.** The router does not cache per-mod
+`initialized`/`active` bits; at dispatch time it asks the registry (`IsOwnerAvailable`), which
+answers from its own `records` + `ModState`. The one thing the router still owns is its **fault
+set** - a binding that throws mid-batch must suppress that mod's remaining events before the
+registry hears about it - which is discovered by the router, not mirrored from the registry.
+(The render subsystem's `active` flag is a separate matter: it is the cross-thread projection the
+render thread reads lock-free, not a same-thread mirror, and it lives and dies with that subsystem.)
 
 ## Commands & keybindings
 
