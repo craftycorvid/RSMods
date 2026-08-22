@@ -16,7 +16,7 @@ bool ShowSongTimerMod::IsEnabled(const ModContext& c) const {
 
 void ShowSongTimerMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
-		"ShowSongTimerKey",
+		Setting::Key::ShowSongTimer,
 		KeyEdge::Up,
 		Availability::Initialized,
 		[](ModContext&, const KeyEvent&) {

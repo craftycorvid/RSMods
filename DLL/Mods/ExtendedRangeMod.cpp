@@ -13,7 +13,7 @@ namespace Setting = Settings::Setting;
 
 void ExtendedRangeMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
-		"RainbowStringsKey",
+		Setting::Key::RainbowStrings,
 		KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) {
@@ -26,7 +26,7 @@ void ExtendedRangeMod::OnInitialize(ModContext& c) {
 		"Rainbow Strings");
 
 	c.Commands().BindSetting(
-		"ToggleExtendedRangeKey",
+		Setting::Key::ToggleExtendedRange,
 		KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) {

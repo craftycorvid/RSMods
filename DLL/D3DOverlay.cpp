@@ -66,14 +66,14 @@ void GameOverlay::DisplayMixer() {
 	if (Settings::IsOn(Setting::VolumeControlEnabled) && displayMixer) {
 
 		float offset = 0;
-		for (int volumeIndex = 0; volumeIndex < mixerInternalNames.size(); ++volumeIndex) {
+		for (int volumeIndex = 0; volumeIndex < (int)mixerChannels.size(); ++volumeIndex) {
 
 			float volume = 0;
 			RTPCValue_type type = RTPCValue_GameObject;
-			Wwise::SoundEngine::Query::GetRTPCValue(mixerInternalNames[volumeIndex].c_str(), AK_INVALID_GAME_OBJECT, &volume, &type);
+			Wwise::SoundEngine::Query::GetRTPCValue(mixerChannels[volumeIndex].channel, AK_INVALID_GAME_OBJECT, &volume, &type);
 
 			DX9DrawText(
-				drawMixerTextName[volumeIndex] + std::to_string(static_cast<int>(volume)) + "%",
+				std::string(mixerChannels[volumeIndex].label) + std::to_string(static_cast<int>(volume)) + "%",
 				whiteText,
 				static_cast<int>(WindowSize.width / 96.0f),  // 20 pixels from left in 1920x1080 resolution
 				static_cast<int>(WindowSize.height / 54.0f + offset), // 20 pixels from top (plus an offset to display multiple values)
@@ -89,10 +89,10 @@ void GameOverlay::DisplayMixer() {
 	else if (Settings::IsOn(Setting::VolumeControlEnabled) && displayCurrentVolume) {
 		float volume = 0;
 		RTPCValue_type type = RTPCValue_GameObject;
-		Wwise::SoundEngine::Query::GetRTPCValue(mixerInternalNames[currentVolumeIndex].c_str(), AK_INVALID_GAME_OBJECT, &volume, &type);
+		Wwise::SoundEngine::Query::GetRTPCValue(mixerChannels[currentVolumeIndex].channel, AK_INVALID_GAME_OBJECT, &volume, &type);
 
 		DX9DrawText(
-			drawMixerTextName[currentVolumeIndex] + std::to_string(static_cast<int>(volume)) + "%",
+			std::string(mixerChannels[currentVolumeIndex].label) + std::to_string(static_cast<int>(volume)) + "%",
 			whiteText,
 			static_cast<int>(WindowSize.width / 96.0f),  // 20 pixels from left in 1920x1080 resolution
 			static_cast<int>(WindowSize.height / 54.0f), // 20 pixels from top 
@@ -166,7 +166,7 @@ void GameOverlay::DisplayRiffRepeaterOverHundredPercentSpeed()
 
 void GameOverlay::DisplayCurrentTuningForAutoTune()
 {
-	if (Settings::IsOn(Setting::AutoTuneForSong) && Settings::GetKeyBind("TuningOffsetKey") != NULL && GameState::Menus::IsInTuningMenus()) {
+	if (Settings::IsOn(Setting::AutoTuneForSong) && Settings::GetKeyBind(Setting::Key::TuningOffset) != NULL && GameState::Menus::IsInTuningMenus()) {
 		DX9DrawText(
 			"Auto Tune For: " + Midi::GetTuningOffsetName(Midi::tuningOffset),
 			whiteText,

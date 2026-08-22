@@ -9,7 +9,7 @@ namespace Setting = Settings::Setting;
 
 void RiffRepeaterMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
-		"RewindKey",
+		Setting::Key::Rewind,
 		KeyEdge::Up,
 		Availability::Active,
 		[](ModContext& context, const KeyEvent&) { Rewind(context); },
@@ -18,7 +18,7 @@ void RiffRepeaterMod::OnInitialize(ModContext& c) {
 		});
 
 	c.Commands().BindSetting(
-		"LoopStartKey",
+		Setting::Key::LoopStart,
 		KeyEdge::Down,
 		Availability::Active,
 		[](ModContext&, const KeyEvent& event) { SetLoopStart(event); },
@@ -28,7 +28,7 @@ void RiffRepeaterMod::OnInitialize(ModContext& c) {
 		"Loop Start Point Set");
 
 	c.Commands().BindSetting(
-		"LoopEndKey",
+		Setting::Key::LoopEnd,
 		KeyEdge::Down,
 		Availability::Active,
 		[](ModContext&, const KeyEvent& event) { SetLoopEnd(event); },
@@ -38,7 +38,7 @@ void RiffRepeaterMod::OnInitialize(ModContext& c) {
 		"Loop End Point Set");
 
 	c.Commands().BindSetting(
-		"RRSpeedKey",
+		Setting::Key::RRSpeed,
 		KeyEdge::Down,
 		Availability::Active,
 		[](ModContext& context, const KeyEvent& event) { ChangeSpeed(context, event); },

@@ -24,12 +24,12 @@ private:
 	};
 
 	static constexpr std::array<VolumeBinding, 7> volumeBindings = { {
-		{ "MasterVolumeKey", "Master_Volume", 0 },
-		{ "SongVolumeKey", "Mixer_Music", 1 },
-		{ "Player1VolumeKey", "Mixer_Player1", 2 },
-		{ "Player2VolumeKey", "Mixer_Player2", 3 },
-		{ "MicrophoneVolumeKey", "Mixer_Mic", 4 },
-		{ "VoiceOverVolumeKey", "Mixer_VO", 5 },
-		{ "SFXVolumeKey", "Mixer_SFX", 6 },
+		{ Settings::Setting::Key::MasterVolume,     Settings::Setting::Channel::Master,    0 },
+		{ Settings::Setting::Key::SongVolume,       Settings::Setting::Channel::Music,     1 },
+		{ Settings::Setting::Key::Player1Volume,    Settings::Setting::Channel::Player1,   2 },
+		{ Settings::Setting::Key::Player2Volume,    Settings::Setting::Channel::Player2,   3 },
+		{ Settings::Setting::Key::MicrophoneVolume, Settings::Setting::Channel::Mic,       4 },
+		{ Settings::Setting::Key::VoiceOverVolume,  Settings::Setting::Channel::VoiceOver, 5 },
+		{ Settings::Setting::Key::SFXVolume,        Settings::Setting::Channel::SFX,       6 },
 	} };
 };

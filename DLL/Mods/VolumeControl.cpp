@@ -1,5 +1,6 @@
 #include "../stdafx.h"
 #include "VolumeControl.hpp"
+namespace Setting = Settings::Setting;
 
 /// <summary>
 /// Increase Volume of Mixer's Backend
@@ -9,12 +10,6 @@
 void VolumeControl::IncreaseVolume(int amountToIncrease, std::string mixerToIncrease) {
 	float volume = 0;
 	RTPCValue_type type = RTPCValue_GameObject;
-
-	// Mixer sent is not a valid mixer.
-	if (!Contains(mixerToIncrease, mixerNames)) {
-		LOG_ERROR("That mixer doesn't exist" << std::endl);
-		return;
-	}
 
 	// Fill Volume Variable With Current Volume
 	Wwise::SoundEngine::Query::GetRTPCValue(mixerToIncrease.c_str(), AK_INVALID_GAME_OBJECT, &volume, &type); 
@@ -40,12 +35,6 @@ void VolumeControl::IncreaseVolume(int amountToIncrease, std::string mixerToIncr
 void VolumeControl::DecreaseVolume(int amountToDecrease, std::string mixerToDecrease) {
 	float volume = 0;
 	RTPCValue_type type = RTPCValue_GameObject;
-
-	// Mixer sent is not a valid mixer.
-	if (!Contains(mixerToDecrease, mixerNames)) {
-		LOG_ERROR("That mixer doesn't exist" << std::endl);
-		return;
-	}
 
 	// Fill Volume Variable With Current Volume
 	Wwise::SoundEngine::Query::GetRTPCValue(mixerToDecrease.c_str(), AK_INVALID_GAME_OBJECT, &volume, &type); 
@@ -80,7 +69,7 @@ void VolumeControl::DisableSongPreviewAudio() {
 void VolumeControl::MutePlayer(bool player2) {
 	RTPCValue_type type = RTPCValue_GameObject;
 
-	const char* mixer = player2 ? "Mixer_Player2" : "Mixer_Player1";
+	const char* mixer = player2 ? Setting::Channel::Player2 : Setting::Channel::Player1;
 
 	// Save current volume.
 	if (player2)
@@ -104,8 +93,8 @@ void VolumeControl::UnmutePlayer(bool player2)
 {
 	RTPCValue_type type = RTPCValue_GameObject;
 
-	const char* mixer = player2 ? "Mixer_Player2" : "Mixer_Player1";
-	
+	const char* mixer = player2 ? Setting::Channel::Player2 : Setting::Channel::Player1;
+
 	// Unmute
 	if (player2)
 	{

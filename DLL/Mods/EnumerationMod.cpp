@@ -10,7 +10,7 @@ namespace Setting = Settings::Setting;
 
 void EnumerationMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
-		"ForceReEnumerationKey",
+		Setting::Key::ForceReEnumeration,
 		KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) {

@@ -19,7 +19,7 @@ void MidiMod::OnInitialize(ModContext& c) {
 
 	// This command changes tuning-controller state, so it must never bypass conflict suppression.
 	c.Commands().BindSetting(
-		"TuningOffsetKey",
+		Setting::Key::TuningOffset,
 		KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent& event) {

@@ -14,7 +14,7 @@ bool RemoveLyricsMod::IsEnabled(const ModContext& c) const {
 
 void RemoveLyricsMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
-		"RemoveLyricsKey",
+		Setting::Key::RemoveLyrics,
 		KeyEdge::Up,
 		Availability::Initialized,
 		[](ModContext&, const KeyEvent&) {

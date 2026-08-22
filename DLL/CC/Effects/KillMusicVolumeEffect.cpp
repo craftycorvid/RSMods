@@ -1,5 +1,6 @@
 #include "../../stdafx.h"
 #include "KillMusicVolumeEffect.hpp"
+namespace Setting = Settings::Setting;
 
 namespace CrowdControl::Effects {
 	
@@ -33,10 +34,10 @@ namespace CrowdControl::Effects {
 
 		RTPCValue_type type = RTPCValue_GameObject; // Save old volume
 		
-		Wwise::SoundEngine::Query::GetRTPCValue("Mixer_Music", AK_INVALID_GAME_OBJECT, &oldVolume, &type);
+		Wwise::SoundEngine::Query::GetRTPCValue(Setting::Channel::Music, AK_INVALID_GAME_OBJECT, &oldVolume, &type);
 
-		Wwise::SoundEngine::SetRTPCValue("Mixer_Music", 0.0f, AK_INVALID_GAME_OBJECT, 2000, AkCurveInterpolation_Linear);
-		Wwise::SoundEngine::SetRTPCValue("Mixer_Music", 0.0f, 0x1234, 2000, AkCurveInterpolation_Linear);
+		Wwise::SoundEngine::SetRTPCValue(Setting::Channel::Music, 0.0f, AK_INVALID_GAME_OBJECT, 2000, AkCurveInterpolation_Linear);
+		Wwise::SoundEngine::SetRTPCValue(Setting::Channel::Music, 0.0f, 0x1234, 2000, AkCurveInterpolation_Linear);
 
 		SetDuration(request);
 		running = true;
@@ -56,8 +57,8 @@ namespace CrowdControl::Effects {
 			// Start fadeout before effect actually stops
 			if (duration < std::chrono::milliseconds(2000) && !ending) {
 				// Restore volume
-				Wwise::SoundEngine::SetRTPCValue("Mixer_Music", oldVolume, AK_INVALID_GAME_OBJECT, 2000, AkCurveInterpolation_Linear);
-				Wwise::SoundEngine::SetRTPCValue("Mixer_Music", oldVolume, 0x1234, 2000, AkCurveInterpolation_Linear);
+				Wwise::SoundEngine::SetRTPCValue(Setting::Channel::Music, oldVolume, AK_INVALID_GAME_OBJECT, 2000, AkCurveInterpolation_Linear);
+				Wwise::SoundEngine::SetRTPCValue(Setting::Channel::Music, oldVolume, 0x1234, 2000, AkCurveInterpolation_Linear);
 				ending = true;
 			}
 
@@ -74,8 +75,8 @@ namespace CrowdControl::Effects {
 		LOG_INFO("KillMusicVolumeEffect::Stop()" << std::endl);
 
 		// Make sure volume was set to original value by setting it immediately effective
-		Wwise::SoundEngine::SetRTPCValue("Mixer_Music", oldVolume, AK_INVALID_GAME_OBJECT, 2000, AkCurveInterpolation_Linear);
-		Wwise::SoundEngine::SetRTPCValue("Mixer_Music", oldVolume, 0x1234, 2000, AkCurveInterpolation_Linear);
+		Wwise::SoundEngine::SetRTPCValue(Setting::Channel::Music, oldVolume, AK_INVALID_GAME_OBJECT, 2000, AkCurveInterpolation_Linear);
+		Wwise::SoundEngine::SetRTPCValue(Setting::Channel::Music, oldVolume, 0x1234, 2000, AkCurveInterpolation_Linear);
 
 		running = false;
 		ending = false;

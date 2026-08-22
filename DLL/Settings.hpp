@@ -146,6 +146,48 @@ namespace Settings {
 		// Solid Notes (user-defined hex color; lives in modSettings, set by the Twitch/CC SolidNotes effect)
 		inline constexpr char SolidNoteColor[]         = "SolidNoteColor";
 
+		// Wwise RTPC channel names passed to SetRTPCValue / GetRTPCValue.
+		namespace Channel {
+			inline constexpr char Master[]    = "Master_Volume";
+			inline constexpr char Music[]     = "Mixer_Music";
+			inline constexpr char Player1[]   = "Mixer_Player1";
+			inline constexpr char Player2[]   = "Mixer_Player2";
+			inline constexpr char Mic[]       = "Mixer_Mic";
+			inline constexpr char VoiceOver[] = "Mixer_VO";
+			inline constexpr char SFX[]       = "Mixer_SFX";
+		}
+
+		// Keybind names. These live in the modSettings map (GetModSetting / GetKeyBind)
+		// alongside the feature-flag and numeric settings above.
+		namespace Key {
+			inline constexpr char CustomSongListTitles[] = "CustomSongListTitles";
+			inline constexpr char ToggleLoft[]           = "ToggleLoftKey";
+			inline constexpr char ShowSongTimer[]        = "ShowSongTimerKey";
+			inline constexpr char ForceReEnumeration[]   = "ForceReEnumerationKey";
+			inline constexpr char RainbowStrings[]       = "RainbowStringsKey";
+			inline constexpr char RainbowNotes[]         = "RainbowNotesKey";
+			inline constexpr char RemoveLyrics[]         = "RemoveLyricsKey";
+			inline constexpr char RRSpeed[]              = "RRSpeedKey";
+			inline constexpr char MenuToggle[]           = "MenuToggleKey";
+			inline constexpr char TuningOffset[]         = "TuningOffsetKey";
+			inline constexpr char ToggleExtendedRange[]  = "ToggleExtendedRangeKey";
+			inline constexpr char LoopStart[]            = "LoopStartKey";
+			inline constexpr char LoopEnd[]              = "LoopEndKey";
+			inline constexpr char Rewind[]               = "RewindKey";
+
+			inline constexpr char MasterVolume[]         = "MasterVolumeKey";
+			inline constexpr char SongVolume[]           = "SongVolumeKey";
+			inline constexpr char Player1Volume[]        = "Player1VolumeKey";
+			inline constexpr char Player2Volume[]        = "Player2VolumeKey";
+			inline constexpr char MicrophoneVolume[]     = "MicrophoneVolumeKey";
+			inline constexpr char VoiceOverVolume[]      = "VoiceOverVolumeKey";
+			inline constexpr char SFXVolume[]            = "SFXVolumeKey";
+			inline constexpr char DisplayMixer[]         = "DisplayMixerKey";
+			inline constexpr char MutePlayer1[]              = "MutePlayer1Key";
+			inline constexpr char MutePlayer2[]              = "MutePlayer2Key";
+			inline constexpr char ChangedSelectedVolume[]    = "ChangedSelectedVolumeKey";
+		}
+
 		// Twitch / Crowd Control effect toggles. These live in the separate twitchSettings map
 		// (IsTwitchSettingEnabled / UpdateTwitchSetting), NOT modSettings, so they get their own scope.
 		namespace Twitch {

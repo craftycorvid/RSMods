@@ -15,7 +15,7 @@ bool LoftMod::IsEnabled(const ModContext& c) const {
 
 void LoftMod::OnInitialize(ModContext& c) {
 	c.Commands().BindSetting(
-		"ToggleLoftKey",
+		Setting::Key::ToggleLoft,
 		KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) { Loft::ToggleLoft(); },

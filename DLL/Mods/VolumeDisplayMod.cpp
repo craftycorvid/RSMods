@@ -12,29 +12,28 @@ void VolumeDisplayMod::OnInitialize(ModContext& c) {
 	auto commands = c.Commands();
 	const auto volumeEnabled = [](const ModContext& context, const KeyEvent&) { return context.IsOn(Setting::VolumeControlEnabled); };
 
-	commands.BindSetting("MutePlayer1Key", KeyEdge::Up,
+	commands.BindSetting(Setting::Key::MutePlayer1, KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) { ToggleMute(false); }, {}, "Mute Player 1");
 
-	commands.BindSetting("MutePlayer2Key", KeyEdge::Up,
+	commands.BindSetting(Setting::Key::MutePlayer2, KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) { ToggleMute(true); }, {}, "Mute Player 2");
 
-	commands.BindSetting("DisplayMixerKey", KeyEdge::Up,
+	commands.BindSetting(Setting::Key::DisplayMixer, KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) { GameOverlay::displayMixer = false; });
 
-	commands.BindSetting("ChangedSelectedVolumeKey", KeyEdge::Up,
+	commands.BindSetting(Setting::Key::ChangedSelectedVolume, KeyEdge::Up,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) {
 			++GameOverlay::currentVolumeIndex;
-			
-			if (GameOverlay::currentVolumeIndex > GameOverlay::mixerInternalNames.size() - 1) {
+			if (GameOverlay::currentVolumeIndex >= GameOverlay::mixerChannels.size()) {
 				GameOverlay::currentVolumeIndex = 0;
 			}
 		}, volumeEnabled);
 
-	commands.BindSetting("DisplayMixerKey", KeyEdge::Down,
+	commands.BindSetting(Setting::Key::DisplayMixer, KeyEdge::Down,
 		Availability::Active,
 		[](ModContext&, const KeyEvent&) { GameOverlay::displayMixer = true; },
 		volumeEnabled, "Display Mixer");
