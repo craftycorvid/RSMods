@@ -52,14 +52,16 @@ namespace QualityOfLife {
 				std::wstring processName(processNameBuffer.data());
 
 				if (processName == L"Rocksmith2014.exe") {
-					LOG_INFO("Found parasitic process '" << processName.c_str() << "'. Terminating." << std::endl);
+					std::string narrowName(processName.begin(), processName.end());
+					LOG_INFO("Found parasitic process '" << narrowName << "'. Terminating." << std::endl);
 
 					if (!TerminateProcess(handle, 0)) {
 						LOG_ERROR("Failed to terminate process. Error: " << GetLastError() << std::endl);
 					}
 				}
 				else {
-					LOG_INFO("Found dialog box, but process '" << processName.c_str() << "' is not the target. Not terminating." << std::endl);
+					std::string narrowName(processName.begin(), processName.end());
+					LOG_INFO("Found dialog box, but process '" << narrowName << "' is not the target. Not terminating." << std::endl);
 				}
 			}
 		}

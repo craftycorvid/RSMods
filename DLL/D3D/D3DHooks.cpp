@@ -1,5 +1,7 @@
 #include "../stdafx.h"
 #include "D3DHooks.hpp"
+#include "../Framework/Framework.hpp"
+#include "../D3DOverlay.hpp"
 
 using Settings::NoteColorMode;
 namespace Setting = Settings::Setting;
@@ -237,7 +239,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 			//Log("{ %d, %d, %d, %d, %d, %d, %d, %d, %d }, ", Stride, PrimCount, NumVertices, StartIndex, StartRegister, PrimType, decl->Type, VectorCount, NumElements);
 
 			if (startLogging) {
-				if (std::find(allMeshes.begin(), allMeshes.end(), currentThicc) == allMeshes.end()) // Make sure we don't log what we'd already logged
+				if (std::ranges::find(allMeshes, currentThicc) == allMeshes.end()) // Make sure we don't log what we'd already logged
 					allMeshes.push_back(currentThicc);
 				if (NOTE_STEMS) // Criteria for search
 					LOG_INFO("{ " << Stride << ", "
@@ -699,7 +701,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 
 			// We've already cached the headstocks we're using, so find the one we are working with and remove it.
 			if (calculatedHeadstocks)
-				if (std::find(std::begin(headstockTexturePointers), std::end(headstockTexturePointers), pCurrTextures[1]) != std::end(headstockTexturePointers))
+				if (std::ranges::find(headstockTexturePointers, pCurrTextures[1]) != headstockTexturePointers.end())
 					return REMOVE_TEXTURE;
 		}
 	}
@@ -734,24 +736,19 @@ void D3DHooks::UpdateHeadstockCacheForMenu() {
 
 std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds)
 {
-	int seconds = 0, minutes = 0, hours = 0;
+	using namespace std::chrono;
 
-	seconds = (int)timeInSeconds % 60;
-	minutes = (int)(timeInSeconds / 60) % 60;
-	hours = timeInSeconds / 3600;
+	const auto dur = duration_cast<seconds>(duration<float>(timeInSeconds));
+	const auto h = duration_cast<hours>(dur);
+	const auto m = duration_cast<minutes>(dur % hours(1));
+	const auto s = duration_cast<seconds>(dur % minutes(1));
 
-	char buffer[64];
-
-	if (hours > 0)
+	if (h.count() > 0)
 	{
-		sprintf_s(buffer, "%02dh:%02dm:%02ds", hours, minutes, seconds);
-	}
-	else
-	{
-		sprintf_s(buffer, "%02dm:%02ds", minutes, seconds);
+		return std::format("{:02}h:{:02}m:{:02}s", h.count(), m.count(), s.count());
 	}
 
-	return std::string(buffer);
+	return std::format("{:02}m:{:02}s", m.count(), s.count());
 }
 
 void D3DHooks::RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice) {

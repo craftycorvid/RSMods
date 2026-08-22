@@ -11,7 +11,7 @@ namespace CrowdControl::Effects {
 		}
 	}
 
-	void CCEffect::SetDuration(const Request& req) {
+	void CCEffect::SetDuration(const Structs::Request& req) {
 		if (req.duration)
 			duration_ms = req.duration;
 
@@ -36,7 +36,7 @@ namespace CrowdControl::Effects {
 
 	bool CCEffect::AreIncompatibleEffectsRunning() const {
 		const auto& allEffects = CrowdControl::EffectList::GetAllEffects();
-		return std::any_of(incompatibleEffects.begin(), incompatibleEffects.end(),
+		return std::ranges::any_of(incompatibleEffects,
 			[&allEffects](const std::string& effectName) {
 				auto it = allEffects.find(effectName);
 				return it != allEffects.end() && it->second->running;

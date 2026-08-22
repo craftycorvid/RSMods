@@ -1,24 +1,25 @@
-#include "../../stdafx.h"
+﻿#include "../../stdafx.h"
 #include "SolidNotesEffect.hpp"
 #include "../../Framework/Framework.hpp"
 
 namespace Setting = Settings::Setting;
 
 namespace CrowdControl::Effects {
-	
+	using enum Enums::EffectStatus;
+
 	/// <summary>
 	/// Test the twitch mod's requirements.
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
-	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesCustomEffect::Test(const Request& request)
+	/// <returns>Enums::EffectStatus::Success if test completed without any issues. Enums::EffectStatus::Retry if we have to retry.</returns>
+	Enums::EffectStatus SolidNotesCustomEffect::Test(const Structs::Request& request)
 	{
 		LOG_INFO("SolidNotesCustomEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Retry;
 
-		return EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
@@ -37,13 +38,13 @@ namespace CrowdControl::Effects {
 	/// Change the color of the strings to the ones specified in the request.
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
-	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesCustomEffect::Start(const Request& request)
+	/// <returns>Enums::EffectStatus::Success if test completed without any issues. Enums::EffectStatus::Retry if we have to retry.</returns>
+	Enums::EffectStatus SolidNotesCustomEffect::Start(const Structs::Request& request)
 	{
 		LOG_INFO("SolidNotesCustomEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Retry;
 
 		running = true;
 
@@ -60,14 +61,14 @@ namespace CrowdControl::Effects {
 
 		SetDuration(request);
 
-		return EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
 	/// Stops the mod.
 	/// </summary>
-	/// <returns>EffectStatus::Success</returns>
-	EffectStatus SolidNotesCustomEffect::Stop()
+	/// <returns>Enums::EffectStatus::Success</returns>
+	Enums::EffectStatus SolidNotesCustomEffect::Stop()
 	{
 		LOG_INFO("SolidNotesCustomEffect::Stop()" << std::endl);
 
@@ -77,7 +78,7 @@ namespace CrowdControl::Effects {
 		running = false;
 		//ERMode::ResetAllStrings();
 
-		return EffectStatus::Success;
+		return Success;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -87,28 +88,28 @@ namespace CrowdControl::Effects {
 	/// Test the twitch mod's requirements.
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
-	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesRandomEffect::Test(const Request& request)
+	/// <returns>Enums::EffectStatus::Success if test completed without any issues. Enums::EffectStatus::Retry if we have to retry.</returns>
+	Enums::EffectStatus SolidNotesRandomEffect::Test(const Structs::Request& request)
 	{
 		LOG_INFO("SolidNotesRandomEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Retry;
 
-		return EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
 	/// Change the color of the strings to the ones specified in the request.
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
-	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesRandomEffect::Start(const Request& request)
+	/// <returns>Enums::EffectStatus::Success if test completed without any issues. Enums::EffectStatus::Retry if we have to retry.</returns>
+	Enums::EffectStatus SolidNotesRandomEffect::Start(const Structs::Request& request)
 	{
 		LOG_INFO("SolidNotesRandomEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Retry;
 
 		LOG_INFO("SolidNotesRandomEffect - Colors Saved" << std::endl);
 		
@@ -130,14 +131,14 @@ namespace CrowdControl::Effects {
 		SetDuration(request);
 		running = true;
 
-		return EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
 	/// Stops the mod.
 	/// </summary>
-	/// <returns>EffectStatus::Success</returns>
-	EffectStatus SolidNotesRandomEffect::Stop()
+	/// <returns>Enums::EffectStatus::Success</returns>
+	Enums::EffectStatus SolidNotesRandomEffect::Stop()
 	{
 		LOG_INFO("SolidNotesRandomEffect::Stop()" << std::endl);
 
@@ -147,7 +148,7 @@ namespace CrowdControl::Effects {
 		running = false;
 		//ERMode::ResetAllStrings();
 
-		return EffectStatus::Success;
+		return Success;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -157,28 +158,28 @@ namespace CrowdControl::Effects {
 	/// Test the twitch mod's requirements.
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
-	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesCustomRGBEffect::Test(const Request& request)
+	/// <returns>Enums::EffectStatus::Success if test completed without any issues. Enums::EffectStatus::Retry if we have to retry.</returns>
+	Enums::EffectStatus SolidNotesCustomRGBEffect::Test(const Structs::Request& request)
 	{
 		LOG_INFO("SolidNotesCustomRGBEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Retry;
 
-		return EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
 	/// Change the color of the strings to the ones specified in the request.
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
-	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus SolidNotesCustomRGBEffect::Start(const Request& request)
+	/// <returns>Enums::EffectStatus::Success if test completed without any issues. Enums::EffectStatus::Retry if we have to retry.</returns>
+	Enums::EffectStatus SolidNotesCustomRGBEffect::Start(const Structs::Request& request)
 	{
 		LOG_INFO("SolidNotesCustomRGBEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Retry;
 
 		//Get color from parameters
 		byte r, g, b;
@@ -204,14 +205,14 @@ namespace CrowdControl::Effects {
 		SetDuration(request);
 		running = true;
 
-		return EffectStatus::Success;
+		return Success;
 	}
 
 	/// <summary>
 	/// Stops the mod.
 	/// </summary>
-	/// <returns>EffectStatus::Success</returns>
-	EffectStatus SolidNotesCustomRGBEffect::Stop()
+	/// <returns>Enums::EffectStatus::Success</returns>
+	Enums::EffectStatus SolidNotesCustomRGBEffect::Stop()
 	{
 		LOG_INFO("SolidNotesCustomRGBEffect::Stop()" << std::endl);
 
@@ -221,6 +222,6 @@ namespace CrowdControl::Effects {
 		running = false;
 		//ERMode::ResetAllStrings();
 
-		return EffectStatus::Success;
+		return Success;
 	}
 }

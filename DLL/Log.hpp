@@ -2,11 +2,11 @@
 
 /// If changing this file, be sure to do a clean build, else some changes might not go into effect.
 
-#pragma once
 #include <iostream>
 #include <string>
 #include <ctime>
 #include <sstream>
+#include <format>
 #include <mutex>
 
 /// <summary>
@@ -57,7 +57,7 @@ public:
     /// </summary>
     template <typename T>
     void Log(const T& message, LogLevel level = LogSettings::defaultLogLevel) {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::lock_guard lock(mutex);
 
         std::string header = GenerateHeader(level);
 
@@ -73,7 +73,7 @@ public:
     /// </summary>
     template <typename T>
     void LogNoHeader(const T& message) {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::lock_guard lock(mutex);
 
         std::cerr << message;
 
@@ -97,20 +97,18 @@ private:
     Logger() = default;
 
     std::string GenerateHeader(LogLevel level) {
-        std::ostringstream header;
-
         double timeSinceStart = static_cast<double>(clock() - LogSettings::startupTime) / CLOCKS_PER_SEC;
-        header << std::fixed << std::setprecision(2) << timeSinceStart << " ";
 
+        const char* levelStr;
         switch (level) {
-            case LogLevel::Debug:   header << "[DEBUG] ";   break;
-            case LogLevel::Info:    header << "[INFO] ";    break;
-            case LogLevel::Warning: header << "[WARNING] "; break;
-            case LogLevel::Error:   header << "[ERROR] ";   break;
-            default:                header << "[UNKNOWN] "; break;
+            case LogLevel::Debug:   levelStr = "[DEBUG] ";   break;
+            case LogLevel::Info:    levelStr = "[INFO] ";    break;
+            case LogLevel::Warning: levelStr = "[WARNING] "; break;
+            case LogLevel::Error:   levelStr = "[ERROR] ";   break;
+            default:                levelStr = "[UNKNOWN] "; break;
         }
 
-        return header.str();
+        return std::format("{:.2f} {}", timeSinceStart, levelStr);
     }
 
     LogLevel currentLevel = LogSettings::defaultLogLevel;

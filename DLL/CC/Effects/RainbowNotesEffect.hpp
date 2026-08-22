@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../../Mods/ExtendedRangeMode.hpp"
 
 namespace CrowdControl::Effects {
@@ -20,8 +20,8 @@ namespace CrowdControl::Effects {
 			return GameState::IsInSong() && !ERMode::IsRainbowNotesEnabled() && !AreIncompatibleEffectsRunning() && !running;
 		}
 
-		EffectStatus Test(const Request& request) override;
-		EffectStatus Start(const Request& request) override;
-		EffectStatus Stop() override;
+		Enums::EffectStatus Test(const Structs::Request& request) override;
+		Enums::EffectStatus Start(const Structs::Request& request) override;
+		Enums::EffectStatus Stop() override;
 	};
 }

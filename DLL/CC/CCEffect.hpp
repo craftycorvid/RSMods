@@ -5,9 +5,6 @@
 
 #include "../ObjectUtil.hpp"
 
-using namespace CrowdControl::Enums;
-using namespace CrowdControl::Structs;
-
 namespace CrowdControl::Effects {
 	class CCEffect
 	{
@@ -19,9 +16,9 @@ namespace CrowdControl::Effects {
 
 		virtual ~CCEffect() = default;
 
-		virtual EffectStatus Test(const Request& request) = 0;
-		virtual EffectStatus Start(const Request& request) = 0;
-		virtual EffectStatus Stop() = 0;
+		virtual Enums::EffectStatus Test(const Structs::Request& request) = 0;
+		virtual Enums::EffectStatus Start(const Structs::Request& request) = 0;
+		virtual Enums::EffectStatus Stop() = 0;
 
 		/**
 		 * \brief Run/Update this effect, checks duration, and stops timed effect when duration has expired. Called approximately every 10ms
@@ -32,7 +29,7 @@ namespace CrowdControl::Effects {
 		/// Sets duration for the current effect, and calculates endTime
 		/// Manually loops through the JSON members of the struct and sets the value of the member called "duration"
 		/// </summary>
-		void SetDuration(const Request& req);
+		void SetDuration(const Structs::Request& req);
 
 		/**
 		 * \brief Can this effect start? By default checks that a song is being played, no incompatible effects are running, and this effect is not running

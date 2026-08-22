@@ -2,14 +2,9 @@
 #include <gdiplus.h>
 
 #include "D3DHelper.hpp"
-#include "GdiplusManager.hpp"
-
-#include "../Mods/CollectColors.hpp"
-#include "../Mods/ExtendedRangeMode.hpp"
 
 // #pragma intrinsic(_ReturnAddress) Not actually declared
 #pragma comment (lib, "gdiplus.lib")
-#pragma once
 
 struct RSColor;
 typedef std::map<std::string, RSColor> ColorMap;
@@ -210,7 +205,7 @@ inline LPDIRECT3DBASETEXTURE9 pBaseTextures[3];
 inline LPDIRECT3DTEXTURE9 pCurrTextures[3];
 
 inline void AddToTextureList(std::vector<LPDIRECT3DTEXTURE9>& textureList, LPDIRECT3DTEXTURE9 newTexture) {
-	if (std::find(std::begin(textureList), std::end(textureList), newTexture) == std::end(textureList))
+	if (std::ranges::find(textureList, newTexture) == textureList.end())
 		textureList.push_back(newTexture);
 }
 

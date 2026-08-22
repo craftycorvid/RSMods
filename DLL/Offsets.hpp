@@ -2,6 +2,7 @@
 
 #include "VersioningStruct.h"
 #include <vector>
+#include <cstddef>
 
 namespace Offsets {
 	extern uintptr_t baseHandle; // Beginning of Rocksmith
@@ -75,7 +76,7 @@ namespace Offsets {
 	//D3D Stuff
 	extern const char* d3dDevice_Pattern;
 	extern uint32_t d3dDevice_SearchLen;
-	extern char* d3dDevice_Mask;
+	extern const char* d3dDevice_Mask;
 
 	// Multiplayer
 	inline VersioningStruct<uintptr_t> ptr_multiplayer;

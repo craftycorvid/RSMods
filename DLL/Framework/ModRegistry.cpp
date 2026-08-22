@@ -249,7 +249,7 @@ namespace Framework {
 					auto& resources = exclusiveResourcesByMod[i];
 					const std::string owned(resource);
 
-					if (std::find(resources.begin(), resources.end(), owned) == resources.end()) {
+					if (std::ranges::find(resources, owned) == resources.end()) {
 						resources.push_back(owned);
 					}
 				}
@@ -329,15 +329,13 @@ namespace Framework {
 	void ModRegistry::Register(std::unique_ptr<IMod> mod) {
 		const std::string_view id = mod->Id();
 
-		for (const auto& record : impl->records) {
-			if (record.mod->Id() == id) {
-				LOG_ERROR("[Framework] Duplicate mod Id '" << id << "' - registration rejected" << std::endl);
-				return;
-			}
+		if (std::ranges::any_of(impl->records, [id](const Impl::Record& r) { return r.mod->Id() == id; })) {
+			LOG_ERROR("[Framework] Duplicate mod Id '" << id << "' - registration rejected" << std::endl);
+			return;
 		}
 
 		LOG_INFO("[Framework] Registered mod: " << id << std::endl);
-		impl->records.push_back(Impl::Record{ std::move(mod) });
+		impl->records.push_back(Impl::Record{ .mod = std::move(mod) });
 		impl->resourceIndexDirty = true;
 	}
 

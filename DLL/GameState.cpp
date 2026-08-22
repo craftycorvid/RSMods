@@ -59,9 +59,7 @@ bool IsSongKeyStringValid(const char* str, size_t max_len)
 		return false;
 
 	std::string_view sv(str, strLen);
-
-	constexpr std::string_view prefix = "Play_";
-	return sv.size() >= prefix.size() && sv.substr(0, prefix.size()) == prefix;
+	return sv.starts_with("Play_");
 }
 
 /// <summary>

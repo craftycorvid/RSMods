@@ -1,4 +1,4 @@
-#include "../../stdafx.h"
+﻿#include "../../stdafx.h"
 #include "HighwayScrollSpeedEffect.hpp"
 
 using namespace CrowdControl::Enums;
@@ -9,41 +9,41 @@ namespace CrowdControl::Effects {
 	/// Test the twitch mod's requirements.
 	/// </summary>
 	/// <param name="request"> - JSON Request</param>
-	/// <returns>EffectStatus::Success if test completed without any issues. EffectStatus::Retry if we have to retry.</returns>
-	EffectStatus HighwayScrollSpeedEffect::Test(const Request& request)
+	/// <returns>Enums::EffectStatus::Success if test completed without any issues. Enums::EffectStatus::Retry if we have to retry.</returns>
+	Enums::EffectStatus HighwayScrollSpeedEffect::Test(const Structs::Request& request)
 	{
 		LOG_INFO("HighwayScrollSpeedEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Enums::EffectStatus::Retry;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 
 	/// <summary>
 	/// Change scroll speed multiplier to let the user have more, or less, time to react to the notes appearing on screen.
 	/// </summary>
-	/// <returns> EffectStatus::Retry if we aren't currently in a song or incompatible effects are running, or EffectStatus::Success if we are</returns>
-	EffectStatus HighwayScrollSpeedEffect::Start(const Request& request)
+	/// <returns> Enums::EffectStatus::Retry if we aren't currently in a song or incompatible effects are running, or Enums::EffectStatus::Success if we are</returns>
+	Enums::EffectStatus HighwayScrollSpeedEffect::Start(const Structs::Request& request)
 	{
 		LOG_INFO("HighwayScrollSpeedEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Enums::EffectStatus::Retry;
 		
 		WriteScrollSpeedMultiplier(multiplier);
 
 		SetDuration(request);
 		running = true;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 
 	/// <summary>
 	/// Stops the mod.
 	/// </summary>
-	/// <returns>EffectStatus::Success</returns>
-	EffectStatus HighwayScrollSpeedEffect::Stop()
+	/// <returns>Enums::EffectStatus::Success</returns>
+	Enums::EffectStatus HighwayScrollSpeedEffect::Stop()
 	{
 		LOG_INFO("HighwayScrollSpeedEffect::Stop()" << std::endl);
 
@@ -51,7 +51,7 @@ namespace CrowdControl::Effects {
 
 		running = false;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 
 	/// <summary>

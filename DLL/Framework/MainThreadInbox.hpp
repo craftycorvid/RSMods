@@ -33,8 +33,8 @@ namespace Framework {
 
 		// Consumer (MainThread).
 		void WaitUntil(std::chrono::steady_clock::time_point deadline);
-		std::deque<KeyEvent> DrainKeyEvents();
-		std::vector<std::function<void()>> DrainSettings();
+		[[nodiscard]] std::deque<KeyEvent> DrainKeyEvents();
+		[[nodiscard]] std::vector<std::function<void()>> DrainSettings();
 
 	private:
 		std::mutex mutex;

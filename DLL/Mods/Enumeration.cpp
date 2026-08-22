@@ -33,7 +33,7 @@ void Enumeration::HookEnumerationService() {
 	uint32_t BaseTextAddress = MemUtil::GetTextSectionAddress();
 
 	const char* sig = "\x55\x8B\xEC\x6A\x00\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\x00\x53\x57\x50\x8D\x45\x00\x64\xA3\x00\x00\x00\x00\x33\xDB\x38\x5E\x00\x0F\x84";
-	char* mask = "xxxx?x????xx????xxx?x????xxxx?xxxxx?xx????xxxx?xx";
+	const char* mask = "xxxx?x????xx????xxx?x????xxxx?xxxxx?xx????xxxx?xx";
 
 	uint32_t hookAddr = MemUtil::FindPattern<uint32_t>(BaseTextAddress, (size_t)MemUtil::GetTextSectionLength(), (uint8_t*)sig, mask);
 	short len = 0x5;

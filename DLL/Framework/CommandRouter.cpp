@@ -38,35 +38,33 @@ namespace Framework {
 				Availability availability, KeyAction action,
 				KeyPredicate predicate, std::string logMessage) {
 
-				Binding binding;
-				binding.mod = mod;
-				binding.commandName = keySetting;
-				binding.keySetting = std::move(keySetting);
-				binding.edge = edge;
-				binding.availability = availability;
-				binding.action = std::move(action);
-				binding.predicate = std::move(predicate);
-				binding.logMessage = std::move(logMessage);
-				
-				return binding;
+				return Binding{
+					.mod          = mod,
+					.commandName  = keySetting,
+					.keySetting   = std::move(keySetting),
+					.edge         = edge,
+					.availability = availability,
+					.action       = std::move(action),
+					.predicate    = std::move(predicate),
+					.logMessage   = std::move(logMessage),
+				};
 			}
 
 			static Binding ForFixedKey(const IMod* mod, std::string name, std::uint32_t virtualKey,
 				KeyEdge edge, Availability availability, KeyAction action,
 				KeyPredicate predicate, std::string logMessage) {
 
-				Binding binding;
-				binding.mod = mod;
-				binding.commandName = std::move(name);
-				binding.fixedVirtualKey = virtualKey;
-				binding.edge = edge;
-				binding.availability = availability;
-				binding.kind = BindingKind::FixedKey;
-				binding.action = std::move(action);
-				binding.predicate = std::move(predicate);
-				binding.logMessage = std::move(logMessage);
-
-				return binding;
+				return Binding{
+					.mod             = mod,
+					.commandName     = std::move(name),
+					.fixedVirtualKey = virtualKey,
+					.edge            = edge,
+					.availability    = availability,
+					.kind            = BindingKind::FixedKey,
+					.action          = std::move(action),
+					.predicate       = std::move(predicate),
+					.logMessage      = std::move(logMessage),
+				};
 			}
 
 			bool operator==(const Binding& other) const {
@@ -102,7 +100,7 @@ namespace Framework {
 		};
 
 		void AddBinding(Binding binding) {
-			if (std::find(bindings.begin(), bindings.end(), binding) != bindings.end()) {
+			if (std::ranges::find(bindings, binding) != bindings.end()) {
 				LOG_ERROR("[Framework] duplicate binding '" << binding.commandName << "' rejected" << std::endl);
 				return;
 			}
@@ -118,7 +116,7 @@ namespace Framework {
 				// A binding this router has already faulted this batch stays unavailable until the
 				// registry tears the mod down (RemoveMod). The registry hasn't seen the fault yet.
 				std::lock_guard<std::mutex> lock(mutex);
-				if (faulted.count(binding.mod)) return false;
+				if (faulted.contains(binding.mod)) return false;
 			}
 
 			return ownerAvailable && ownerAvailable(binding.mod, binding.availability);
@@ -236,11 +234,9 @@ namespace Framework {
 	void CommandRouter::RemoveMod(const IMod* mod) {
 		std::lock_guard<std::mutex> lock(impl->mutex);
 
-		impl->bindings.erase(std::remove_if(impl->bindings.begin(), impl->bindings.end(),
-			[mod](const Impl::Binding& binding) { return binding.mod == mod; }), impl->bindings.end());
+		std::erase_if(impl->bindings, [mod](const Impl::Binding& b) { return b.mod == mod; });
 		impl->faulted.erase(mod);
-		impl->faultedMods.erase(std::remove(impl->faultedMods.begin(), impl->faultedMods.end(), mod),
-			impl->faultedMods.end());
+		std::erase(impl->faultedMods, mod);
 	}
 
 	void CommandRouter::DispatchPending(ModContext& context, const std::deque<KeyEvent>& events, bool gameLoaded, const OwnerAvailabilityFn& ownerAvailable) {

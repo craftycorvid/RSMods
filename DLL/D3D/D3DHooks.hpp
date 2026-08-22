@@ -1,8 +1,8 @@
 #pragma once
 #include <atomic>
+#include <format>
 
 #include "../Mods/ExtendedRangeMode.hpp"
-#include "../Framework/Framework.hpp"
 
 namespace D3DHooks {
 	inline UINT StartRegister;

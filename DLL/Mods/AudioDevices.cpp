@@ -113,8 +113,8 @@ void AudioDevices::SetupMicrophones() {
 /// <param name="microphone"> - Name of the microphone</param>
 /// <param name="volume"> - New Volume</param>
 void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
-	if (activeMicrophones.find(microphoneName) != activeMicrophones.end()) {
-		LPWSTR microphoneId = activeMicrophones[microphoneName];
+	if (auto it = activeMicrophones.find(microphoneName); it != activeMicrophones.end()) {
+		LPWSTR microphoneId = it->second;
 		IMMDevice* microphone = NULL;
 
 		IMMDeviceEnumerator* deviceEnumerator = NULL;
@@ -185,8 +185,8 @@ void AudioDevices::SetMicrophoneVolume(std::string microphoneName, int volume) {
 /// <param name="microphone"> - Name of the microphone</param>
 /// <returns>Int 0-100 of the current volume of the microphone</returns>
 int AudioDevices::GetMicrophoneVolume(std::string microphoneName) {
-	if (activeMicrophones.find(microphoneName) != activeMicrophones.end()) {
-		LPWSTR microphoneId = activeMicrophones[microphoneName];
+	if (auto it = activeMicrophones.find(microphoneName); it != activeMicrophones.end()) {
+		LPWSTR microphoneId = it->second;
 		IMMDevice* microphone = NULL;
 
 		IMMDeviceEnumerator* deviceEnumerator = NULL;

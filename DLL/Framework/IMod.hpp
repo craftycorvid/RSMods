@@ -10,7 +10,7 @@
 // The assertion catches copying the macro from another class without updating its argument.
 #define MOD_ID(Type)                                                   \
     std::string_view Id() const final {                                \
-        using Self = std::decay_t<decltype(*this)>;                    \
+        using Self = std::remove_cvref_t<decltype(*this)>;             \
         static_assert(std::is_same_v<Type, Self>,                      \
             "MOD_ID must name the class that contains it");            \
         return #Type;                                                  \

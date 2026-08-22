@@ -41,7 +41,7 @@ namespace Framework {
 		void DispatchPending(ModContext& context, const std::deque<KeyEvent>& events, bool gameLoaded,
 			const OwnerAvailabilityFn& ownerAvailable);
 
-		std::vector<const IMod*> TakeFaultedMods();
+		[[nodiscard]] std::vector<const IMod*> TakeFaultedMods();
 		void RefreshDiagnostics();
 
 	private:

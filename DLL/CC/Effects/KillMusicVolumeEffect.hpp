@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace CrowdControl::Effects {
 	class KillMusicVolumeEffect : public CCEffect
@@ -8,10 +8,10 @@ namespace CrowdControl::Effects {
 			duration_ms = durationMilliseconds;
 		}
 
-		EffectStatus Test(const Request& request) override;
-		EffectStatus Start(const Request& request) override;
+		Enums::EffectStatus Test(const Structs::Request& request) override;
+		Enums::EffectStatus Start(const Structs::Request& request) override;
 		void Run() override;
-		EffectStatus Stop() override;
+		Enums::EffectStatus Stop() override;
 
 	private:
 		float oldVolume = 100.0f;

@@ -38,14 +38,19 @@ bool MemUtil::bCompare(const BYTE* pData, const byte* bMask, const char* szMask)
 	return (*szMask) == NULL;
 }
 
-bool MemUtil::PatchAdr(uintptr_t address, LPVOID changeToMake, size_t len, bool addBaseHandle) {
+bool MemUtil::PatchAdr(uintptr_t address, LPCVOID changeToMake, size_t len, bool addBaseHandle) {
 	uintptr_t addr = address + (addBaseHandle ? Offsets::baseHandle : 0);
 	return PatchAdr((LPVOID)(addr), changeToMake, len);
 }
 
-bool MemUtil::PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake, size_t len, bool addBaseHandle) {
+bool MemUtil::PatchAdr(VersioningStruct<uintptr_t>& address, LPCVOID changeToMake, size_t len, bool addBaseHandle) {
 	uintptr_t addr = address.Get() + (addBaseHandle ? Offsets::baseHandle : 0);
 	return PatchAdr((LPVOID)(addr), changeToMake, len);
+
+}
+
+bool MemUtil::PatchAdr(uintptr_t address, std::string_view data, bool addBaseHandle) {
+	return PatchAdr(address, static_cast<LPCVOID>(data.data()), data.size(), addBaseHandle);
 }
 
 /// <summary>
@@ -55,7 +60,7 @@ bool MemUtil::PatchAdr(VersioningStruct<uintptr_t>& address, LPVOID changeToMake
 /// <param name="changeToMake"> - Edit you want to make</param>
 /// <param name="len"> - How long is the edit</param>
 /// <returns></returns>
-bool MemUtil::PatchAdr(LPVOID address, LPVOID changeToMake, size_t len) {
+bool MemUtil::PatchAdr(LPVOID address, LPCVOID changeToMake, size_t len) {
 	DWORD dwOldProt, dwDummy, ret;
 
 	clock_t before = clock();
@@ -210,7 +215,7 @@ bool MemUtil::IsBadReadPtr(void* pointer)
 /// <param name="offsets"> - Cheat Engine Offsets</param>
 /// <param name="safe"> - Should we trust this to not crash our game?</param>
 /// <returns>Memory Address</returns>
-uintptr_t MemUtil::FindDMAAddy(uintptr_t ptr, const std::vector<unsigned int>& offsets, bool safe)
+uintptr_t MemUtil::FindDMAAddy(uintptr_t ptr, std::span<const unsigned int> offsets, bool safe)
 {
 	// Set addr to the base pointer.
 	uintptr_t addr = ptr;

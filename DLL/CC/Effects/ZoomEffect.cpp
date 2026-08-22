@@ -1,26 +1,26 @@
-#include "../../stdafx.h"
+﻿#include "../../stdafx.h"
 #include "ZoomEffect.hpp"
 
 using namespace CrowdControl::Enums;
 
 namespace CrowdControl::Effects {
-	EffectStatus ZoomEffect::Test(const Request& request)
+	Enums::EffectStatus ZoomEffect::Test(const Structs::Request& request)
 	{
 		LOG_INFO("ZoomEffect::Test()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Enums::EffectStatus::Retry;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 
 
-	EffectStatus ZoomEffect::Start(const Request& request)
+	Enums::EffectStatus ZoomEffect::Start(const Structs::Request& request)
 	{
 		LOG_INFO("ZoomEffect::Start()" << std::endl);
 
 		if (!CanStart())
-			return EffectStatus::Retry;
+			return Enums::EffectStatus::Retry;
 
 		auto rootObject = ObjectUtil::GetRootObject();
 
@@ -33,10 +33,10 @@ namespace CrowdControl::Effects {
 		SetDuration(request);
 		running = true;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 
-	EffectStatus ZoomEffect::Stop()
+	Enums::EffectStatus ZoomEffect::Stop()
 	{
 		LOG_INFO("ZoomEffect::Stop()" << std::endl);
 
@@ -49,6 +49,6 @@ namespace CrowdControl::Effects {
 
 		running = false;
 
-		return EffectStatus::Success;
+		return Enums::EffectStatus::Success;
 	}
 }

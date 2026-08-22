@@ -1,6 +1,8 @@
 #pragma once
 
-#include "stdafx.h"
+#include <array>
+
+#include "Tuning.h"
 
 namespace SongTuning {
 	std::array<byte, 6> GetCurrentTuning(bool verbose = false);

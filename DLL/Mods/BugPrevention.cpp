@@ -1,5 +1,6 @@
 #include "../stdafx.h"
 #include "BugPrevention.hpp"
+#include "../MemUtil.hpp"
 
 namespace BugPrevention {
 

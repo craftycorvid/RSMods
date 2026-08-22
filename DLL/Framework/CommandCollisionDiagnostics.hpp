@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <mutex>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -37,8 +38,8 @@ namespace Framework::Detail {
 		static std::vector<Collision> CollectCollisions(
 			std::vector<ResolvedCommandBinding> bindings);
 		static void LogNewCollisions(
-			const std::vector<Collision>& collisions,
-			const std::vector<Collision>& previousCollisions);
+			std::span<const Collision> collisions,
+			std::span<const Collision> previousCollisions);
 
 		std::mutex mutex;
 		std::vector<Collision> previousCollisions;
