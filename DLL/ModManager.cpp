@@ -21,6 +21,7 @@ namespace ModManager {
 		BugPrevention::PreventAdvancedDisplayCrash();
 		BugPrevention::PreventPortAudioInDeviceCrash();
 		BugPrevention::PreventExtraAudioDevicesCrash();
+		BugPrevention::FixCalibrationSampleCount();
 
 		if (Settings::IsOn(Setting::FixBrokenTones)) {
 			BugPrevention::PreventStuckTone();

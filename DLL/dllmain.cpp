@@ -174,6 +174,11 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 		return originalReturn;
 	}
 
+	// Don't draw our overlay onto a lost / not-yet-reset device (e.g. mid Alt+Tab out of exclusive fullscreen).
+	if (FAILED(pDevice->TestCooperativeLevel())) {
+		return originalReturn;
+	}
+
 	Menu::Init(pDevice, (LONG_PTR)WndProc);
 	Menu::RenderImGuiMenu();
 	Menu::UpdateStringTextures(pDevice);

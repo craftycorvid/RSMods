@@ -32,7 +32,9 @@ namespace GameOverlay {
 	void DisplaySongAccuracy();
 	void CheckCurrentFont();
 	void RenderOverlay(IDirect3DDevice9* pDevice);
-
+  void OnLostDevice();
+	void OnResetDevice();
+  
 	struct MixerEntry { const char* channel; const char* label; };
 	inline constexpr std::array<MixerEntry, 7> mixerChannels = { {
 		{ Settings::Setting::Channel::Master,    "Master Volume: "     },

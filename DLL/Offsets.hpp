@@ -209,6 +209,10 @@ namespace Offsets {
 	inline VersioningStruct<uintptr_t> patch_scrollSpeedGTTarget; // Greater than target
 	extern const char* patch_scrollSpeedChange;
 
+	// Calibration meter volume sample count
+	inline VersioningStruct<uintptr_t> ptr_calibrationSampleCountClamp;
+	inline VersioningStruct<uintptr_t> ptr_calibrationSampleCountClampJmpBck;
+
 	// Runtime data.
 	inline uintptr_t runtimeVersionStructValue;
 
