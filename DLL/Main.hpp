@@ -11,7 +11,6 @@
 #include "Mods/DisableControllers.hpp"
 #include "Mods/Midi.hpp"
 #include "Mods/VolumeControl.hpp"
-#include "Mods/LaunchOnExternalMonitor.hpp"
 #include "Mods/VoiceOverControl.hpp"
 #include "Mods/RiffRepeater.hpp"
 #include "Mods/AudioDevices.hpp"

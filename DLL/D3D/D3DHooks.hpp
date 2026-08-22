@@ -1,5 +1,8 @@
 #pragma once
+#include <atomic>
+
 #include "../Mods/ExtendedRangeMode.hpp"
+#include "../Framework/Framework.hpp"
 
 namespace D3DHooks {
 	inline UINT StartRegister;
@@ -28,7 +31,7 @@ namespace D3DHooks {
 
 	inline bool debug = true;
 
-	inline bool regenerateUserDefinedTexture = false;
+	inline std::atomic_bool regenerateUserDefinedTexture = false;
 	
 	inline HWND hThisWnd = NULL;
 	inline WNDPROC oWndProc = NULL;
@@ -55,7 +58,7 @@ namespace D3DHooks {
 	inline bool GreenScreenWall = false; // If true, set the Greenscreen wall up. This helps call it in Lesson mode for No-Loft users (True - Black wall, False - Loft)
 	inline bool RemoveLyrics = false; // If true, remove the lyrics from Learn A Song & Non-stop Play. (True - No Lyrics, False - Keep Lyrics)
 	
-	inline bool RemoveHeadstockInThisMenu = false; // If true, the headstock of the guitar / bass will be disabled in this menu. (True - No Headstock, False - Keep Headstock)
+	inline std::atomic<bool> RemoveHeadstockInThisMenu = false; // If true, the headstock of the guitar / bass will be disabled in this menu. (True - No Headstock, False - Keep Headstock)
 	inline bool showSongTimerOnScreen = false; // If true, the current song timer will be shown in the top-right of the screen. This will only work when inside a song. (True - Show, False - Hide)
 	inline bool DiscoModeEnabled = false; // If true, we do the trippy effects that disco mode is known for (True - Disco, False - Normal).
 	inline std::map<IDirect3DDevice9*, std::pair<DWORD, DWORD>> DiscoModeInitialSetting; // List of all the pDevices that have been affected by Disco Mode
@@ -64,8 +67,8 @@ namespace D3DHooks {
 	inline bool RainbowNotes = false; // If true, the notes will turn rainbow along with the stems
 	inline bool AutomatedSelectedVolume = false; // If true, we will always show the selected volume.
 
-	inline bool RecreateTextures = false; // User has triggered an update, so we need to re-create textures.
-	inline bool RecreateTextureTimer = false; // If user spams recreating textures then we end up with a lot of memory usage. Limit how often we update textures.
+	inline std::atomic_bool RecreateTextures = false; // User has triggered an update, so we need to re-create textures.
+	inline std::atomic_bool RecreateTextureTimer = false; // If user spams recreating textures then we end up with a lot of memory usage. Limit how often we update textures.
 
 	// Dev Functions
 	inline bool startLogging = false; // Should we log what's happening in Hook_DIP? Logs to log.txt in your RS2014 directory
@@ -80,6 +83,9 @@ namespace D3DHooks {
 	/// <returns>std::string of time in "h:m:s" format.</returns>
 	std::string ConvertFloatTimeToStringTime(float timeInSeconds);
 	void RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice);
+
+	// Refreshes the headstock texture cache based on the current/previous menu. Call once per menu tick.
+	void UpdateHeadstockCacheForMenu();
 
 	inline HWND cachedGameHwnd = nullptr;
 	inline HWND GetGameWindow() {

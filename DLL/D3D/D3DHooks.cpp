@@ -1,6 +1,9 @@
 #include "../stdafx.h"
 #include "D3DHooks.hpp"
 
+using Settings::NoteColorMode;
+namespace Setting = Settings::Setting;
+
 /// <summary>
 /// IDirect3DDevice9::DrawPrimitive Middleware. Mainly used for Note Tails
 /// </summary>
@@ -17,7 +20,7 @@ HRESULT APIENTRY D3DHooks::Hook_DP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE P
 	if (ERMode::AttemptedERInThisSong && ERMode::UseEROrColorsInThisSong && NOTE_TAILS) {
 		GameState::ToggleCB(ERMode::UseERExclusivelyInThisSong);
 
-		switch (Settings::GetModSetting("SeparateNoteColors")) {
+		switch (Settings::GetModSetting(Setting::SeparateNoteColors)) {
 			case 0: // Use same color scheme on notes as we do on strings
 				pDevice->SetTexture(1, customStringColorTexture);
 				break;
@@ -32,16 +35,16 @@ HRESULT APIENTRY D3DHooks::Hook_DP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE P
 	}
 
 	// Note-tails for Twitch mod - Remove Notes.
-	if (Settings::IsTwitchSettingEnabled("RemoveNotes") && NOTE_TAILS)
+	if (Settings::IsTwitchSettingEnabled(Setting::Twitch::RemoveNotes) && NOTE_TAILS)
 		return REMOVE_TEXTURE;
 
 	// Note-tails for Twitch mod - Transparent Notes.
-	if (Settings::IsTwitchSettingEnabled("TransparentNotes") && NOTE_TAILS)
+	if (Settings::IsTwitchSettingEnabled(Setting::Twitch::TransparentNotes) && NOTE_TAILS)
 		pDevice->SetTexture(1, nonexistentTexture);
 
 	// Note-tails for Twitch mod - Solid Colored notes.
-	if (Settings::IsTwitchSettingEnabled("SolidNotes") && NOTE_TAILS) {
-		if (Settings::ReturnSettingValue("SolidNoteColor") == "random")
+	if (Settings::IsTwitchSettingEnabled(Setting::Twitch::SolidNotes) && NOTE_TAILS) {
+		if (Settings::ReturnSettingValue(Setting::SolidNoteColor) == "random")
 			pDevice->SetTexture(1, randomTextures[currentRandomTexture]);
 		else
 			pDevice->SetTexture(1, twitchUserDefinedTexture);
@@ -184,12 +187,15 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 		Stream_Data->Release();
 
 	// This could potentially lead to game locking up (because DIP is called multiple times per frame) if that value is not filled, but generally it should work 
-	if (Settings::ReturnSettingValue("ExtendedRangeEnabled").length() < 2) { // Due to some weird reasons, sometimes settings decide to go missing - this may solve the problem
-		Settings::UpdateSettings();
-		D3D::GenerateTextures(pDevice, D3D::Strings);
-		D3D::GenerateTextures(pDevice, D3D::Notes);
-		D3D::GenerateTextures(pDevice, D3D::Rainbow);
-		LOG_INFO("Reloaded settings" << std::endl);
+	if (Settings::ReturnSettingValue(Setting::ExtendedRangeEnabled).length() < 2) { // Due to some weird reasons, sometimes settings decide to go missing - this may solve the problem
+		static std::atomic_bool reloadQueued = false;
+		if (!reloadQueued.exchange(true)) {
+			Framework::Registry().EnqueueSettingsUpdate([] {
+				Settings::UpdateSettings();
+				reloadQueued.store(false);
+				LOG_INFO("Reloaded settings" << std::endl);
+			});
+		}
 	}
 
 	if (setAllToNoteGradientTexture) {
@@ -269,7 +275,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 
 	// Mods
 
-    bool RemoveFingerprints = Settings::ReturnSettingValue("RemoveFingerprints") == (std::string)"on";
+    bool RemoveFingerprints = Settings::IsOn(Setting::RemoveFingerprints);
 	if (RemoveFingerprints && IsExtraRemoved(fingerprintMeshes, currentThicc)) {
 		for (DWORD stage = 0; stage < 2; stage++) {
 			LPDIRECT3DBASETEXTURE9 pTuningTexBase = nullptr;
@@ -285,7 +291,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	}
 
 	// Change Noteway Color | This NEEDS to be above Extended Range / Custom Colors or it won't work.
-	if (IsToBeRemoved(noteHighway, current) && Settings::ReturnSettingValue("CustomHighwayColors") == (std::string)"on") {
+	if (IsToBeRemoved(noteHighway, current) && Settings::IsOn(Setting::CustomHighwayColors)) {
 		pDevice->GetTexture(1, &pBaseNotewayTexture);
 		pCurrNotewayTexture = (IDirect3DTexture9*)pBaseNotewayTexture;
 
@@ -445,15 +451,15 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 
 		// Settings::GetModSetting("SeparateNoteColors") == 1 -> Default Colors, so don't do anything.
 
-		// Use same color scheme on notes as we do on strings (0) || Use Custom Note Color Scheme (2)
-		if (Settings::GetModSetting("SeparateNoteColorsMode") == 0 || (Settings::ReturnSettingValue("SeparateNoteColors") == "on" && Settings::GetModSetting("SeparateNoteColorsMode") == 2)) { 
+		// Color notes like strings (SameAsStrings) || Use Custom Note Color Scheme (Custom)
+		if (Settings::GetNoteColorMode() == NoteColorMode::SameAsStrings || (Settings::IsOn(Setting::SeparateNoteColors) && Settings::GetNoteColorMode() == NoteColorMode::Custom)) {
 
 			// Color notes like string colors
-			LPDIRECT3DTEXTURE9 textureToUseOnNotes = customStringColorTexture; 
+			LPDIRECT3DTEXTURE9 textureToUseOnNotes = customStringColorTexture;
 
 			// Custom colored notes
-			if (Settings::GetModSetting("SeparateNoteColorsMode") == 2)
-				textureToUseOnNotes = customNoteColorTexture; 
+			if (Settings::GetNoteColorMode() == NoteColorMode::Custom)
+				textureToUseOnNotes = customNoteColorTexture;
 
 			// Change all pieces of note head's textures
 			if (IsToBeRemoved(sevenstring, current) || IsExtraRemoved(noteModifiers, currentThicc))  
@@ -480,7 +486,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	}
 
 	// Twitch wants notes to be removed.
-	if (Settings::IsTwitchSettingEnabled("RemoveNotes"))
+	if (Settings::IsTwitchSettingEnabled(Setting::Twitch::RemoveNotes))
 		// Note textures, outside of note stems and open note accents.
 		if (IsToBeRemoved(sevenstring, current) || IsExtraRemoved(noteModifiers, currentThicc))
 			return REMOVE_TEXTURE;
@@ -504,7 +510,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 		}
 
 	// Twitch wants transparent notes.
-	if (Settings::IsTwitchSettingEnabled("TransparentNotes"))
+	if (Settings::IsTwitchSettingEnabled(Setting::Twitch::TransparentNotes))
 		// Note textures, outside of note stems and open note accents.
 		if (IsToBeRemoved(sevenstring, current) || IsExtraRemoved(noteModifiers, currentThicc) || NOTE_STEMS || OPEN_NOTE_ACCENTS)
 			pDevice->SetTexture(1, nonexistentTexture);
@@ -528,12 +534,12 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 		}
 
 	// Twitch wants solid note colors
-	if (Settings::IsTwitchSettingEnabled("SolidNotes")) {
+	if (Settings::IsTwitchSettingEnabled(Setting::Twitch::SolidNotes)) {
 		// Note textures, outside of note stems and open note accents.
 		if (IsToBeRemoved(sevenstring, current) || IsExtraRemoved(noteModifiers, currentThicc)) {
 
 			// Random Colors
-			if (Settings::ReturnSettingValue("SolidNoteColor") == "random") 
+			if (Settings::ReturnSettingValue(Setting::SolidNoteColor) == "random") 
 				pDevice->SetTexture(1, randomTextures[currentRandomTexture]);
 			// They set the color they want in the GUI | TODO: Colors are changed on chord boxes
 			else 
@@ -554,7 +560,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 				if (crc == crcStemsAccents || crc == crcBendSlideIndicators) {  
 
 					// Random Colors
-					if (Settings::ReturnSettingValue("SolidNoteColor") == "random") 
+					if (Settings::ReturnSettingValue(Setting::SolidNoteColor) == "random") 
 						pDevice->SetTexture(1, randomTextures[currentRandomTexture]);
 					else
 						pDevice->SetTexture(1, twitchUserDefinedTexture);
@@ -566,7 +572,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	}
 
 	// Twitch wants us to reset your note streak.
-	if (Settings::IsTwitchSettingEnabled("FYourFC")) {
+	if (Settings::IsTwitchSettingEnabled(Setting::Twitch::FYourFC)) {
 		uintptr_t currentNoteStreak = 0;
 
 		if (GameState::Menus::IsInLearnASongModes())
@@ -579,29 +585,29 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	}
 
 	// Twitch wants to see the user play in Drunk Mode.
-	if (Settings::IsTwitchSettingEnabled("DrunkMode")) {
+	if (Settings::IsTwitchSettingEnabled(Setting::Twitch::DrunkMode)) {
 		std::uniform_real_distribution<> keepValueWithin(-1.5, 1.5);
 		MemUtil::SetStaticValue(Offsets::ptr_drunkShit.Get(), (float)keepValueWithin(rng), sizeof(float));
 	}
 
 	// Greenscreen Wall
-	if ((Settings::ReturnSettingValue("GreenScreenWallEnabled") == "on" || GreenScreenWall) && IsExtraRemoved(greenScreenWallMesh, currentThicc))
+	if ((Settings::IsOn(Setting::GreenScreenWallEnabled) || GreenScreenWall) && IsExtraRemoved(greenScreenWallMesh, currentThicc))
 		return REMOVE_TEXTURE;
 
 	// Thicc Mesh Mods that are as simple as doing a simple check against the params of this function.
 	if (GameState::IsInSong()) {
-		if (Settings::ReturnSettingValue("FretlessModeEnabled") == "on" && IsExtraRemoved(fretless, currentThicc))
+		if (Settings::IsOn(Setting::FretlessModeEnabled) && IsExtraRemoved(fretless, currentThicc))
 			return REMOVE_TEXTURE;
-		if (Settings::ReturnSettingValue("RemoveInlaysEnabled") == "on" && IsExtraRemoved(inlays, currentThicc))
+		if (Settings::IsOn(Setting::RemoveInlaysEnabled) && IsExtraRemoved(inlays, currentThicc))
 			return REMOVE_TEXTURE;
-		if (Settings::ReturnSettingValue("RemoveLaneMarkersEnabled") == "on" && IsExtraRemoved(laneMarkers, currentThicc))
+		if (Settings::IsOn(Setting::RemoveLaneMarkersEnabled) && IsExtraRemoved(laneMarkers, currentThicc))
 			return REMOVE_TEXTURE;
-		if (RemoveLyrics && Settings::ReturnSettingValue("RemoveLyrics") == "on" && IsExtraRemoved(lyrics, currentThicc))
+		if (RemoveLyrics && Settings::IsOn(Setting::RemoveLyricsEnabled) && IsExtraRemoved(lyrics, currentThicc))
 			return REMOVE_TEXTURE;
 	}
 
 	// Remove Headstock Artifacts
-	else if (GameState::Menus::IsInTuningMenus() && Settings::ReturnSettingValue("RemoveHeadstockEnabled") == "on" && RemoveHeadstockInThisMenu)
+	else if (GameState::Menus::IsInTuningMenus() && Settings::IsOn(Setting::RemoveHeadstockEnabled) && RemoveHeadstockInThisMenu)
 	{
 		// This is called to remove those pesky tuning letters that share the same texture values as fret numbers and chord fingerings
 		if (IsExtraRemoved(tuningLetters, currentThicc)) 
@@ -657,7 +663,7 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	}
 
 	// Headstock Removal
-	else if (Settings::ReturnSettingValue("RemoveHeadstockEnabled") == "on") {
+	else if (Settings::IsOn(Setting::RemoveHeadstockEnabled)) {
 		if (POSSIBLE_HEADSTOCKS) { // If we call GetTexture without any filtering, it causes a lockup when ALT-TAB-ing/changing fullscreen to windowed and vice versa
 			if (!RemoveHeadstockInThisMenu) // This user has RemoveHeadstock only on during the song. So if we aren't in the song, we need to draw the headstock texture.
 				return SHOW_TEXTURE;
@@ -712,7 +718,21 @@ HRESULT APIENTRY D3DHooks::Hook_DIP(IDirect3DDevice9* pDevice, D3DPRIMITIVETYPE 
 	return SHOW_TEXTURE; // KEEP THIS LINE. This translates to "Display Graphics".
 }
 
-std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds) 
+// Resets the headstock texture cache when appropriate, so we aren't re-running the same textures over and over again.
+void D3DHooks::UpdateHeadstockCacheForMenu() {
+	if (Settings::IsOn(Setting::RemoveHeadstockEnabled) && !GameState::Menus::IsInTuningMenus() ||
+		GameState::currentMenu == "MissionMenu") {
+		resetHeadstockCache = true;
+	}
+
+	// If the current menu is not the same as the previous menu and if it's one of menus where you tune your guitar (i.e. headstock is shown), reset the cache because user may want to change the headstock style
+	if (GameState::previousMenu != GameState::currentMenu && GameState::Menus::IsInTuningMenus()) {
+		resetHeadstockCache = true;
+		headstockTexturePointers.clear();
+	}
+}
+
+std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds)
 {
 	int seconds = 0, minutes = 0, hours = 0;
 
@@ -735,8 +755,8 @@ std::string D3DHooks::ConvertFloatTimeToStringTime(float timeInSeconds)
 }
 
 void D3DHooks::RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice) {
-	if (regenerateUserDefinedTexture) {
-		RSColor userDefColor = Settings::ConvertHexToColor(Settings::ReturnSettingValue("SolidNoteColor"));
+	if (regenerateUserDefinedTexture.exchange(false)) {
+		RSColor userDefColor = Settings::ConvertHexToColor(Settings::ReturnSettingValue(Setting::SolidNoteColor));
 
 		ColorList customColorList(16, userDefColor);
 		D3D::GenerateTexture(pDevice, &twitchUserDefinedTexture, customColorList);
@@ -745,6 +765,5 @@ void D3DHooks::RegenerateTwitchNoteColors(IDirect3DDevice9* pDevice) {
 		for (int str = 0; str < 6;str++)
 			ERMode::customSolidColor.push_back(userDefColor);
 
-		regenerateUserDefinedTexture = false;
 	}
 }

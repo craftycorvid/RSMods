@@ -32,6 +32,8 @@ namespace Midi {
 	inline int dataToSendPC = 0, dataToSendCC = 0, lastCC = 0, lastPC = 666;
 	inline int lastPC_TUNING = 0; // Only use if the song requires a tuning change AND a true tuning. (Hendrix Eb Standard)
 	inline bool alreadyAttemptedTuningInTuner = false, alreadyAutomatedTuningInThisSong = false, alreadyAutomatedTrueTuningInThisSong = false, userWantsToUseAutoTuning = false;
+	// Latches once we auto-tune in the pre-song tuner and is never reset for the process lifetime.
+	inline bool appliedTunerAutoTune = false;
 	inline int sleepFor = 33; // Sleep for 33ms or ~ 1/33rd of a second.
 	inline MidiPedal selectedPedal = MidiPedal();
 	inline int tuningOffset;

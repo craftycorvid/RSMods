@@ -3,6 +3,7 @@
 #include "Mods/AudioDevices.hpp"
 #include "Mods/VoiceOverControl.hpp"
 #include "Mods/Midi.hpp"
+#include "Framework/Framework.hpp"
 
 namespace Menu {
 	void GenerateTestingTextures(IDirect3DDevice9* pDevice) {
@@ -90,7 +91,7 @@ namespace Menu {
 
 		LOG_INFO("ImGUI Init" << std::endl);
 
-		Settings::UpdateSettings();
+		Framework::Registry().EnqueueSettingsUpdate([] { Settings::UpdateSettings(); });
 
 		CreateTextures(pDevice);
 	}

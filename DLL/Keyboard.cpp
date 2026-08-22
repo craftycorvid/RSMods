@@ -35,15 +35,9 @@ namespace Keyboard {
 	/// Force a Steam screenshot. Requires the default "F12" screenshot key for Steam.
 	/// </summary>
 	void TakeScreenshot() {
-		if (!takenScreenshotOfThisScreen) {
-			takenScreenshotOfThisScreen = true;
-			Sleep(8000); // The menu title changes while the animation is running so we are giving it so time to show the actual results. (8 seconds)
-
-			// Press F12
-			PostMessage(D3DHooks::GetGameWindow(), WM_KEYDOWN, VK_F12, 0);
-			LOG_INFO("Took screenshot" << std::endl);
-			Sleep(30);
-			PostMessage(D3DHooks::GetGameWindow(), WM_KEYUP, VK_F12, 0);
-		}
+		PostMessage(D3DHooks::GetGameWindow(), WM_KEYDOWN, VK_F12, 0);
+		LOG_INFO("Took screenshot" << std::endl);
+		Sleep(30);
+		PostMessage(D3DHooks::GetGameWindow(), WM_KEYUP, VK_F12, 0);
 	}
 }

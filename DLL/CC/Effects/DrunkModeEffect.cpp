@@ -1,5 +1,8 @@
 #include "../../stdafx.h"
 #include "DrunkModeEffect.hpp"
+#include "../../Framework/Framework.hpp"
+
+namespace Setting = Settings::Setting;
 
 using namespace CrowdControl::Enums;
 
@@ -32,7 +35,9 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 		if (!CanStart())
 			return EffectStatus::Retry;
 
-		Settings::UpdateTwitchSetting("DrunkMode", "on");
+		Framework::Registry().EnqueueSettingsUpdate([] {
+			Settings::UpdateTwitchSetting(Setting::Twitch::DrunkMode, "on");
+		});
 		Loft::ToggleDrunkMode(true);
 
 		SetDuration(request);
@@ -51,7 +56,9 @@ namespace CrowdControl::Effects { // Makes some of game's object very woobly (ly
 
 		running = false;
 		Loft::ToggleDrunkMode(false);
-		Settings::UpdateTwitchSetting("DrunkMode", "off");
+		Framework::Registry().EnqueueSettingsUpdate([] {
+			Settings::UpdateTwitchSetting(Setting::Twitch::DrunkMode, "off");
+		});
 
 		return EffectStatus::Success;
 	}

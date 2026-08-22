@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "SongTuning.hpp"
 
+namespace Setting = Settings::Setting;
+
 /// <summary>
 /// Get Tuning of all 6 strings (even on bass)
 /// </summary>
@@ -119,7 +121,7 @@ bool SongTuning::IsExtendedRangeSong() {
 		return false;
 	}
 
-	if (Settings::ReturnSettingValue("ExtendedRangeEnabled") != "on")
+	if (!Settings::IsOn(Setting::ExtendedRangeEnabled))
 		return false;
 
 	auto highestLowest = GetHighestLowestString();
@@ -134,7 +136,7 @@ bool SongTuning::IsExtendedRangeSong() {
 	}
 
 	// When a charter makes a bad bass tuning, and leaves the last two strings blank, let's fix that.
-	if (Settings::ReturnSettingValue("ExtendedRangeFixBassTuning") == "on") {
+	if (Settings::IsOn(Setting::ExtendedRangeFixBassTuning)) {
 		tuning.strB = tuning.strG;
 		tuning.highE = tuning.strG;
 	}
@@ -152,18 +154,18 @@ bool SongTuning::IsExtendedRangeSong() {
 		lowestTuning -= 12;
 
 	// Does the user's settings allow us to toggle on drop tunings (ER on B, trigger on C# Drop B)
-	if (Settings::ReturnSettingValue("ExtendedRangeDropTuning") == "on" && lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") && dropTuning) {
-		LOG_INFO("Successful: IsExtendedRangeSong in DROP where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << std::endl);
+	if (Settings::IsOn(Setting::ExtendedRangeDropTuning) && lowestTuning <= Settings::GetModSetting(Setting::ExtendedRangeMode) && dropTuning) {
+		LOG_INFO("Successful: IsExtendedRangeSong in DROP where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting(Setting::ExtendedRangeMode) << std::endl);
 		return true;
 	}
 
 	// Does the user's settings allow us to toggle Extended Range Mode for this tuning
-	if (lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") && (!dropTuning || lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") - 2)) {
-		LOG_INFO("Successful: IsExtendedRangeSong in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << " minus 2. Drop Tuned: " << std::boolalpha << dropTuning << std::endl);
+	if (lowestTuning <= Settings::GetModSetting(Setting::ExtendedRangeMode) && (!dropTuning || lowestTuning <= Settings::GetModSetting(Setting::ExtendedRangeMode) - 2)) {
+		LOG_INFO("Successful: IsExtendedRangeSong in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting(Setting::ExtendedRangeMode) << " minus 2. Drop Tuned: " << std::boolalpha << dropTuning << std::endl);
 		return true;
 	}
 
-	LOG_INFO("Failed: IsExtendedRangeSong. Drop at " << Settings::GetModSetting("ExtendedRangeMode") << " but received " << lowestTuning << " with drop tuning " << Settings::ReturnSettingValue("ExtendedRangeDropTuning") << std::endl);
+	LOG_INFO("Failed: IsExtendedRangeSong. Drop at " << Settings::GetModSetting(Setting::ExtendedRangeMode) << " but received " << lowestTuning << " with drop tuning " << Settings::ReturnSettingValue(Setting::ExtendedRangeDropTuning) << std::endl);
 	return false;
 }
 
@@ -178,7 +180,7 @@ bool SongTuning::IsExtendedRangeTuner() {
 	}
 
 	// Verify the user actually wants Extended Range enabled.
-	if (Settings::ReturnSettingValue("ExtendedRangeEnabled") != "on")
+	if (!Settings::IsOn(Setting::ExtendedRangeEnabled))
 		return false;
 
 	Tuning tunerSongTuning = GetTuningAtTuner();
@@ -202,18 +204,18 @@ bool SongTuning::IsExtendedRangeTuner() {
 		lowestTuning -= 256;
 
 	// Does the user's settings allow us to toggle on drop tunings (ER on B, trigger on C# Drop B)
-	if (Settings::ReturnSettingValue("ExtendedRangeDropTuning") == "on" && inDrop && lowestTuning <= Settings::GetModSetting("ExtendedRangeMode")) {
-		LOG_INFO("Successful: IsExtendedRangeTuner in DROP where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << std::endl);
+	if (Settings::IsOn(Setting::ExtendedRangeDropTuning) && inDrop && lowestTuning <= Settings::GetModSetting(Setting::ExtendedRangeMode)) {
+		LOG_INFO("Successful: IsExtendedRangeTuner in DROP where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting(Setting::ExtendedRangeMode) << std::endl);
 		return true;
 	}
 
 	// Does the user's settings allow us to toggle Extended Range Mode for this tuning
-	if (lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") && (!inDrop || lowestTuning <= Settings::GetModSetting("ExtendedRangeMode") - 2)) {
-		LOG_INFO("Successful: IsExtendedRangeTuner in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting("ExtendedRangeMode") << " minus 2. Drop Tuned: " << std::boolalpha << inDrop << std::endl);
+	if (lowestTuning <= Settings::GetModSetting(Setting::ExtendedRangeMode) && (!inDrop || lowestTuning <= Settings::GetModSetting(Setting::ExtendedRangeMode) - 2)) {
+		LOG_INFO("Successful: IsExtendedRangeTuner in standard where " << lowestTuning << " is less than, or equal to, " << Settings::GetModSetting(Setting::ExtendedRangeMode) << " minus 2. Drop Tuned: " << std::boolalpha << inDrop << std::endl);
 		return true;
 	}
 
-	LOG_INFO("Failed: IsExtendedRangeTuner. Drop at " << Settings::GetModSetting("ExtendedRangeMode") << " but received " << lowestTuning << " with drop tuning " << Settings::ReturnSettingValue("ExtendedRangeDropTuning") << std::endl);
+	LOG_INFO("Failed: IsExtendedRangeTuner. Drop at " << Settings::GetModSetting(Setting::ExtendedRangeMode) << " but received " << lowestTuning << " with drop tuning " << Settings::ReturnSettingValue(Setting::ExtendedRangeDropTuning) << std::endl);
 	return false;
 }
 
@@ -231,7 +233,7 @@ std::array<int, 2> SongTuning::GetHighestLowestString() {
 		return { 666, 666 };
 	}
 
-	int numberOfStrings = (Settings::ReturnSettingValue("ExtendedRangeFixBassTuning") == "on" && (songTuning[4] == 0 || songTuning[4] == 12) && (songTuning[5] == 0 || songTuning[5] == 12)) ? 4 : 6; // When a charter makes a bad bass tuning, and leaves the last two strings blank, let's fix that.
+	int numberOfStrings = (Settings::IsOn(Setting::ExtendedRangeFixBassTuning) && (songTuning[4] == 0 || songTuning[4] == 12) && (songTuning[5] == 0 || songTuning[5] == 12)) ? 4 : 6; // When a charter makes a bad bass tuning, and leaves the last two strings blank, let's fix that.
 
 	bool bassOctaveEffect = GetTrueTuning() == 220;
 
@@ -283,7 +285,7 @@ std::array<int, 2> SongTuning::GetHighestLowestString(Tuning tuningOverride) {
 		return { 666, 666 };
 	}
 
-	int numberOfStrings = (Settings::ReturnSettingValue("ExtendedRangeFixBassTuning") == "on" && (tuningOverride.strB == 0 || tuningOverride.strB == 12) && (tuningOverride.highE == 0 || tuningOverride.highE == 12)) ? 4 : 6; // When a charter makes a bad bass tuning, and leaves the last two strings blank, let's fix that.
+	int numberOfStrings = (Settings::IsOn(Setting::ExtendedRangeFixBassTuning) && (tuningOverride.strB == 0 || tuningOverride.strB == 12) && (tuningOverride.highE == 0 || tuningOverride.highE == 12)) ? 4 : 6; // When a charter makes a bad bass tuning, and leaves the last two strings blank, let's fix that.
 
 	bool bassOctaveEffect = GetTrueTuning() == 220;
 

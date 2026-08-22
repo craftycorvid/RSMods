@@ -1,6 +1,8 @@
 #include "../stdafx.h"
 #include "GuitarSpeak.hpp"
 
+namespace Setting = Settings::Setting;
+
 /*
 Modified / Translated from the Visual Basic code provided by UKLooney
 Open source here: https://github.com/uklooney/G2RS
@@ -50,7 +52,7 @@ bool GuitarSpeak::RunGuitarSpeak() {
 		GameState::currentMenu = GameState::GetCurrentMenu();
 
 		// If someone wants to tune in the setting menu they skip the check
-		if (GameState::Menus::IsInTuningMenus() && Settings::ReturnSettingValue("GuitarSpeakWhileTuning") == "off") {
+		if (GameState::Menus::IsInTuningMenus() && Settings::IsOff(Setting::GuitarSpeakWhileTuning)) {
 			if (verbose)
 				LOG_INFO("(GS) Entered Tuning Menu! Stopping Guitar Speak." << std::endl);
 			break; // We aren't needed here anymore.
@@ -150,19 +152,19 @@ bool GuitarSpeak::RunGuitarSpeak() {
 /// Add available keybinds
 /// </summary>
 void GuitarSpeak::FillKeyList() {
-	strKeyList[Settings::GetModSetting("GuitarSpeakDelete")]	= "DELETE";
-	strKeyList[Settings::GetModSetting("GuitarSpeakSpace")]		= "SPACE";
-	strKeyList[Settings::GetModSetting("GuitarSpeakEnter")]		= "ENTER";
-	strKeyList[Settings::GetModSetting("GuitarSpeakTab")]		= "TAB";
-	strKeyList[Settings::GetModSetting("GuitarSpeakPageUp")]	= "PGUP";
-	strKeyList[Settings::GetModSetting("GuitarSpeakPageDown")]	= "PGDN";
-	strKeyList[Settings::GetModSetting("GuitarSpeakUpArrow")]	= "UP";
-	strKeyList[Settings::GetModSetting("GuitarSpeakDownArrow")] = "DOWN";
-	strKeyList[Settings::GetModSetting("GuitarSpeakEscape")]	= "ESCAPE";
-	strKeyList[Settings::GetModSetting("GuitarSpeakClose")]		= "CLOSE";
-	strKeyList[Settings::GetModSetting("GuitarSpeakOBracket")]	= "OBRACKET";
-	strKeyList[Settings::GetModSetting("GuitarSpeakCBracket")]	= "CBRACKET";
-	strKeyList[Settings::GetModSetting("GuitarSpeakTildea")]	= "TILDEA";
-	strKeyList[Settings::GetModSetting("GuitarSpeakForSlash")]	= "FORSLASH";
-	strKeyList[Settings::GetModSetting("GuitarSpeakAlt")]		= "ALT";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakDelete)]	= "DELETE";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakSpace)]		= "SPACE";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakEnter)]		= "ENTER";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakTab)]		= "TAB";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakPageUp)]	= "PGUP";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakPageDown)]	= "PGDN";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakUpArrow)]	= "UP";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakDownArrow)] = "DOWN";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakEscape)]	= "ESCAPE";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakClose)]		= "CLOSE";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakOBracket)]	= "OBRACKET";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakCBracket)]	= "CBRACKET";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakTildea)]	= "TILDEA";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakForSlash)]	= "FORSLASH";
+	strKeyList[Settings::GetModSetting(Setting::GuitarSpeakAlt)]		= "ALT";
 }

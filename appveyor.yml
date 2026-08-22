@@ -27,6 +27,8 @@
   build:
       parallel: true
       verbosity: quiet
+  test_script:
+    - ps: .\DLL\Framework\Tests\BuildAndRun.ps1
   artifacts:
   - path: 'Installer/bin/Release/RS2014-Mod-Installer.exe'
     name: Installer

@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "Main.hpp"
+#include "Framework/Framework.hpp"
+
+namespace Setting = Settings::Setting;
 
 #include <io.h>
 #include <share.h>
@@ -19,32 +22,6 @@ bool wwiseLogging = false;
 #ifndef _RSMODS_VERSION
 #define _RSMODS_VERSION "RSMODS Version: 1.2.8.4 SRC. DEBUG: " << std::boolalpha << debug << ". Wwise Logs: " << std::boolalpha << wwiseLogging << "."
 #endif
-
-/// <summary>
-/// Handle Force Enumeration
-/// </summary>
-/// <returns>NULL. Loops while game is open.</returns>
-unsigned WINAPI EnumerationThread() {
-	while (!GameState::GameLoaded)
-		Sleep(5000);
-
-	int oldDLCCount = Enumeration::GetCurrentDLCCount();
-	int newDLCCount = oldDLCCount;
-
-	while (!GameState::GameClosing) {
-		if (Settings::ReturnSettingValue("ForceReEnumerationEnabled") == "automatic") {
-			oldDLCCount = newDLCCount;
-			newDLCCount = Enumeration::GetCurrentDLCCount();
-
-			if (oldDLCCount != newDLCCount)
-				Enumeration::ForceEnumeration();
-		}
-
-		Sleep(Settings::GetModSetting("CheckForNewSongsInterval"));
-	}
-
-	return 0;
-}
 
 /// <summary>
 /// Send Midi Data Async. Only really used in debug builds to test MIDI commands.
@@ -115,7 +92,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 	if (Menu::menuEnabled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, keyPressed, lParam))
 		return true;
 
-	if (Settings::ReturnSettingValue("PreventMidSongPause") == "on" && D3DHooks::cachedIsInSong) {
+	if (Settings::IsOn(Setting::PreventMidSongPause) && D3DHooks::cachedIsInSong) {
 		switch (msg) {
 			case WM_NCACTIVATE:
 			case WM_ACTIVATEAPP:
@@ -142,13 +119,14 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 
 			break;
 		case WM_KEYUP:
-			Keybindings::HandleKeyUp(keyPressed);
+			Keybindings::HandleKeyUp(keyPressed, lParam);
 			break;
 		case WM_KEYDOWN:
-			Keybindings::HandleKeyDown(keyPressed);
+			Keybindings::HandleKeyDown(keyPressed, lParam);
 			break;
 		case WM_CLOSE:
 			GameState::GameClosing = true;
+			Framework::Inbox().Wake();
 			break;
 		case WM_COPYDATA:
 			Keybindings::UpdateSettingsOnGUIChange(lParam);
@@ -167,7 +145,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM keyPressed, LPARAM lParam) {
 }
 
 void UpdateGameWindowStacking() {
-	if (Settings::ReturnSettingValue("PreventMidSongPause") == "on") {
+	if (Settings::IsOn(Setting::PreventMidSongPause)) {
 		bool actuallyInSong = GameState::IsInSong();
 
 		if (ensureForcedTopMode) {
@@ -207,7 +185,7 @@ HRESULT APIENTRY D3DHooks::Hook_EndScene(IDirect3DDevice9* pDevice) {
 	UpdateGameWindowStacking();
 	GameOverlay::RenderOverlay(pDevice);
 	D3DHooks::RegenerateTwitchNoteColors(pDevice);
-	
+
 	return originalReturn;
 }
 
@@ -233,23 +211,42 @@ unsigned WINAPI HandleEffectQueueThread() {
 unsigned WINAPI MainThread() {
 	LOG_NOHEAD(_RSMODS_VERSION << std::endl);
 
-	GameLoopState loopState = {};
-
 	Keybindings::InitializeCommands();
 	ModManager::InitializeConfiguration();
 	ModManager::InitializeMods(debug);
+	Framework::Registry().InstantiatePending();
 	ModManager::ApplyStartupMods();
+	Framework::Registry().DispatchInitialize();
 
+	auto nextModTick = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
 	while (!GameState::GameClosing) {
-		Sleep(250);
+		Framework::Inbox().WaitUntil(nextModTick);
+		if (GameState::GameClosing) break;
+
+		// Commands are drained independently of the maintenance tick. Both paths run on this
+		// thread, so command actions and mod lifecycle/tick callbacks cannot race one another.
+		const Framework::GamePhase commandPhase = !GameState::GameLoaded
+			? Framework::GamePhase::Loading
+			: GameState::IsInSong() ? Framework::GamePhase::Song : Framework::GamePhase::Menu;
+		Framework::Registry().DispatchCommands(commandPhase, GameState::GameLoaded);
+
+		const auto now = std::chrono::steady_clock::now();
+		if (now < nextModTick) continue;
 
 		if (GameState::GameLoaded) {
-			ModManager::HandlePostGameLoadedMods(loopState);
+			ModManager::HandlePostGameLoadedMods();
+			Framework::Registry().Tick(GameState::IsInSong() ? Framework::GamePhase::Song : Framework::GamePhase::Menu);
 		}
 		else {
-			ModManager::UpdateGameLoadingState(loopState);
+			ModManager::UpdateGameLoadingState();
+			Framework::Registry().Tick(Framework::GamePhase::Loading);
 		}
+
+		// Missed maintenance deadlines are not replayed as a burst of catch-up ticks.
+		nextModTick = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
 	}
+
+	Framework::Registry().Shutdown();
 
 	return 0;
 }
@@ -263,7 +260,6 @@ void Initialize() {
 	Wwise::Exports::Initialize();
 
 	std::thread(MainThread).detach(); // Mod Toggle based on menus
-	std::thread(EnumerationThread).detach(); // Force Enumeration
 	std::thread(HandleEffectQueueThread).detach(); // Twitch Effects
 	std::thread(MidiThread).detach(); // MIDI Auto Tuning / True Tuning
 	std::thread(RiffRepeaterThread).detach(); // RR Speed Above 100% Log

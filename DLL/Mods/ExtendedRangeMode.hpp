@@ -5,6 +5,7 @@
 namespace ERMode {
 	void Toggle7StringMode();
 	void DoRainbow();
+	void StopRainbowThread();
 	void ToggleRainbowMode();
 	void ToggleRainbowNotes();
 	bool IsRainbowEnabled();
