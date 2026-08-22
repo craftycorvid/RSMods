@@ -2,6 +2,9 @@
 #include "ExtendedRangeMode.hpp"
 #include "../StringState.h"
 
+#include <atomic>
+#include <thread>
+
 using Settings::StringColorMode;
 namespace Setting = Settings::Setting;
 
@@ -279,12 +282,23 @@ bool ERMode::IsRainbowNotesEnabled() {
 	return RainbowNotesEnabled;
 }
 
-/// <summary>
-/// Toggle on Rainbow Strings / Rainbow Notes
-/// </summary>
-void ERMode::DoRainbow() {
-	if (!RainbowEnabled && !RainbowNotesEnabled)
-		return;
+namespace {
+	// The rainbow animation runs on this dedicated thread instead of the mod MainThread. The
+	// MainThread also drains keybind commands, so blocking it here (as the loop below does, until
+	// the flags clear) used to make the rainbow impossible to toggle back off - a self-deadlock.
+	std::atomic<bool> g_rainbowWorkerRunning{ false };
+	std::thread g_rainbowWorker;
+}
+
+// The blocking animation loop, now confined to g_rainbowWorker. Reads game memory and cycles the
+// string colours until both rainbow flags are cleared (by ToggleRainbowMode / StopRainbowThread on
+// another thread), then returns.
+static void RainbowWorker() {
+	// Clear the running flag on every exit path (incl. the early return below), so DoRainbow can
+	// relaunch the worker next time the effect is enabled.
+	struct RunningGuard {
+		~RunningGuard() { g_rainbowWorkerRunning.store(false); }
+	} runningGuard;
 
 	std::vector<uintptr_t> stringsEnabled;
 	std::vector<uintptr_t> stringsHigh;
@@ -308,7 +322,7 @@ void ERMode::DoRainbow() {
 	float speed = 2.f;
 	float stringOffset = 20.f;
 	bool didWeUseRainbowStrings = false; // If we don't use this, then the strings won't reset to default colors unless you end with rainbow strings.
-	while (RainbowEnabled || RainbowNotesEnabled) {
+	while (ERMode::RainbowEnabled || ERMode::RainbowNotesEnabled) {
 		// Increment Hue by the speed we are trying to mimick.
 		h += speed;
 
@@ -318,7 +332,7 @@ void ERMode::DoRainbow() {
 		// For each string
 		for (int i = 0; i < 6; i++) {
 			// Save the previous colors
-			if (RainbowEnabled) {
+			if (ERMode::RainbowEnabled) {
 				oldEnabledColors.push_back(*(RSColor*)stringsEnabled[i]);
 				oldHigh.push_back(*(RSColor*)stringsHigh[i]);
 				oldDisabledColors.push_back(*(RSColor*)stringsDisabled[i]);
@@ -334,19 +348,19 @@ void ERMode::DoRainbow() {
 
 			// Since we only make textures for 180 possibilities, we can narrow out results down to 180 different values (0-179).
 			if (newH > 4)
-				customNoteColorH = (newH / 2) - 1;
+				ERMode::customNoteColorH = (newH / 2) - 1;
 			else
-				customNoteColorH = 1;
+				ERMode::customNoteColorH = 1;
 
 			// Set the new rainbow colors.
-			if (RainbowEnabled) {
+			if (ERMode::RainbowEnabled) {
 				*(RSColor*)stringsEnabled[i] = c;
 				*(RSColor*)stringsHigh[i] = c;
 				*(RSColor*)stringsDisabled[i] = c;
 			}
 
 			// Reset back to the original colors.
-			if (!RainbowEnabled && didWeUseRainbowStrings) {
+			if (!ERMode::RainbowEnabled && didWeUseRainbowStrings) {
 				if (oldEnabledColors.size() == 0)
 					return;
 
@@ -359,6 +373,32 @@ void ERMode::DoRainbow() {
 		}
 		Sleep(16);
 	}
+}
+
+
+// Launch the rainbow animation on its own thread if it isn't already running. Non-blocking: returns
+// immediately so MainThread command dispatch keeps flowing and the effect can be toggled off again.
+void ERMode::DoRainbow() {
+	if (!RainbowEnabled && !RainbowNotesEnabled)
+		return;
+
+	if (g_rainbowWorkerRunning.exchange(true))
+		return; // already animating
+
+	if (g_rainbowWorker.joinable())
+		g_rainbowWorker.join(); // reap the previous, already-finished worker before relaunching
+
+	g_rainbowWorker = std::thread(RainbowWorker);
+}
+
+// Stop the rainbow worker and wait for it to finish. Called on mod teardown so the thread never
+// outlives the DLL. Safe to call when no worker is running.
+void ERMode::StopRainbowThread() {
+	RainbowEnabled = false;
+	RainbowNotesEnabled = false;
+
+	if (g_rainbowWorker.joinable())
+		g_rainbowWorker.join();
 }
 
 

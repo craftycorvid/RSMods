@@ -37,6 +37,10 @@ void ExtendedRangeMod::OnInitialize(ModContext& c) {
 		"Toggle Extended Range");
 }
 
+void ExtendedRangeMod::OnShutdown(ModContext&) {
+	ERMode::StopRainbowThread();
+}
+
 // Edge: this mod became active in a song.
 void ExtendedRangeMod::OnSongEnter(ModContext& c) {
 	// Tuner detection must not bleed into the song.
@@ -87,9 +91,10 @@ void ExtendedRangeMod::OnSongExit(ModContext&) {
 	}
 }
 
-// Always-on string coloring. Runs at the END of each phase tick so the flag updates above are visible to 
-// Toggle7StringMode in the same frame. 
-// Old debt: DoRainbow() intentionally blocks MainThread until rainbow is toggled off
+// Always-on string coloring. Runs at the END of each phase tick so the flag updates above are visible to
+// Toggle7StringMode in the same frame.
+// DoRainbow() launches the rainbow animation on its own thread (it must not block MainThread, which
+// also drains keybind commands, otherwise the effect could never be toggled back off).
 void ExtendedRangeMod::ApplyColors() {
 	if (ERMode::IsRainbowEnabled() || ERMode::IsRainbowNotesEnabled())
 		ERMode::DoRainbow();

@@ -31,7 +31,7 @@ void NonStopPlayTimerMod::ApplyTimer(ModContext& c) {
 
 	const double eps = std::numeric_limits<double>::epsilon() * std::max(1.0, std::max(std::abs(desired), std::abs(current))) * 4;
 	if (std::abs(current - desired) > eps) {
-		LOG_INFO("Updating NSP timer...");
+		LOG_INFO("Updating NSP timer..." << std::endl);
 		SongTimer::SetNonStopPlayTimer(desired);
 	}
 }

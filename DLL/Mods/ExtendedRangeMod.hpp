@@ -10,6 +10,7 @@ public:
 	MOD_ID(ExtendedRangeMod)
 
 	void OnInitialize(Framework::ModContext& c) override;
+	void OnShutdown(Framework::ModContext& c) override;
 	void OnSongEnter(Framework::ModContext& c) override;
 	void OnSongTick(Framework::ModContext& c) override;
 	void OnMenuTick(Framework::ModContext& c) override;
