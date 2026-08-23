@@ -375,6 +375,9 @@
     <ClCompile Include="Keyboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Framework\ResourceLedger.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MemUtil.hpp">
@@ -775,6 +778,9 @@
     </ClInclude>
     <ClInclude Include="NoteData.h">
       <Filter>Main Headers\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\ResourceLedger.hpp">
+      <Filter>Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

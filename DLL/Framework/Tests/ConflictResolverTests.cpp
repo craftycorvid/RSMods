@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 using Framework::Resolver::Candidate;
@@ -18,7 +19,9 @@ namespace {
 		std::vector<std::string> resources;
 	};
 
-	std::set<std::string> ActiveIds(std::vector<Mod>& mods) {
+	std::set<std::string> ActiveIds(std::vector<Mod>& mods,
+		const std::unordered_set<std::string>& initiallyReserved = {})
+	{
 		std::vector<Candidate> candidates(mods.size());
 		for (size_t i = 0; i < mods.size(); ++i) {
 			candidates[i].id = mods[i].id;
@@ -26,7 +29,7 @@ namespace {
 			candidates[i].requested = mods[i].enabled;
 			candidates[i].exclusiveResources = &mods[i].resources;
 		}
-		const auto selected = Framework::Resolver::Resolve(candidates);
+		const auto selected = Framework::Resolver::Resolve(candidates, initiallyReserved);
 
 		std::set<std::string> result;
 		for (size_t i = 0; i < mods.size(); ++i)
@@ -109,6 +112,34 @@ int main() {
 			{"MidiAutoTune", 0, true, {"tuning-controller"}},
 		};
 		Check("DropPedal wins tuning-controller", ActiveIds(mods), { "DropPedal" });
+	}
+
+	// Phase 2: seeded reservation from the ledger (CC effect holds a resource the mod wants).
+	{
+		std::vector<Mod> mods = {
+			{"VolumeControl", 5, true, {"player-volume"}},
+		};
+		Check("mod blocked by seeded CC reservation",
+			ActiveIds(mods, { "player-volume" }), {});
+	}
+
+	{
+		std::vector<Mod> mods = {
+			{"A", 10, true, {"R"}},
+			{"B", 0,  true, {"S"}},
+		};
+		// Only A is blocked; B claims a different resource and still wins.
+		Check("seeded reservation blocks only the conflicting mod",
+			ActiveIds(mods, { "R" }), { "B" });
+	}
+
+	{
+		std::vector<Mod> mods = {
+			{"A", 0, true, {"R"}},
+		};
+		// Empty initiallyReserved is a no-op — same result as calling without the param.
+		Check("empty initiallyReserved is a no-op",
+			ActiveIds(mods, {}), { "A" });
 	}
 
 	std::cout << (g_failures == 0 ? "\nALL PASS\n" : "\nFAILURES: " + std::to_string(g_failures) + "\n");

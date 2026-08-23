@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -13,6 +14,7 @@
 #include "ConflictResolver.hpp"
 #include "MainThreadInbox.hpp"
 #include "ModContext.hpp"
+#include "ResourceLedger.hpp"
 
 namespace Framework {
 	PendingRegistration* g_modPendingHead = nullptr;
@@ -32,6 +34,9 @@ namespace Framework {
 		Suppressed,
 		Faulted,
 	};
+
+	// Stable identity token for the registry's ledger slot. Pointer used as owner key.
+	static const char registryOwner = 0;
 
 	namespace {
 		ModState TeardownTargetState(DeactivationReason reason) {
@@ -270,8 +275,9 @@ namespace Framework {
 			return requestedActive;
 		}
 
-		ActivationMask SelectActiveMods(const ActivationMask& requestedActive) {
+		ActivationMask SelectActiveMods(const ActivationMask& requestedActive, const std::unordered_set<std::string>& initiallyReserved = {}) {
 			std::vector<Resolver::Candidate> candidates(records.size());
+			
 			for (size_t i = 0; i < records.size(); ++i) {
 				Resolver::Candidate& candidate = candidates[i];
 				candidate.id = records[i].mod->Id();
@@ -280,7 +286,21 @@ namespace Framework {
 				candidate.requested = requestedActive[i] && IsResolutionEligible(records[i].state);
 			}
 
-			return Resolver::Resolve(candidates);
+			return Resolver::Resolve(candidates, initiallyReserved);
+		}
+
+		// Publish the selected winners' exclusive resources to the ledger so CC effects see what the
+		// registry currently holds. Flattens each winner's resource list into one owner-wide claim.
+		void PublishSelectedResources(const ActivationMask& selectedActive) {
+			std::vector<std::string> winnerResources;
+
+			for (size_t i = 0; i < records.size(); ++i) {
+				if (!selectedActive[i]) continue;
+				const auto& res = exclusiveResourcesByMod[i];
+				winnerResources.insert(winnerResources.end(), res.begin(), res.end());
+			}
+
+			Ledger().Publish(&registryOwner, std::move(winnerResources));
 		}
 
 		// Tear down every Active mod the resolver did not select. Reverts run synchronously, so a
@@ -377,8 +397,11 @@ namespace Framework {
 		impl->DrainSettings();
 		impl->BuildResourceIndexIfNeeded();
 
+		// Snapshot CC's live holdings before computing (read-seed → compute unlocked → publish).
+		const auto ccHeld = Ledger().HeldExcluding(&registryOwner);
 		const auto requestedActive = impl->ComputeRequestedActive();
-		const auto selectedActive = impl->SelectActiveMods(requestedActive);
+		const auto selectedActive = impl->SelectActiveMods(requestedActive, ccHeld);
+		impl->PublishSelectedResources(selectedActive);
 
 		// Outgoing teardowns run before any activation so a replacement cannot acquire an exclusive
 		// resource the outgoing mod hasn't released; reverts are synchronous, so one pass suffices.
@@ -400,6 +423,7 @@ namespace Framework {
 		}
 
 		impl->records.clear();
+		Ledger().Release(&registryOwner);
 	}
 
 	ModRegistry& Registry() {

@@ -27,7 +27,7 @@ namespace Framework::Resolver {
 	// One win/lose flag per candidate, positionally indexed alongside `candidates`.
 	using SelectionMask = std::vector<char>;
 
-	[[nodiscard]] inline SelectionMask Resolve(const std::vector<Candidate>& candidates) {
+	[[nodiscard]] inline SelectionMask Resolve(const std::vector<Candidate>& candidates, const std::unordered_set<std::string>& initiallyReserved = {}) {
 		SelectionMask selected(candidates.size(), 0);
 
 		std::vector<std::size_t> priorityOrder(candidates.size());
@@ -43,7 +43,7 @@ namespace Framework::Resolver {
 			return left.id < right.id; // Stable across TUs, unlike registration order.
 		});
 
-		std::unordered_set<std::string> reservedResources;
+		std::unordered_set<std::string> reservedResources(initiallyReserved);
 		for (std::size_t candidateIndex : priorityOrder) {
 			const Candidate& candidate = candidates[candidateIndex];
 			if (!candidate.requested) continue;
