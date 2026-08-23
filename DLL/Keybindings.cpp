@@ -33,8 +33,7 @@ namespace Keybindings {
 		commands.BindKey(nullptr, "ReloadSettings", 'A', Framework::KeyEdge::Up,
 			Framework::Availability::Initialized,
 			[](Framework::ModContext&, const Framework::KeyEvent&) {
-				Settings::UpdateSettings();
-				Framework::Commands().RefreshDiagnostics();
+				Framework::Registry().EnqueueSettingsUpdate([] { Settings::UpdateSettings(); });
 				LOG_INFO("Triggered Setting Update" << std::endl);
 			},
 			[](const Framework::ModContext&, const Framework::KeyEvent& event) {
