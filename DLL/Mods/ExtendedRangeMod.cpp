@@ -46,29 +46,39 @@ void ExtendedRangeMod::OnSongEnter(ModContext& c) {
 	// Tuner detection must not bleed into the song.
 	ERMode::AttemptedERInTuner = false;
 	ERMode::UseERInTuner = false;
+	tunerSettleUntil.reset();
 
 	if (ERMode::AttemptedERInThisSong) return;
 
-	// Tuning takes ~1.5s to settle before the numbers are trustworthy.
-	if (!SkipERSleep(c)) Sleep(1500); 	
-
-	ERMode::UseERExclusivelyInThisSong = SongTuning::IsExtendedRangeSong();
-	ERMode::UseEROrColorsInThisSong =
-		(c.IsOn(Setting::ExtendedRangeEnabled) && ERMode::UseERExclusivelyInThisSong) ||
-		c.ColorMode() == StringColorMode::Custom ||
-		(c.IsOn(Setting::SeparateNoteColors) && c.NoteColorMode() != NoteColorMode::Default);
-	ERMode::AttemptedERInThisSong = true;
+	// Arm the tuning-settle wait; OnSongTick runs the detection once it expires.
+	songSettleUntil = SettleDeadline(c);
 }
 
-void ExtendedRangeMod::OnSongTick(ModContext&) {
+void ExtendedRangeMod::OnSongTick(ModContext& c) {
+	if (songSettleUntil) {
+		if (Clock::now() < *songSettleUntil) return; // Still settling - leave the strings alone.
+
+		songSettleUntil.reset();
+
+		ERMode::UseERExclusivelyInThisSong = SongTuning::IsExtendedRangeSong();
+		ERMode::UseEROrColorsInThisSong =
+			(c.IsOn(Setting::ExtendedRangeEnabled) && ERMode::UseERExclusivelyInThisSong) ||
+			c.ColorMode() == StringColorMode::Custom ||
+			(c.IsOn(Setting::SeparateNoteColors) && c.NoteColorMode() != NoteColorMode::Default);
+		ERMode::AttemptedERInThisSong = true;
+	}
+
 	ApplyColors();
 }
 
 void ExtendedRangeMod::OnMenuTick(ModContext& c) {
 	if (GameState::Menus::IsInPreSongTuner()) {
 		if (!ERMode::AttemptedERInTuner) {
-			if (!SkipERSleep(c)) Sleep(1500);
+			if (!tunerSettleUntil) tunerSettleUntil = SettleDeadline(c);
 
+			if (Clock::now() < *tunerSettleUntil) return; // Still settling - leave the strings alone.
+
+			tunerSettleUntil.reset();
 			ERMode::AttemptedERInTuner = true;
 			ERMode::UseERInTuner = SongTuning::IsExtendedRangeTuner();
 		}
@@ -76,6 +86,7 @@ void ExtendedRangeMod::OnMenuTick(ModContext& c) {
 	else {
 		ERMode::AttemptedERInTuner = false;
 		ERMode::UseERInTuner = false;
+		tunerSettleUntil.reset();
 	}
 
 	ApplyColors();
@@ -84,6 +95,8 @@ void ExtendedRangeMod::OnMenuTick(ModContext& c) {
 // Edge: this mod stopped being active in a song. Formerly the ER block of
 // CleanupSongSpecificStates.
 void ExtendedRangeMod::OnSongExit(ModContext&) {
+	songSettleUntil.reset(); // The player may have backed out mid-settle.
+
 	if (ERMode::AttemptedERInThisSong) {
 		ERMode::UseERExclusivelyInThisSong = false;
 		ERMode::UseEROrColorsInThisSong = false;
@@ -102,9 +115,16 @@ void ExtendedRangeMod::ApplyColors() {
 		ERMode::Toggle7StringMode();
 }
 
-// Skip the 1.5s tuning-settle sleep once MIDI has auto-tuned in the pre-song tuner: the pedal tuning is
+// When the detection may run. Zero-length when the wait is skipped, so it lands on this same tick.
+ExtendedRangeMod::Clock::time_point ExtendedRangeMod::SettleDeadline(const ModContext& c) {
+	const auto wait = SkipTuningSettle(c) ? std::chrono::milliseconds::zero() : TuningSettleTime;
+
+	return Clock::now() + wait;
+}
+
+// Skip the tuning-settle wait once MIDI has auto-tuned in the pre-song tuner: the pedal tuning is
 // already applied and the game's tuning numbers are stable. MidiMod owns and latches this flag.
-bool ExtendedRangeMod::SkipERSleep(const ModContext&) {
+bool ExtendedRangeMod::SkipTuningSettle(const ModContext&) {
 	return Midi::appliedTunerAutoTune;
 }
 

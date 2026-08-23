@@ -16,6 +16,10 @@ instead of `ModManager` doing it, and adding a mod is adding one `.cpp` rather t
 - **Activation ownership lives in the framework, not in each mod.** A mod says *what* it wants
   (enabled? which resources?); the registry decides *whether* and *when* it runs. All mod hooks
   run on `MainThread`.
+- **Hooks must not block.** `MainThread` also drains keybind commands, so a sleeping hook freezes
+  every keybind and every other mod's tick, including the one that would undo the wait. To wait,
+  hold a `steady_clock` deadline and return early until a later tick passes it (see
+  `ExtendedRangeMod`); to do real work, own a thread and join it in `OnShutdown`.
 - **No raw input/WndProc surface.** `Keybindings` remains the Win32 adapter and never exposes
   consumable window messages to mods. It snapshots key events into non-consumable `KeyEvent`s;
   mods register named commands through `ModContext`.
