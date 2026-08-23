@@ -2,6 +2,7 @@
 #include "ExtendedRangeMode.hpp"
 #include "../StringState.h"
 
+#include <array>
 #include <atomic>
 #include <thread>
 
@@ -258,14 +259,14 @@ void ERMode::Toggle7StringMode() {
 /// Toggle RainbowEnabled on / off.
 /// </summary>
 void ERMode::ToggleRainbowMode() {
-	RainbowEnabled = !RainbowEnabled;
+	RainbowEnabled = !RainbowEnabled.load();
 }
 
 /// <summary>
 /// Toggle RainbowNotesEnabled on / off.
 /// </summary>
 void ERMode::ToggleRainbowNotes() {
-	RainbowNotesEnabled = !RainbowNotesEnabled;
+	RainbowNotesEnabled = !RainbowNotesEnabled.load();
 }
 
 /// <summary>
@@ -283,34 +284,40 @@ bool ERMode::IsRainbowNotesEnabled() {
 }
 
 namespace {
-	// The rainbow animation runs on this dedicated thread instead of the mod MainThread. The
-	// MainThread also drains keybind commands, so blocking it here (as the loop below does, until
-	// the flags clear) used to make the rainbow impossible to toggle back off - a self-deadlock.
+	// The rainbow animation runs on this dedicated thread instead of the mod MainThread. 
 	std::atomic<bool> g_rainbowWorkerRunning{ false };
 	std::thread g_rainbowWorker;
+
+	// Resolve the six colour addresses for one string state.
+	// Returns false and leaves `out` untouched if any string fails to resolve.
+	bool TryResolveStringColors(std::array<uintptr_t, 6>& out, int state) {
+		std::array<uintptr_t, 6> resolved{};
+
+		for (int i = 0; i < 6; i++) {
+			resolved[i] = GetStringColor(i, state);
+
+			if (!resolved[i]) return false;
+		}
+
+		out = resolved;
+		return true;
+	}
 }
 
-// The blocking animation loop, now confined to g_rainbowWorker. Reads game memory and cycles the
-// string colours until both rainbow flags are cleared (by ToggleRainbowMode / StopRainbowThread on
-// another thread), then returns.
+// The blocking animation loop. Reads game memory and cycles the string colours 
+// until both rainbow flags are cleared, then returns.
 static void RainbowWorker() {
-	// Clear the running flag on every exit path (incl. the early return below), so DoRainbow can
-	// relaunch the worker next time the effect is enabled.
+	// Clear the running flag on every exit path, so DoRainbow can relaunch the worker 
+	// next time the effect is enabled.
 	struct RunningGuard {
 		~RunningGuard() { g_rainbowWorkerRunning.store(false); }
 	} runningGuard;
 
-	std::vector<uintptr_t> stringsEnabled;
-	std::vector<uintptr_t> stringsHigh;
-	std::vector<uintptr_t> stringsDisabled;
-	std::vector<RSColor> oldEnabledColors, oldHigh, oldDisabledColors;
+	// Re-resolved every frame rather than captured once up front.
+	std::array<uintptr_t, 6> stringsEnabled{}, stringsHigh{}, stringsDisabled{};
 
-	// Get original string colors.
-	for (int i = 0; i < 6; i++) {
-		stringsEnabled.push_back(GetStringColor(i, Enabled));
-		stringsHigh.push_back(GetStringColor(i, Glow));
-		stringsDisabled.push_back(GetStringColor(i, Disabled));
-	}
+	// Latched once, on the first frame that actually recolours the strings.
+	std::array<RSColor, 6> oldEnabledColors{}, oldHigh{}, oldDisabledColors{};
 
 	// Start with Red.
 	RSColor c;
@@ -329,20 +336,31 @@ static void RainbowWorker() {
 		// Hue can only be a value from 0-360, so reset it to 0 if it's over 360.
 		if (h >= 360.f) { h = 0.f; }
 
+		// Only the string writes need these addresses, so a frame we can't resolve still advances
+		// the hue below - Rainbow Notes rides on customNoteColorH and keeps animating regardless.
+		const bool stringsResolved =
+			TryResolveStringColors(stringsEnabled, Enabled) &&
+			TryResolveStringColors(stringsHigh, Glow) &&
+			TryResolveStringColors(stringsDisabled, Disabled);
+
+		const bool recolourStrings = ERMode::RainbowEnabled && stringsResolved;
+
+		// Save the previous colors, once, on the first frame that actually recolours the strings.
+		if (recolourStrings && !didWeUseRainbowStrings) {
+			for (int i = 0; i < 6; i++) {
+				oldEnabledColors[i] = *(RSColor*)stringsEnabled[i];
+				oldHigh[i] = *(RSColor*)stringsHigh[i];
+				oldDisabledColors[i] = *(RSColor*)stringsDisabled[i];
+			}
+
+			didWeUseRainbowStrings = true;
+		}
+
 		// For each string
 		for (int i = 0; i < 6; i++) {
-			// Save the previous colors
-			if (ERMode::RainbowEnabled) {
-				oldEnabledColors.push_back(*(RSColor*)stringsEnabled[i]);
-				oldHigh.push_back(*(RSColor*)stringsHigh[i]);
-				oldDisabledColors.push_back(*(RSColor*)stringsDisabled[i]);
-				didWeUseRainbowStrings = true;
-			}
-			
 			int newH = h + (stringOffset * i);
 			c.setH(newH);
 
-			// Hue only goes from 0-360.
 			if (newH > 360)
 				newH -= 360;
 
@@ -353,24 +371,23 @@ static void RainbowWorker() {
 				ERMode::customNoteColorH = 1;
 
 			// Set the new rainbow colors.
-			if (ERMode::RainbowEnabled) {
+			if (recolourStrings) {
 				*(RSColor*)stringsEnabled[i] = c;
 				*(RSColor*)stringsHigh[i] = c;
 				*(RSColor*)stringsDisabled[i] = c;
 			}
+		}
 
-			// Reset back to the original colors.
-			if (!ERMode::RainbowEnabled && didWeUseRainbowStrings) {
-				if (oldEnabledColors.size() == 0)
-					return;
-
-				for (int i = 0; i < 6; i++) {
-					*(RSColor*)stringsEnabled[i] = oldEnabledColors[i];
-					*(RSColor*)stringsHigh[i] = oldHigh[i];
-					*(RSColor*)stringsDisabled[i] = oldDisabledColors[i];
-				}
+		// Reset back to the original colors. If the strings can't be resolved 
+		// right now the restore just waits for a frame where they can.
+		if (!ERMode::RainbowEnabled && didWeUseRainbowStrings && stringsResolved) {
+			for (int i = 0; i < 6; i++) {
+				*(RSColor*)stringsEnabled[i] = oldEnabledColors[i];
+				*(RSColor*)stringsHigh[i] = oldHigh[i];
+				*(RSColor*)stringsDisabled[i] = oldDisabledColors[i];
 			}
 		}
+
 		Sleep(16);
 	}
 }
