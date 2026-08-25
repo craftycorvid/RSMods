@@ -9,12 +9,13 @@ void SaveSteamServicePointer(uint32_t eax) {
 }
 
 uint32_t hookBackAddr;
+uint32_t pushedPrologueValue;
 
 void __declspec(naked) Hook_EnumerationService() {
 	__asm {
 		push ebp
 		mov ebp, esp
-		and esp, 0FFFFFFF8h
+		push dword ptr[pushedPrologueValue]
 
 		pushad
 
@@ -44,6 +45,8 @@ void Enumeration::HookEnumerationService() {
 	}
 
 	hookBackAddr = hookAddr + len;
+	pushedPrologueValue = (uint32_t)(int32_t)*(int8_t*)(hookAddr + 4); // The imm8 of `push imm8`, at offset 4 of the signature.
+
 	if (MemUtil::PlaceHook((void*)hookAddr, Hook_EnumerationService, len)) {
 		LOG_INFO("Hooked Steam enumeration function successfully!" << std::endl);
 	}
