@@ -256,13 +256,49 @@ uintptr_t MemUtil::ReadPtr(uintptr_t adr) {
 	return *(uintptr_t*)adr;
 }
 
+/// <summary>
+/// Are we running under Wine / Proton rather than on Windows?
+/// </summary>
+/// <returns>True if the host is Wine.</returns>
+bool MemUtil::IsRunningOnWine()
+{
+	static bool checked = false;
+	static bool isWine = false;
+
+	if (!checked) {
+		HMODULE hNtdll = GetModuleHandleA("ntdll.dll");
+		if (hNtdll && GetProcAddress(hNtdll, "wine_get_version") != nullptr) {
+			isWine = true;
+		}
+		checked = true;
+	}
+
+	return isWine;
+}
+
 NTSTATUS MemUtil::HookedVirtualProtect(LPVOID address, SIZE_T len, ULONG newProtection, ULONG& oldProtection)
 {
+	if (IsRunningOnWine()) {
+		DWORD oldProtect = 0;
+		if (VirtualProtect(address, len, newProtection, &oldProtect)) {
+			oldProtection = oldProtect;
+			return 0; // STATUS_SUCCESS
+		}
+		return 0xC0000001; // STATUS_UNSUCCESSFUL
+	}
+
 	return NtProtectVirtualMemory(GetCurrentProcess(), &address, &len, newProtection, &oldProtection);
 }
 
 NTSTATUS MemUtil::HookedQueryVirtualMemory(LPVOID address, PMEMORY_BASIC_INFORMATION memoryBuffer, SIZE_T dwLength)
 {
+	if (IsRunningOnWine()) {
+		if (VirtualQuery(address, memoryBuffer, dwLength) != 0) {
+			return 0; // STATUS_SUCCESS
+		}
+		return 0xC0000001; // STATUS_UNSUCCESSFUL
+	}
+
 	SIZE_T returnLength = 0;
 	return NtQueryVirtualMemory(GetCurrentProcess(), address, MemoryBasicInformation, memoryBuffer, dwLength, &returnLength);
 }
