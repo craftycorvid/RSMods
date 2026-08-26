@@ -73,11 +73,6 @@ namespace Offsets {
 	inline VersioningStruct<uintptr_t> xinputModule;
 	inline VersioningStruct<uintptr_t> xinputEnable;
 
-	//D3D Stuff
-	extern const char* d3dDevice_Pattern;
-	extern uint32_t d3dDevice_SearchLen;
-	extern const char* d3dDevice_Mask;
-
 	// Multiplayer
 	inline VersioningStruct<uintptr_t> ptr_multiplayer;
 	extern std::vector<unsigned int> ptr_multiplayerOffsets;

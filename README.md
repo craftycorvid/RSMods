@@ -143,7 +143,14 @@ Feel free to try the 1.2.8.0 version if you are on the Learn & Play version.
 1. Manually build/copy the DLL to the root folder of Rocksmith 2014 RM, create a file called RSMods.ini and fill it with options as [shown below](https://github.com/Lovrom8/RSMods#settings)
    If it is installed in the most common folder (C drive, Program Files/Steam/Steamapps), VS will attempt to copy the DLL to the folder for your convenience.
 2. Use the One-Click-Installer to copy both the DLL and RSMods GUI to the game folder. If it's unable to automatically detect where Rocksmith is installed, it will ask you to point it to the correct folder.
-  
+
+### Running under Wine / Proton
+Install RSMods into the Rocksmith 2014 wineprefix using protontricks, then add this to the Rocksmith 2014 launch options in Steam:
+
+```
+WINEDLLOVERRIDES="xinput1_3=n,b" %command%
+```
+
 ## Requirements:
 * Latest Steam version of Rocksmith 2014 Remastered on Windows, https://store.steampowered.com/app/221680/Rocksmith_2014_Edition__Remastered/
 * MS Visual C++ 2015-2022 Redistributable for the DLL, .NET framework 4.7.2 for GUI/One-Click-Installer
