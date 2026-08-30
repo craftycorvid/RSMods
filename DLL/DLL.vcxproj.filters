@@ -811,9 +811,4 @@
       <Filter>Libs</Filter>
     </Library>
   </ItemGroup>
-  <ItemGroup>
-    <MASM Include="syscalls.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
-  </ItemGroup>
 </Project>
