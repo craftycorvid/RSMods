@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include <io.h>
-#include <share.h>
 #include "Proxy.hpp"
 #include "ModManager.hpp"
 #include "Framework/Framework.hpp"
@@ -282,22 +280,8 @@ void SetupLogging() {
 		freopen_s(&streamConsole, "CONOUT$", "w", stdout);
 	}
 
-	// Create log file to both help with debugging release builds,
-	// and allow the user to examine their debug logs after a crash.
 	if (debugLogPresent) {
-		// freopen_s / fopen_s open with exclusive (no share) mode, which blocks
-		// external tools from reading the log while the game is running.
-		// Open with _SH_DENYWR so others can read; deny concurrent writers.
-		// Mode "w" truncates so we start clean each launch (same as before).
-		FILE* debugLog = _fsopen("RSMods_debug.txt", "w", _SH_DENYWR);
-		if (debugLog) {
-			// Point stderr's fd at the share-read handle. Logger writes via std::cerr.
-			if (_dup2(_fileno(debugLog), _fileno(stderr)) == 0) {
-				// Unbuffered so external readers see new lines promptly.
-				setvbuf(stderr, nullptr, _IONBF, 0);
-			}
-			// Keep debugLog open for process lifetime (handle must stay valid).
-		}
+		Logger::GetInstance().InitFile("RSMods_debug.txt");
 	}
 }
 
