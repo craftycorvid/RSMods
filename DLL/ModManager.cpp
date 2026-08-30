@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <array>
 #include "ModManager.hpp"
 #include "Mods/Midi.hpp"
 
@@ -9,26 +10,27 @@ namespace {
 
 	/// <summary>
 	/// Read the IDirect3DDevice9 vTable out of a throwaway device.
-	/// Every device handed out by a given d3d9.dll shares one vTable, so the entries we find here are
-	/// the ones the game's real device calls through. Works the same on Microsoft's d3d9, WineD3D, and DXVK.
+	/// Copies the function pointers to a std::array so dummy device can be released immediately without leaks.
 	/// </summary>
 	/// <param name="d3d9Module"> - Handle of the d3d9.dll the game loaded.</param>
-	/// <returns>The device vTable, or NULL if we couldn't create a device to read it from.</returns>
-	void** GetD3D9DeviceVTable(HMODULE d3d9Module) {
+	/// <returns>std::array of device vTable function pointers, or empty array if failed.</returns>
+	std::array<void*, 119> GetD3D9DeviceVTable(HMODULE d3d9Module) {
+		std::array<void*, 119> vTable{};
+
 		// Resolve the entry point out of the module the game already loaded, rather than importing it.
 		// That keeps us from pulling d3d9.dll into the process earlier than the game would itself.
 		tDirect3DCreate9 direct3DCreate9 = (tDirect3DCreate9)GetProcAddress(d3d9Module, "Direct3DCreate9");
 
 		if (!direct3DCreate9) {
 			LOG_ERROR("d3d9.dll does not export Direct3DCreate9." << std::endl);
-			return NULL;
+			return vTable;
 		}
 
 		IDirect3D9* d3d9 = direct3DCreate9(D3D_SDK_VERSION);
 
 		if (!d3d9) {
 			LOG_ERROR("Direct3DCreate9 failed." << std::endl);
-			return NULL;
+			return vTable;
 		}
 
 		D3DPRESENT_PARAMETERS presentParameters{};
@@ -49,13 +51,16 @@ namespace {
 			result = d3d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, presentParameters.hDeviceWindow, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParameters, &dummyDevice);
 		}
 
-		void** vTable = NULL;
-
 		if (SUCCEEDED(result) && dummyDevice) {
-			vTable = *(void***)dummyDevice;
+			void** rawVTable = *(void***)dummyDevice;
+			if (rawVTable) {
+				memcpy(vTable.data(), rawVTable, sizeof(vTable));
+			}
+			dummyDevice->Release();
 		}
-		else
+		else {
 			LOG_ERROR("Could not create a D3D9 device to read the vTable from. Error: 0x" << std::hex << result << std::dec << std::endl);
+		}
 
 		d3d9->Release();
 
@@ -102,9 +107,9 @@ namespace ModManager {
 		while ((d3d9Module = GetModuleHandleA("d3d9.dll")) == NULL)
 			Sleep(500);
 
-		void** vTable = GetD3D9DeviceVTable(d3d9Module);
+		const auto vTable = GetD3D9DeviceVTable(d3d9Module);
 
-		if (!vTable) {
+		if (vTable[0] == nullptr) {
 			LOG_ERROR("Could not find D3D device's vTable address." << std::endl);
 			MessageBoxA(NULL, "Could not find D3D device's vTable address \n Restart the game and if you still get this error after a few tries, please report the error!", "Error", NULL);
 			return;
