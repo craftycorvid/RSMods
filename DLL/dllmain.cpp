@@ -266,9 +266,30 @@ void Initialize() {
 	std::thread(RiffRepeaterThread).detach(); // RR Speed Above 100% Log
 }
 
+/// <summary>
+/// Build an absolute path to a file sitting next to the game executable.
+/// SetupLogging() runs under the loader lock at DLL_PROCESS_ATTACH, where the
+/// process working directory is not yet guaranteed to be the Rocksmith folder,
+/// so a bare relative filename would resolve against the wrong directory.
+/// </summary>
+static std::string PathNextToExecutable(const std::string& fileName) {
+	char executable[MAX_PATH]{};
+	GetModuleFileNameA(NULL, executable, MAX_PATH);
+
+	std::string path(executable);
+	const size_t slash = path.find_last_of("\\/");
+	if (slash != std::string::npos)
+		path.resize(slash + 1);
+	else
+		path.clear();
+
+	return path + fileName;
+}
+
 void SetupLogging() {
 	// Opt-in: only log to file if RSMods_debug.txt already exists (same as before).
-	const bool debugLogPresent = std::ifstream("RSMods_debug.txt").good();
+	const std::string debugLogPath = PathNextToExecutable("RSMods_debug.txt");
+	const bool debugLogPresent = std::ifstream(debugLogPath).good();
 
 	if (debug) {
 		AllocConsole();
@@ -281,7 +302,7 @@ void SetupLogging() {
 	}
 
 	if (debugLogPresent) {
-		Logger::GetInstance().InitFile("RSMods_debug.txt");
+		Logger::GetInstance().InitFile(debugLogPath);
 	}
 }
 

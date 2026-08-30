@@ -2723,7 +2723,9 @@ namespace RSMods
                 return;
 
             if (checkBox_ModsLog.Checked)
-                File.Create(Path.Combine(GenUtil.GetRSDirectory(), "RSMods_debug.txt"));
+                // Dispose the stream immediately so we don't hold a write-denying
+                // handle that blocks the DLL from opening the log at game launch.
+                File.Create(Path.Combine(GenUtil.GetRSDirectory(), "RSMods_debug.txt")).Dispose();
             else
             {
                 // First we have to do garbage cleanup since it keeps the file in use way too long.
