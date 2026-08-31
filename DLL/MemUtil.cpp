@@ -14,7 +14,7 @@ bool MemUtil::bCompare(const BYTE* pData, const byte* bMask, const char* szMask)
 		if (*szMask == 'x' && *pData != *bMask)
 			return 0;
 	}
-		
+
 	return (*szMask) == NULL;
 }
 
@@ -47,7 +47,7 @@ bool MemUtil::PatchAdr(LPVOID address, LPCVOID changeToMake, size_t len) {
 
 	// Save old Virtual Protect status, but allow us to Execute, Read, and Write to the executable's memory so we can place our hook.
 	ret = HookedVirtualProtect(address, len, PAGE_EXECUTE_READWRITE, dwOldProt);
-	if (!NT_SUCCESS(ret)) 
+	if (!NT_SUCCESS(ret))
 	{
 		printf_s("MemUtil::PatchAdr Failed 1: Addr: 0x%X | Status: 0x%08X | Time to run in sec: %f\n", (uintptr_t)address, ret, (float)(clock() - before) / CLOCKS_PER_SEC); // Can't use log here, need to use printf.
 		return false;
@@ -91,9 +91,9 @@ bool MemUtil::PlaceHook(void* hookSpot, void* ourFunct, int len)
 	DWORD oldProtect;
 	DWORD ret;
 	clock_t before = clock();
-	
+
 	ret = HookedVirtualProtect(hookSpot, len, PAGE_EXECUTE_READWRITE, oldProtect);
-	if (!NT_SUCCESS(ret)) 
+	if (!NT_SUCCESS(ret))
 	{
 		printf_s("MemUtil::PlaceHook Failed 1: Addr: 0x%X | Status: 0x%08X | Time to run in sec: %f\n", (uintptr_t)hookSpot, ret, (float)(clock() - before) / CLOCKS_PER_SEC); // Can't use log here, need to use printf.
 		return false;
@@ -111,7 +111,7 @@ bool MemUtil::PlaceHook(void* hookSpot, void* ourFunct, int len)
 
 	// Reset the virtual protect to the status we saved earlier in this function. 
 	DWORD backup;
-	
+
 	ret = HookedVirtualProtect(hookSpot, len, oldProtect, backup);
 	if (!NT_SUCCESS(ret))
 	{
@@ -151,32 +151,51 @@ PBYTE MemUtil::TrampHook(PBYTE src, PBYTE dst, unsigned int len)
 		hookLen = len;
 	}
 
-	// Create the gateway (hookLen + 5 for the overwritten bytes + the jmp)
-	auto gateway = (PBYTE)VirtualAlloc(nullptr, hookLen + 5, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+	// Relocating the stolen prologue can make it grow (a short jump promotes to a
+	// near jump, and so on), so give the gateway generous headroom over hookLen.
+	const unsigned int gatewaySize = hookLen * 2 + 16;
+
+	// Create the gateway (relocated prologue + the jmp back to the original).
+	auto gateway = (PBYTE)VirtualAlloc(nullptr, gatewaySize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 	// Makes sure gateway doesn't equal null
 	if (!gateway)
 	{
 		return nullptr;
 	}
-		
-	// Put the bytes that will be overwritten in the gateway
-	memcpy(gateway, src, hookLen);
 
-	// Get the gateway to destination addy
-	auto gateJmpAddy = (uintptr_t)(src - gateway - 5);
+	// Copy the overwritten bytes into the gateway, relocating any relative instructions
+	// as we go, while keeping in mind any changes done by other tools (Steam, Rivatuner, ...). 
+	// DetourCopyInstructionEx rewrites each relative operand for the gateway's address, and
+	// reports via `extra` how many bytes the relocated instruction grew by.
+	PBYTE srcPos = src;
+	PBYTE dstPos = gateway;
+	while (srcPos < src + hookLen) {
+		PBYTE target = nullptr;
+		LONG extra = 0;
+		PBYTE srcNext = DetourCopyInstructionEx(dstPos, srcPos, &target, &extra);
+		if (!srcNext || srcNext <= srcPos) {
+			VirtualFree(gateway, 0, MEM_RELEASE);
+			return nullptr;
+		}
+		dstPos += (srcNext - srcPos) + extra;
+		srcPos = srcNext;
+	}
 
-	// Add the jmp opcode to the end of the gateway
-	*(gateway + hookLen) = (unsigned char)0xE9;
+	// Jump from the end of the relocated prologue back into the original function,
+	// continuing at the first instruction boundary past the bytes we stole (srcPos).
+	*dstPos = (unsigned char)0xE9;
+	*(uint32_t*)(dstPos + 1) = (uint32_t)(srcPos - (dstPos + 5));
 
-	// Add the address to the jmp
-	*(uintptr_t*)(gateway + hookLen + 1) = gateJmpAddy;
+	// The gateway is freshly written executable code; make sure no stale copy runs.
+	FlushInstructionCache(GetCurrentProcess(), gateway, gatewaySize);
 
 	// Place the hook at the destination
 	if (PlaceHook(src, dst, hookLen))
 		return gateway;
-	else
-		return nullptr;
+
+	VirtualFree(gateway, 0, MEM_RELEASE);
+	return nullptr;
 }
 
 /// <summary>
@@ -184,7 +203,7 @@ PBYTE MemUtil::TrampHook(PBYTE src, PBYTE dst, unsigned int len)
 /// </summary>
 /// <param name="p"> - Pointer</param>
 /// <returns>True - Bad Pointer, do not read. False - Safe to read.</returns>
-bool MemUtil::IsBadReadPtr(void* pointer) 
+bool MemUtil::IsBadReadPtr(void* pointer)
 {
 	//NOTE: We are very aware this is not exactly the optimal (neither completely thread safe nor very fast) way to handle pointers to a non-initialized variable.
 	//      but for now it will have to do the job until we figure out a better current menu check.
@@ -320,7 +339,7 @@ namespace MemUtil {
 					}
 				}
 				return 0;
-			};
+				};
 
 			DWORD expOffset = RvaToRaw(exportRva);
 			if (!expOffset) return 0;
@@ -368,15 +387,15 @@ namespace MemUtil {
 		{
 			__asm {
 				mov eax, ssnProtect
-				mov edx, fs:[0C0h]
+				mov edx, fs: [0C0h]
 				test edx, edx
 				jnz is_wow64
 				mov edx, 7FFE0300h
-				call dword ptr [edx]
+				call dword ptr[edx]
 				ret 14h
-			is_wow64:
+				is_wow64 :
 				call edx
-				ret 14h
+					ret 14h
 			}
 		}
 
@@ -384,15 +403,15 @@ namespace MemUtil {
 		{
 			__asm {
 				mov eax, ssnQuery
-				mov edx, fs:[0C0h]
+				mov edx, fs: [0C0h]
 				test edx, edx
 				jnz is_wow64
 				mov edx, 7FFE0300h
-				call dword ptr [edx]
+				call dword ptr[edx]
 				ret 18h
-			is_wow64:
+				is_wow64 :
 				call edx
-				ret 18h
+					ret 18h
 			}
 		}
 	}
