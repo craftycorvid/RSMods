@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -20,7 +21,18 @@ namespace UltrawideShaders {
 
 	inline std::mutex registryMutex;
 	inline std::unordered_map<IDirect3DVertexShader9*, Entry> registry;
-	inline Entry* currentEntry = nullptr;
+	inline std::atomic<Entry*> currentEntry = nullptr;
+
+	/// <summary>
+	/// Drops every cached layout. Call on device reset: the registry is keyed by raw shader
+	/// pointer, and once the game releases its shaders a later allocation can reuse the same
+	/// address and inherit an unrelated layout.
+	/// </summary>
+	inline void Forget() {
+		std::lock_guard lock(registryMutex);
+		currentEntry.store(nullptr, std::memory_order_relaxed);
+		registry.clear();
+	}
 
 	inline AspectRatio::ShaderLayout ParseLayout(IDirect3DVertexShader9* shader) {
 		AspectRatio::ShaderLayout layout;
@@ -61,7 +73,7 @@ namespace UltrawideShaders {
 
 	inline void OnVertexShaderBound(IDirect3DVertexShader9* shader) {
 		if (!shader) {
-			currentEntry = nullptr;
+			currentEntry.store(nullptr, std::memory_order_relaxed);
 			return;
 		}
 
@@ -71,7 +83,7 @@ namespace UltrawideShaders {
 		if (found == registry.end())
 			found = registry.emplace(shader, Entry{ ParseLayout(shader) }).first;
 
-		currentEntry = &found->second;
+		currentEntry.store(&found->second, std::memory_order_relaxed);
 	}
 
 	/// <summary>
@@ -86,7 +98,7 @@ namespace UltrawideShaders {
 			if (!D3DHooks::ultrawideActive.load(std::memory_order_relaxed))
 				return;
 
-			Entry* entry = currentEntry;
+			Entry* entry = currentEntry.load(std::memory_order_relaxed);
 			if (!entry)
 				return;
 

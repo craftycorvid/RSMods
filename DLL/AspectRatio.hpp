@@ -24,6 +24,18 @@ namespace AspectRatio {
 		return (std::fabs(scale - 1.0f) < 1.0e-4f) ? 1.0f : scale;
 	}
 
+	/// <summary>
+	/// Whether a ClipXScale describes a display wider than the game's 16:9 reference.
+	///
+	/// Only wider-than-reference displays are correctable here. A narrower display (4:3, 16:10)
+	/// produces a scale above 1.0, which widens the camera frustum past the backbuffer and drives
+	/// RemapHorizontal to a negative left edge. Those displays would need pillarboxing, which is a
+	/// different correction, so the mod stays inert on them instead of half-applying.
+	/// </summary>
+	inline bool IsWiderThanReference(float clipXScale) {
+		return clipXScale > 0.0f && clipXScale < 1.0f;
+	}
+
 	inline bool SameAspect(unsigned int width, unsigned int height, unsigned int referenceWidth, unsigned int referenceHeight) {
 		const float aspect = AspectOf(width, height);
 		const float reference = AspectOf(referenceWidth, referenceHeight);

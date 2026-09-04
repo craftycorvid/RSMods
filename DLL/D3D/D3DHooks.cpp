@@ -124,8 +124,10 @@ HRESULT APIENTRY D3DHooks::Hook_SetVertexShaderConstantF(LPDIRECT3DDEVICE9 pDevi
 /// per-constant-upload path never has to touch Settings or query the swap chain.
 /// </summary>
 void D3DHooks::UpdateUltrawideState(IDirect3DDevice9* pDevice) {
+	// Only widen. A narrower-than-16:9 display gives a scale above 1.0, which would push the
+	// camera frustum and the remapped viewport outside the backbuffer, so the mod stays inert.
 	const bool active = ultrawideSettingOn.load(std::memory_order_relaxed)
-		&& ultrawideBackBufferValid && ultrawideClipXScale != 1.0f;
+		&& ultrawideBackBufferValid && AspectRatio::IsWiderThanReference(ultrawideClipXScale);
 
 	ultrawideActive.store(active, std::memory_order_relaxed);
 
@@ -293,6 +295,7 @@ HRESULT APIENTRY D3DHooks::Hook_Reset(IDirect3DDevice9* pDevice, D3DPRESENT_PARA
 
 		ultrawideBackBufferValid = false; // Resolution may have changed; recompute the scale lazily.
 		ultrawideRenderTargetTextures.clear(); // Targets are recreated after a reset; stale pointers must not match new textures.
+		UltrawideShaders::Forget(); // Same hazard: shaders are released across a reset too.
 	}
 
 	return ResetReturn;

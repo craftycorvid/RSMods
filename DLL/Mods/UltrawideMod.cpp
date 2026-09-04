@@ -44,8 +44,6 @@ void UltrawideMod::SetPatched(bool enable) {
 		return;
 
 	if (!located) {
-		located = true;
-
 		const uintptr_t match = MemUtil::FindPattern<uintptr_t>(MemUtil::GetTextSectionAddress(), MemUtil::GetTextSectionLength(),
 			const_cast<PBYTE>(aspectLoadSignature), aspectLoadMask);
 
@@ -58,6 +56,7 @@ void UltrawideMod::SetPatched(bool enable) {
 				if (constant >= sixteenByNine - 0.01 && constant <= sixteenByNine + 0.01) {
 					operandAddress = candidate;
 					originalOperand = constantAddress;
+					located = true; // Only latch on success, so a scan run before the text section is ready can retry.
 				}
 			}
 		}
